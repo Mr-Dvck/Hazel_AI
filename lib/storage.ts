@@ -69,6 +69,36 @@ function setItem<T>(key: string, value: T): void {
 export const Storage = {
   getProfile: (): UserProfile => getItem<UserProfile>(STORAGE_KEYS.PROFILE, INITIAL_PROFILE),
   setProfile: (profile: UserProfile): void => setItem(STORAGE_KEYS.PROFILE, profile),
+  updateProfile: (updates: Partial<UserProfile>): UserProfile => {
+    const current = Storage.getProfile();
+    const updated: UserProfile = {
+      ...current,
+      ...updates,
+      lastActive: Date.now(),
+    };
+    Storage.setProfile(updated);
+    return updated;
+  },
+
+  syncToServer: async (userId: string = 'hazel_default'): Promise<boolean> => {
+    if (typeof window === 'undefined') return false;
+    try {
+      const res = await fetch('/api/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          profile: Storage.getProfile(),
+          monsters: Storage.getMonsters(),
+          memories: Storage.getMemories(),
+          guardianInsight: Storage.getGuardianInsight(),
+        }),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  },
 
   getMessages: (): ChatMessage[] => getItem<ChatMessage[]>(STORAGE_KEYS.MESSAGES, []),
   setMessages: (messages: ChatMessage[]): void => setItem(STORAGE_KEYS.MESSAGES, messages),

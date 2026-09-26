@@ -61,4 +61,17 @@ requiredNames.forEach((name, idx) => {
 });
 console.log('  ✅ Pass: All 10 collectible monsters verified with complete lore & mechanics\n');
 
-console.log('🎉 ALL AUTOMATED TESTS PASSED SUCCESSFULLY! (4/4 test gates green)\n');
+// Test 5: User Profile Data Structure & Customization Integrity
+console.log('▶ Test 5: User Profile Structure & Personalization Integrity');
+const { INITIAL_PROFILE } = require('../lib/constants.ts');
+assert.strictEqual(typeof INITIAL_PROFILE.name, 'string', 'Profile must have a valid string name');
+assert.strictEqual(typeof INITIAL_PROFILE.companionName, 'string', 'Profile must have a companion name');
+assert.ok(INITIAL_PROFILE.vibeTheme, 'Profile must have a default vibe theme');
+assert.ok(INITIAL_PROFILE.avatarEmoji, 'Profile must have an avatar emoji');
+assert.ok(INITIAL_PROFILE.companionAvatar, 'Profile must have a companion avatar emoji');
+assert.ok(INITIAL_PROFILE.bioOrMotto, 'Profile must have a personal motto');
+assert.strictEqual(typeof INITIAL_PROFILE.streakDays, 'number', 'Streak must be a number');
+assert.strictEqual(typeof INITIAL_PROFILE.totalMessages, 'number', 'Total messages must be a number');
+console.log('  ✅ Pass: User profile schema supports full personalization, avatars & stats\n');
+
+console.log('🎉 ALL AUTOMATED TESTS PASSED SUCCESSFULLY! (5/5 test gates green)\n');

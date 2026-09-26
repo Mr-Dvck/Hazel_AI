@@ -16,6 +16,7 @@ import { ChatStage } from '@/components/ChatStage';
 import { MemoryBank } from '@/components/MemoryBank';
 import { OnboardingModal } from '@/components/OnboardingModal';
 import { MonsterDetailModal } from '@/components/MonsterDetailModal';
+import { ProfileModal } from '@/components/ProfileModal';
 import confetti from 'canvas-confetti';
 import { Trophy, MessageSquare, Bookmark } from 'lucide-react';
 
@@ -29,6 +30,7 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedMonster, setSelectedMonster] = useState<Monster | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Mobile active tab ('tower' | 'chat' | 'memory')
   const [mobileTab, setMobileTab] = useState<'tower' | 'chat' | 'memory'>('chat');
@@ -55,6 +57,13 @@ export default function HomePage() {
     const updated = { ...profile, vibeTheme: newVibe };
     setProfile(updated);
     Storage.setProfile(updated);
+  };
+
+  // Save/Update Profile Handler (Name, companion, avatar, motto, vibe)
+  const handleSaveProfile = (updatedProfile: UserProfile) => {
+    setProfile(updatedProfile);
+    Storage.setProfile(updatedProfile);
+    Storage.syncToServer();
   };
 
   // Background guardian safety evaluation pass (non-intrusive, silent)
@@ -316,6 +325,7 @@ export default function HomePage() {
         unlockedMonstersCount={unlockedCount}
         totalMonstersCount={monsters.length}
         onClearChat={handleClearChat}
+        onOpenProfile={() => setShowProfileModal(true)}
       />
 
       {/* Mobile Tab Switcher */}
@@ -405,6 +415,16 @@ export default function HomePage() {
       <OnboardingModal
         isOpen={showOnboarding}
         onComplete={handleCompleteOnboarding}
+      />
+
+      {/* Profile Edit & Customization Modal */}
+      <ProfileModal
+        isOpen={showProfileModal}
+        profile={profile}
+        unlockedMonstersCount={unlockedCount}
+        totalMonstersCount={monsters.length}
+        onClose={() => setShowProfileModal(false)}
+        onSave={handleSaveProfile}
       />
 
       {/* Monster Details & Celebration Modal */}

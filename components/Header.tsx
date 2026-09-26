@@ -11,6 +11,7 @@ interface HeaderProps {
   unlockedMonstersCount: number;
   totalMonstersCount: number;
   onClearChat: () => void;
+  onOpenProfile: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -19,6 +20,7 @@ export const Header: React.FC<HeaderProps> = ({
   unlockedMonstersCount,
   totalMonstersCount,
   onClearChat,
+  onOpenProfile,
 }) => {
   const router = useRouter();
   const [clickCount, setClickCount] = useState(0);
@@ -51,45 +53,56 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="relative z-30 w-full px-4 py-3 sm:px-6 flex items-center justify-between border-b border-white/10 bg-black/40 backdrop-blur-md">
-      {/* Left: Brand with discrete 5-click Guardian access */}
+      {/* Left: Brand with discrete 5-click Guardian access & Profile click */}
       <div className="flex items-center gap-3">
         <button
           onClick={handleLogoClick}
           title="Hazel_AI (Click 5x quickly to open Guardian Portal)"
-          className="group flex items-center gap-2.5 text-left focus:outline-none focus:ring-2 focus:ring-purple-400/40 rounded-xl px-2 py-1 -ml-2 transition-all hover:bg-white/5 active:scale-95"
+          className="group relative flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 via-pink-500 to-cyan-400 p-[1.5px] shadow-neon-pink/30 shadow-md active:scale-95 transition-transform"
         >
-          <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 via-pink-500 to-cyan-400 p-[1.5px] shadow-neon-pink/30 shadow-md">
-            <div className="w-full h-full bg-black/90 rounded-[10px] flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-pink-400 group-hover:rotate-12 transition-transform duration-300" />
-            </div>
-            {clickCount > 1 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 text-[9px] font-bold bg-pink-500 text-white rounded-full flex items-center justify-center animate-bounce">
-                {5 - clickCount}
-              </span>
-            )}
+          <div className="w-full h-full bg-black/90 rounded-[10px] flex items-center justify-center">
+            <Sparkles className="w-4 h-4 text-pink-400 group-hover:rotate-12 transition-transform duration-300" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-base font-bold tracking-tight text-white flex items-center gap-1.5">
-                Hazel<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-300 to-cyan-400">_AI</span>
-              </span>
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                Safe Sanctuary
-              </span>
-            </div>
-            <p className="text-[11px] text-gray-400">
-              Devoted companion for <span className="text-pink-300 font-medium">{profile.name}</span>
-            </p>
+          {clickCount > 1 && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 text-[9px] font-bold bg-pink-500 text-white rounded-full flex items-center justify-center animate-bounce">
+              {5 - clickCount}
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={onOpenProfile}
+          title="Edit Sanctuary Profile"
+          className="text-left group/profile p-1 -m-1 rounded-xl hover:bg-white/5 transition-all focus:outline-none focus:ring-1 focus:ring-pink-400/40"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-base font-bold tracking-tight text-white flex items-center gap-1.5">
+              Hazel<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-300 to-cyan-400">_AI</span>
+            </span>
+            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              Safe Sanctuary
+            </span>
           </div>
+          <p className="text-[11px] text-gray-400 flex items-center gap-1">
+            Devoted companion for{' '}
+            <span className="text-pink-300 font-semibold group-hover/profile:underline flex items-center gap-1">
+              {profile.name}
+              <span>{profile.avatarEmoji || '🦄'}</span>
+            </span>
+          </p>
         </button>
       </div>
 
-      {/* Center: Live Resilience Status */}
-      <div className="hidden md:flex items-center gap-4 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 backdrop-blur-sm">
+      {/* Center: Live Resilience Status (Clickable to edit profile) */}
+      <button
+        onClick={onOpenProfile}
+        title="Edit Profile & Companion"
+        className="hidden md:flex items-center gap-4 bg-white/5 hover:bg-white/10 hover:border-pink-500/30 border border-white/10 rounded-full px-4 py-1.5 backdrop-blur-sm transition-all text-left group"
+      >
         <div className="flex items-center gap-2 text-xs text-gray-300">
           <Heart className="w-3.5 h-3.5 text-pink-400 fill-pink-400 animate-pulse" />
           <span>
-            Companion: <strong className="text-white">{profile.companionName}</strong>
+            Companion: <strong className="text-white group-hover:text-pink-300 transition-colors">{profile.companionName}</strong> {profile.companionAvatar || '✨'}
           </span>
         </div>
         <div className="h-3 w-[1px] bg-white/15" />
@@ -103,10 +116,20 @@ export const Header: React.FC<HeaderProps> = ({
             Monsters Awake
           </span>
         </div>
-      </div>
+      </button>
 
-      {/* Right: Actions (Vibe selector, Clear chat, Discreet Guardian link) */}
+      {/* Right: Actions (Profile button, Vibe selector, Clear chat, Discreet Guardian link) */}
       <div className="flex items-center gap-2 sm:gap-3">
+        {/* Profile Button */}
+        <button
+          onClick={onOpenProfile}
+          className="flex items-center gap-1.5 text-xs text-pink-300 hover:text-white bg-pink-950/40 hover:bg-pink-900/50 border border-pink-500/30 hover:border-pink-500/60 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all shadow-sm active:scale-95"
+          title="View & Edit Hazel's Sanctuary Profile"
+        >
+          <span className="text-sm">{profile.avatarEmoji || '🦄'}</span>
+          <span className="font-semibold text-pink-200 hidden sm:inline">{profile.name}</span>
+          <span className="text-[10px] text-pink-400 hidden md:inline">• Edit</span>
+        </button>
         {/* Vibe Selector */}
         <div className="relative">
           <button

@@ -50,6 +50,10 @@ export interface UserProfile {
   totalMessages: number;
   createdAt: number;
   lastActive: number;
+  avatarEmoji?: string;
+  companionAvatar?: string;
+  bioOrMotto?: string;
+  favoriteColor?: string;
 }
 
 export interface GuardianIncident {

@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { UserProfile, VibeTheme, MemoryItem } from '@/types';
-import { Sparkles, Heart, Palette, ArrowRight, Check } from 'lucide-react';
+import { Sparkles, Heart, Palette, ArrowRight, Check, Shield } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface OnboardingModalProps {
@@ -17,13 +18,33 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   isOpen,
   onComplete,
 }) => {
+  const router = useRouter();
   const [step, setStep] = useState(1);
+  const [clickCount, setClickCount] = useState(0);
+  const [lastClickTime, setLastClickTime] = useState(0);
   const [name, setName] = useState('Hazel');
   const [companionName, setCompanionName] = useState('Sparky');
   const [vibeTheme, setVibeTheme] = useState<VibeTheme>('cyber-pink');
   const [favorite1, setFavorite1] = useState('Drawing cute dragons and reading mystery books');
   const [favorite2, setFavorite2] = useState('Hot cocoa with marshmallows on cozy rainy days');
   const [favorite3, setFavorite3] = useState('My plushies and designing secret kingdoms');
+
+  // Stealth 5-click easter egg to open Guardian portal from onboarding
+  const handleLogoClick = () => {
+    const now = Date.now();
+    if (now - lastClickTime < 900) {
+      const nextCount = clickCount + 1;
+      if (nextCount >= 5) {
+        setClickCount(0);
+        router.push('/guardian');
+      } else {
+        setClickCount(nextCount);
+      }
+    } else {
+      setClickCount(1);
+    }
+    setLastClickTime(now);
+  };
 
   if (!isOpen) return null;
 
@@ -101,7 +122,45 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300">
+      {/* Top Header Bar with Brand Logo & Guardian Access for Parents */}
+      <div className="w-full max-w-lg mb-3 flex items-center justify-between px-1">
+        <button
+          type="button"
+          onClick={handleLogoClick}
+          title="Hazel_AI (Click 5x quickly to open Guardian Portal)"
+          className="group flex items-center gap-2.5 text-left focus:outline-none focus:ring-1 focus:ring-pink-400/40 rounded-xl px-2 py-1 -ml-1 transition-all hover:bg-white/5 active:scale-95"
+        >
+          <div className="relative flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 via-pink-500 to-cyan-400 p-[1.5px] shadow-neon-pink/30 shadow-md">
+            <div className="w-full h-full bg-black/90 rounded-[10px] flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-pink-400 group-hover:rotate-12 transition-transform duration-300" />
+            </div>
+            {clickCount > 1 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 text-[9px] font-bold bg-pink-500 text-white rounded-full flex items-center justify-center animate-bounce">
+                {5 - clickCount}
+              </span>
+            )}
+          </div>
+          <div>
+            <div className="text-sm font-bold tracking-tight text-white flex items-center gap-1">
+              Hazel<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-300 to-cyan-400">_AI</span>
+            </div>
+            <span className="text-[10px] text-gray-400 block -mt-0.5">Safe Sanctuary</span>
+          </div>
+        </button>
+
+        {/* Discreet Guardian Portal Access for Parents */}
+        <button
+          type="button"
+          onClick={() => router.push('/guardian')}
+          className="flex items-center gap-1.5 text-xs text-purple-300 hover:text-purple-100 bg-purple-950/50 hover:bg-purple-900/60 border border-purple-500/30 px-3 py-1.5 rounded-xl transition-all shadow-sm active:scale-95"
+          title="Guardian Portal for Parents (PIN Protected)"
+        >
+          <Shield className="w-3.5 h-3.5 text-purple-400" />
+          <span className="text-[11px] font-medium">Guardian Portal</span>
+        </button>
+      </div>
+
       <div className="relative w-full max-w-lg bg-obsidian-900 border border-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden">
         {/* Neon Ambient Header Glow */}
         <div className="absolute -top-24 -left-24 w-60 h-60 rounded-full bg-pink-600/30 blur-3xl pointer-events-none" />
@@ -136,6 +195,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               <p className="text-xs text-gray-300 mt-1 max-w-sm mx-auto">
                 A warm, 100% judgment-free private sanctuary built just for you.
               </p>
+              <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/40 border border-emerald-500/30 text-[11px] text-emerald-300">
+                <Shield className="w-3 h-3 text-emerald-400" />
+                <span>No account required • 100% private &amp; saved on this device</span>
+              </div>
             </div>
 
             <div className="space-y-4 pt-2">

@@ -142,6 +142,10 @@ export const INITIAL_PROFILE: UserProfile = {
   totalMessages: 0,
   createdAt: Date.now(),
   lastActive: Date.now(),
+  avatarEmoji: '🦄',
+  companionAvatar: '✨',
+  bioOrMotto: 'Kind, brave, and full of imagination! ✨',
+  favoriteColor: 'Neon Purple & Pink',
 };
 
 export const INITIAL_MEMORIES: MemoryItem[] = [

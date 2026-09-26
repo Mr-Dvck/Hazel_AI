@@ -136,7 +136,51 @@ async function testApi() {
   assert.ok(familyData.insight.familySentiment.summary.includes('Mom') || familyData.insight.familySentiment.summary.includes('family'), 'Family summary synthesizes real conversation context');
   console.log('  ✅ Pass: Dynamic family sentiment correctly extracts home connection context\n');
 
-  console.log('🎉 ALL API END-TO-END TESTS PASSED! (6/6 gates green)\n');
+  // Test 7: Profile Customization & Cross-Device State Sync
+  console.log('▶ Test 7: Profile Customization & Cross-Device Sync Verification');
+  const customizedProfile = {
+    name: 'Hazel Rose',
+    companionName: 'Astra',
+    vibeTheme: 'sunset-violet',
+    isOnboarded: true,
+    streakDays: 3,
+    totalMessages: 15,
+    avatarEmoji: '🐉',
+    companionAvatar: '🌟',
+    bioOrMotto: 'Bold, creative, and invincible! ✨',
+    favoriteColor: 'Sunset Amber',
+    createdAt: Date.now() - 86400000 * 3,
+    lastActive: Date.now(),
+  };
+
+  const updateProfileReq = new Request('http://localhost/api/sync', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId: 'hazel_profile_customized',
+      profile: customizedProfile,
+      monsters: [{ id: 1, name: 'Pufflet', unlocked: true }],
+      memories: [],
+    }),
+  });
+  const updateProfileRes = await syncPostHandler(updateProfileReq as any);
+  assert.strictEqual(updateProfileRes.status, 200, 'Profile sync POST returns 200');
+
+  const retrieveProfileReq = new Request('http://localhost/api/sync?userId=hazel_profile_customized', {
+    method: 'GET',
+  });
+  const retrieveProfileRes = await syncGetHandler(retrieveProfileReq as any);
+  assert.strictEqual(retrieveProfileRes.status, 200, 'Profile sync GET returns 200');
+  const retrieveProfileData = await retrieveProfileRes.json();
+  assert.strictEqual(retrieveProfileData.found, true, 'Customized profile found in sync store');
+  assert.strictEqual(retrieveProfileData.data.profile.name, 'Hazel Rose', 'Customized profile name verified');
+  assert.strictEqual(retrieveProfileData.data.profile.companionName, 'Astra', 'Customized companion name verified');
+  assert.strictEqual(retrieveProfileData.data.profile.avatarEmoji, '🐉', 'Customized avatar emoji verified');
+  assert.strictEqual(retrieveProfileData.data.profile.bioOrMotto, 'Bold, creative, and invincible! ✨', 'Customized motto verified');
+  assert.strictEqual(retrieveProfileData.data.profile.vibeTheme, 'sunset-violet', 'Customized vibe theme verified');
+  console.log('  ✅ Pass: Profile customizations (name, companion, avatar, motto, vibe) seamlessly persist and synchronize\n');
+
+  console.log('🎉 ALL API END-TO-END TESTS PASSED! (7/7 gates green)\n');
 }
 
 testApi().catch((err) => {
