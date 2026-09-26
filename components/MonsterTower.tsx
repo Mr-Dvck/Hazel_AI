@@ -96,6 +96,7 @@ export const MonsterTower: React.FC<MonsterTowerProps> = ({
                   <MonsterSvg
                     id={monster.id}
                     unlocked={monster.unlocked}
+                    style={monster.style}
                     size={46}
                   />
                 </div>

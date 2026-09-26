@@ -1,5 +1,5 @@
-import { ChatMessage, Monster, MemoryItem, UserProfile, GuardianInsight } from '@/types';
-import { INITIAL_MONSTERS, INITIAL_PROFILE, INITIAL_MEMORIES, INITIAL_GUARDIAN_INSIGHT } from './constants';
+import { ChatMessage, Monster, MemoryItem, UserProfile, GuardianInsight, MonsterStyle } from '@/types';
+import { INITIAL_MONSTERS, INITIAL_PROFILE, INITIAL_MEMORIES, INITIAL_GUARDIAN_INSIGHT, getMonstersByStyle } from './constants';
 
 const STORAGE_KEYS = {
   PROFILE: 'hazel_profile_v1',
@@ -117,6 +117,14 @@ export const Storage = {
       m.id === id ? { ...m, unlocked: true, unlockedAt: Date.now() } : m
     );
     Storage.setMonsters(updated);
+    return updated;
+  },
+  setMonsterStyle: (style: MonsterStyle): Monster[] => {
+    const currentMonsters = Storage.getMonsters();
+    const updated = getMonstersByStyle(style, currentMonsters);
+    Storage.setMonsters(updated);
+    const profile = Storage.getProfile();
+    Storage.setProfile({ ...profile, monsterStyle: style, lastActive: Date.now() });
     return updated;
   },
 

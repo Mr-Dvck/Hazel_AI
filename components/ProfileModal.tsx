@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { UserProfile, VibeTheme } from '@/types';
-import { calculateAge } from '@/lib/constants';
+import { UserProfile, VibeTheme, MonsterStyle } from '@/types';
+import { calculateAge, MONSTER_STYLE_OPTIONS } from '@/lib/constants';
 import {
   Sparkles,
   Heart,
@@ -16,6 +16,7 @@ import {
   MessageCircle,
   Calendar,
   Smile,
+  Ghost,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -46,7 +47,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   );
   const [favoriteColor, setFavoriteColor] = useState(profile.favoriteColor || 'Neon Pink');
   const [birthday, setBirthday] = useState(profile.birthday || '');
-  const [activeTab, setActiveTab] = useState<'profile' | 'companion' | 'vibe' | 'stats'>('profile');
+  const [monsterStyle, setMonsterStyle] = useState<MonsterStyle>(profile.monsterStyle || 'cute');
+  const [activeTab, setActiveTab] = useState<'profile' | 'companion' | 'guardians' | 'vibe' | 'stats'>('profile');
   const [isSaved, setIsSaved] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -56,6 +58,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       setName(profile.name);
       setCompanionName(profile.companionName);
       setVibeTheme(profile.vibeTheme);
+      setMonsterStyle(profile.monsterStyle || 'cute');
       setAvatarEmoji(profile.avatarEmoji || '🦄');
       setCompanionAvatar(profile.companionAvatar || '✨');
       setBioOrMotto(profile.bioOrMotto || 'Kind, brave, and full of imagination! ✨');
@@ -152,6 +155,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       name: cleanName,
       companionName: cleanCompanionName,
       vibeTheme,
+      monsterStyle,
       avatarEmoji,
       companionAvatar,
       bioOrMotto: bioOrMotto.trim() || 'Kind, brave, and full of imagination! ✨',
@@ -238,6 +242,19 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
           >
             <Bot className="w-3.5 h-3.5" />
             <span>Companion ({companionName || 'Sparky'})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('guardians')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
+              activeTab === 'guardians'
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-neon-purple'
+                : 'bg-white/5 text-gray-300 hover:bg-white/10'
+            }`}
+          >
+            <Ghost className="w-3.5 h-3.5" />
+            <span>Monster Theme</span>
           </button>
 
           <button
@@ -432,6 +449,74 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     drawings, or process school days.
                   </p>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: MONSTER GUARDIANS THEME */}
+          {activeTab === 'guardians' && (
+            <div className="space-y-3 animate-in fade-in duration-150">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-gray-300">
+                  Select your active 10-guardian set across 4 degrees of scariness:
+                </p>
+                <span className="text-[10px] font-semibold text-pink-300 px-2 py-0.5 rounded-full bg-pink-500/15 border border-pink-500/30">
+                  Preserves Unlocked Tiers
+                </span>
+              </div>
+
+              <div className="space-y-2.5">
+                {MONSTER_STYLE_OPTIONS.map((opt) => {
+                  const isSelected = monsterStyle === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setMonsterStyle(opt.id)}
+                      className={`w-full p-3 rounded-2xl border text-left transition-all ${
+                        isSelected
+                          ? `bg-white/15 ${opt.borderColor} shadow-lg scale-[1.01]`
+                          : 'bg-white/5 border-white/10 hover:bg-white/10'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-xl">{opt.icon}</span>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-white">{opt.name}</span>
+                              <span
+                                className="text-[9px] font-bold px-2 py-0.5 rounded-full border"
+                                style={{
+                                  color: opt.previewColor,
+                                  borderColor: `${opt.previewColor}50`,
+                                  backgroundColor: `${opt.previewColor}15`,
+                                }}
+                              >
+                                {opt.badge}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-gray-400 mt-0.5">{opt.tagline}</p>
+                          </div>
+                        </div>
+                        {isSelected && (
+                          <div className="w-5 h-5 rounded-full bg-pink-500 text-white flex items-center justify-center flex-shrink-0">
+                            <Check className="w-3 h-3 stroke-[3]" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="mt-2 pt-2 border-t border-white/5 flex items-center gap-1.5 text-[10px] text-gray-400">
+                        <span className="text-gray-300 font-semibold">Creatures:</span>
+                        <span className="truncate">{opt.sampleMonsters.join(', ')}...</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="p-3 rounded-2xl bg-purple-950/30 border border-purple-500/25 flex items-center gap-2 text-xs text-purple-200">
+                <Sparkles className="w-4 h-4 text-purple-400 flex-shrink-0" />
+                <span>Your unlocked tiers and tower progress remain unlocked when switching themes!</span>
               </div>
             </div>
           )}

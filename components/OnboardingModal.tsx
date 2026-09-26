@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { UserProfile, VibeTheme, MemoryItem } from '@/types';
-import { Sparkles, Heart, Palette, ArrowRight, Check, Shield } from 'lucide-react';
+import { UserProfile, VibeTheme, MemoryItem, MonsterStyle } from '@/types';
+import { MONSTER_STYLE_OPTIONS, calculateAge } from '@/lib/constants';
+import { Sparkles, Heart, Palette, ArrowRight, Check, Shield, Calendar, Skull, Ghost, Cloud, Zap } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface OnboardingModalProps {
@@ -25,6 +26,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   const [name, setName] = useState('Hazel');
   const [companionName, setCompanionName] = useState('Sparky');
   const [birthday, setBirthday] = useState('');
+  const [monsterStyle, setMonsterStyle] = useState<MonsterStyle>('spooky'); // Great default for Hazel who is a dark kid!
   const [vibeTheme, setVibeTheme] = useState<VibeTheme>('cyber-pink');
   const [favorite1, setFavorite1] = useState('Drawing cute dragons and reading mystery books');
   const [favorite2, setFavorite2] = useState('Hot cocoa with marshmallows on cozy rainy days');
@@ -84,10 +86,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     e.preventDefault();
 
     confetti({
-      particleCount: 80,
-      spread: 80,
+      particleCount: 90,
+      spread: 85,
       origin: { y: 0.5 },
-      colors: ['#ff2e93', '#00f0ff', '#facc15', '#a855f7'],
+      colors: ['#ff2e93', '#00f0ff', '#facc15', '#a855f7', '#ef4444'],
     });
 
     const memories: Omit<MemoryItem, 'id' | 'timestamp'>[] = [
@@ -125,6 +127,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
         name: name.trim() || 'Hazel',
         companionName: companionName.trim() || 'Sparky',
         vibeTheme,
+        monsterStyle,
         birthday: birthday.trim() || undefined,
         isOnboarded: true,
       },
@@ -177,9 +180,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
         <div className="absolute -top-24 -left-24 w-60 h-60 rounded-full bg-pink-600/30 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -right-24 w-60 h-60 rounded-full bg-cyan-600/20 blur-3xl pointer-events-none" />
 
-        {/* Stepper Dots */}
+        {/* Stepper Dots (5 steps) */}
         <div className="flex items-center justify-center gap-2 mb-6">
-          {[1, 2, 3].map((s) => (
+          {[1, 2, 3, 4, 5].map((s) => (
             <div
               key={s}
               className={`h-2 rounded-full transition-all duration-300 ${
@@ -193,7 +196,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           ))}
         </div>
 
-        {/* Step 1: Names */}
+        {/* STEP 1: WELCOME & NAMES */}
         {step === 1 && (
           <div className="space-y-5 animate-in fade-in duration-200">
             <div className="text-center">
@@ -240,25 +243,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   required
                 />
               </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-pink-300">
-                    When is your birthday so we can celebrate and grow together? 🎂
-                  </label>
-                  <span className="text-[10px] text-gray-400 font-normal">Optional (defaults to 10)</span>
-                </div>
-                <input
-                  type="text"
-                  value={birthday}
-                  onChange={(e) => setBirthday(e.target.value)}
-                  placeholder="e.g. May 14, 2015 (or leave blank to skip)"
-                  className="w-full px-4 py-3 rounded-2xl bg-black/60 border border-white/20 text-sm text-white focus:outline-none focus:border-pink-500 shadow-inner"
-                />
-                <p className="text-[11px] text-gray-400 mt-1">
-                  You can skip this if you don't know it right now—Sparky will celebrate you being 10!
-                </p>
-              </div>
             </div>
 
             <button
@@ -266,14 +250,176 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               onClick={() => setStep(2)}
               className="w-full mt-4 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider text-white bg-gradient-to-r from-pink-500 via-purple-600 to-cyan-500 hover:opacity-95 flex items-center justify-center gap-2 shadow-neon-pink"
             >
-              <span>Next: Pick Your Sanctuary Vibe</span>
+              <span>Next: Your Special Birthday 🎂</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         )}
 
-        {/* Step 2: Sanctuary Vibe */}
+        {/* STEP 2: EXPLICIT, UNMISSABLE BIRTHDAY STEP */}
         {step === 2 && (
+          <div className="space-y-5 animate-in fade-in duration-200">
+            <div className="text-center">
+              <div className="w-14 h-14 rounded-2xl bg-pink-500/20 border border-pink-500/40 flex items-center justify-center mx-auto mb-3 shadow-neon-pink/30">
+                <span className="text-3xl">🎂</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-white">
+                When is your Birthday?
+              </h2>
+              <p className="text-xs text-pink-200/90 mt-1 max-w-sm mx-auto leading-relaxed">
+                Sparky wants to celebrate your milestones, draw special birthday art, and grow right alongside you!
+              </p>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <div className="p-4 rounded-2xl bg-black/60 border border-pink-500/30 shadow-inner">
+                <label className="block text-xs font-bold uppercase tracking-wider text-pink-300 mb-2 flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-pink-400" />
+                  <span>Enter Your Birthday</span>
+                </label>
+                <input
+                  type="text"
+                  value={birthday}
+                  onChange={(e) => setBirthday(e.target.value)}
+                  placeholder="e.g. May 14, 2015 (or October 25)"
+                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/20 text-sm text-white focus:outline-none focus:border-pink-400 shadow-inner"
+                  autoFocus
+                />
+
+                {birthday.trim() ? (
+                  <div className="mt-2.5 p-2 rounded-xl bg-pink-950/40 border border-pink-500/30 text-xs text-pink-300 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-pink-400 flex-shrink-0" />
+                    <span>
+                      Awesome! We will celebrate you being <strong>{calculateAge(birthday)} years old</strong>! 🎉
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-gray-400 mt-2">
+                    Tip: You can include the year (e.g. 2015) so Sparky always tracks your exact age!
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setStep(3)}
+                className="w-full py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider text-white bg-gradient-to-r from-pink-500 via-purple-600 to-cyan-500 hover:opacity-95 flex items-center justify-center gap-2 shadow-neon-pink"
+              >
+                <span>{birthday.trim() ? 'Save Birthday & Next' : 'Next: Pick Monster Guardians'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="py-2.5 px-4 rounded-xl text-xs font-semibold text-gray-400 hover:text-white bg-white/5 hover:bg-white/10"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBirthday('');
+                    setStep(3);
+                  }}
+                  className="flex-1 py-2.5 px-4 rounded-xl text-xs font-medium text-gray-400 hover:text-pink-300 hover:bg-white/5 text-right transition-colors"
+                >
+                  Skip for now (Defaults to age 10) →
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3: 4 MONSTER STYLES WITH VARYING SCARINESS */}
+        {step === 3 && (
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-2">
+                <Ghost className="w-6 h-6 text-purple-400" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-white">
+                Choose Your Monster Guardians
+              </h2>
+              <p className="text-xs text-gray-300 mt-1 max-w-sm mx-auto">
+                Pick the scariness &amp; aesthetic of the 10 creatures that guard your Resilience Tower. You can switch styles anytime in Profile Settings!
+              </p>
+            </div>
+
+            <div className="space-y-2.5 max-h-[310px] overflow-y-auto pr-1 custom-scrollbar">
+              {MONSTER_STYLE_OPTIONS.map((opt) => {
+                const isSelected = monsterStyle === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setMonsterStyle(opt.id)}
+                    className={`w-full p-3 rounded-2xl border text-left transition-all ${
+                      isSelected
+                        ? `bg-white/15 ${opt.borderColor} shadow-lg scale-[1.01]`
+                        : 'bg-white/5 border-white/10 hover:bg-white/10'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-xl">{opt.icon}</span>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-white">{opt.name}</span>
+                            <span
+                              className="text-[9px] font-bold px-2 py-0.5 rounded-full border"
+                              style={{
+                                color: opt.previewColor,
+                                borderColor: `${opt.previewColor}50`,
+                                backgroundColor: `${opt.previewColor}15`,
+                              }}
+                            >
+                              {opt.badge}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-gray-400 mt-0.5">{opt.tagline}</p>
+                        </div>
+                      </div>
+                      {isSelected && (
+                        <div className="w-5 h-5 rounded-full bg-pink-500 text-white flex items-center justify-center flex-shrink-0">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-2 pt-2 border-t border-white/5 flex items-center gap-1.5 text-[10px] text-gray-400">
+                      <span className="text-gray-300 font-semibold">Guardians:</span>
+                      <span className="truncate">{opt.sampleMonsters.join(', ')}...</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setStep(2)}
+                className="py-3 px-5 rounded-2xl text-xs font-semibold text-gray-400 bg-white/5 hover:bg-white/10"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                onClick={() => setStep(4)}
+                className="flex-1 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider text-white bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500 hover:opacity-95 flex items-center justify-center gap-2 shadow-neon-pink"
+              >
+                <span>Next: Sanctuary Vibe</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 4: SANCTUARY VIBE */}
+        {step === 4 && (
           <div className="space-y-5 animate-in fade-in duration-200">
             <div className="text-center">
               <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-3">
@@ -314,14 +460,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             <div className="flex items-center gap-2 pt-2">
               <button
                 type="button"
-                onClick={() => setStep(1)}
+                onClick={() => setStep(3)}
                 className="py-3 px-5 rounded-2xl text-xs font-semibold text-gray-400 bg-white/5 hover:bg-white/10"
               >
                 Back
               </button>
               <button
                 type="button"
-                onClick={() => setStep(3)}
+                onClick={() => setStep(5)}
                 className="flex-1 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider text-white bg-gradient-to-r from-cyan-500 to-pink-500 hover:opacity-95 flex items-center justify-center gap-2 shadow-neon-cyan"
               >
                 <span>Next: 3 Things You Love</span>
@@ -331,18 +477,18 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           </div>
         )}
 
-        {/* Step 3: Tell me 3 things you love */}
-        {step === 3 && (
+        {/* STEP 5: 3 THINGS YOU LOVE & CLEAN "ALL DONE" BUTTON */}
+        {step === 5 && (
           <form onSubmit={handleFinish} className="space-y-4 animate-in fade-in duration-200">
             <div className="text-center">
-              <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-3">
+              <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-2">
                 <Sparkles className="w-6 h-6 text-amber-400" />
               </div>
               <h2 className="text-xl sm:text-2xl font-black text-white">
                 Tell Me 3 Things You Love
               </h2>
               <p className="text-xs text-gray-300 mt-1">
-                This populates your Memory Bank so I will always remember what makes you shine!
+                This populates your Memory Bank so Sparky will always remember what makes you shine!
               </p>
             </div>
 
@@ -390,28 +536,21 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               </div>
             </div>
 
-            <div className="p-3 rounded-2xl bg-purple-950/40 border border-purple-500/30 flex items-center gap-3">
-              <span className="text-xl">☁️</span>
-              <p className="text-[11px] text-purple-200">
-                Completing this awakens your Tier 1 Monster:{' '}
-                <strong className="text-white">Pufflet (Cozy Cloud Puff)</strong>!
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2 pt-2">
+            <div className="flex items-center gap-2 pt-3">
               <button
                 type="button"
-                onClick={() => setStep(2)}
-                className="py-3 px-5 rounded-2xl text-xs font-semibold text-gray-400 bg-white/5 hover:bg-white/10"
+                onClick={() => setStep(4)}
+                className="py-3.5 px-5 rounded-2xl text-xs font-semibold text-gray-400 bg-white/5 hover:bg-white/10"
               >
                 Back
               </button>
+              {/* Bold, prominent "ALL DONE" button directly entering the main interface */}
               <button
                 type="submit"
-                className="flex-1 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider text-black bg-gradient-to-r from-pink-400 via-amber-300 to-cyan-300 hover:opacity-95 flex items-center justify-center gap-2 shadow-lg"
+                className="flex-1 py-4 rounded-2xl font-black text-sm uppercase tracking-wider text-black bg-gradient-to-r from-pink-400 via-amber-300 to-cyan-300 hover:opacity-95 active:scale-98 transition-all flex items-center justify-center gap-2.5 shadow-lg shadow-pink-500/25"
               >
-                <Check className="w-4 h-4" />
-                <span>Enter Sanctuary & Awaken Pufflet</span>
+                <Check className="w-5 h-5 stroke-[2.5]" />
+                <span>ALL DONE</span>
               </button>
             </div>
           </form>

@@ -171,13 +171,6 @@ export const ChatStage: React.FC<ChatStageProps> = ({
     }
   };
 
-  const quickPrompts = [
-    { label: '🎨 Critique my drawing', prompt: "I drew something today! Can I show you my art?" },
-    { label: '🏰 Invent a creature', prompt: "Let's invent a new secret creature for our Resilience Tower!" },
-    { label: '💭 Talk about school', prompt: "School felt really tough and lonely today..." },
-    { label: '✨ Boost my confidence', prompt: "I need a superpower reminder today. Tell me something brave." },
-  ];
-
   const quickEmojis = ['💖', '🎨', '🌟', '🦄', '🚀', '🫂', '🐾', '🔥'];
 
   return (
@@ -219,18 +212,9 @@ export const ChatStage: React.FC<ChatStageProps> = ({
               Whatever happened today, you are safe, understood, and deeply celebrated here.
             </p>
 
-            {/* Quick Starter Prompts */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-6 w-full max-w-lg">
-              {quickPrompts.map((qp, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => onSendMessage(qp.prompt)}
-                  className="flex items-center gap-2 p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-pink-500/40 text-left text-xs text-gray-200 hover:text-white transition-all group"
-                >
-                  <span className="text-sm">{qp.label.slice(0, 2)}</span>
-                  <span className="flex-1 truncate font-medium">{qp.label.slice(2)}</span>
-                </button>
-              ))}
+            <div className="flex items-center gap-2 mt-5 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs text-gray-400">
+              <Sparkles className="w-3.5 h-3.5 text-pink-400" />
+              <span>Type anything below or upload your artwork to begin!</span>
             </div>
           </div>
         ) : (
@@ -307,8 +291,16 @@ export const ChatStage: React.FC<ChatStageProps> = ({
           </div>
         )}
 
-        <div className="flex items-center gap-2 bg-obsidian-800/90 border border-white/15 rounded-full px-3 py-1.5 shadow-inner focus-within:border-pink-500/60 focus-within:shadow-neon-pink/30 transition-all">
-          {/* File Upload Button */}
+        <div className={`flex items-center gap-2 bg-obsidian-900/90 border rounded-full px-3 py-1.5 shadow-inner transition-all ${
+          profile.vibeTheme === 'cyber-blue'
+            ? 'border-cyan-400/60 shadow-[0_0_20px_rgba(0,240,255,0.35)] focus-within:border-cyan-300 focus-within:shadow-[0_0_30px_rgba(0,240,255,0.6)]'
+            : profile.vibeTheme === 'cosmic-emerald'
+            ? 'border-emerald-400/60 shadow-[0_0_20px_rgba(16,185,129,0.35)] focus-within:border-emerald-300 focus-within:shadow-[0_0_30px_rgba(16,185,129,0.6)]'
+            : profile.vibeTheme === 'sunset-violet'
+            ? 'border-purple-400/60 shadow-[0_0_20px_rgba(168,85,247,0.35)] focus-within:border-purple-300 focus-within:shadow-[0_0_30px_rgba(168,85,247,0.6)]'
+            : 'border-pink-500/60 shadow-[0_0_20px_rgba(255,46,147,0.35)] focus-within:border-pink-400 focus-within:shadow-[0_0_30px_rgba(255,46,147,0.6)]'
+        }`}>
+          {/* Prominent Picture & Artwork Upload Button */}
           <input
             ref={fileInputRef}
             type="file"
@@ -320,10 +312,11 @@ export const ChatStage: React.FC<ChatStageProps> = ({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            title="Attach a drawing, camera roll photo, or doodle"
-            className="p-2 rounded-full text-gray-400 hover:text-pink-400 hover:bg-white/5 transition-colors"
+            title="Attach a drawing, painting, or photo"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-pink-400/60 transition-all hover:scale-105 active:scale-95 shadow-sm"
           >
-            <Paperclip className="w-4 h-4" />
+            <ImageIcon className="w-4 h-4 text-pink-400" />
+            <span className="hidden sm:inline font-medium">Add Picture</span>
           </button>
 
           {/* Quick Emoji Picker Button */}
@@ -334,16 +327,6 @@ export const ChatStage: React.FC<ChatStageProps> = ({
             title="Add cheer emoji"
           >
             <Smile className="w-4 h-4" />
-          </button>
-
-          {/* Quick Desk Note Dispatch Button */}
-          <button
-            type="button"
-            onClick={() => setShowDeskNoteModal(true)}
-            className="p-2 rounded-full text-pink-400 hover:text-pink-300 hover:bg-pink-500/10 transition-colors"
-            title="Send note to Tim's computer desk"
-          >
-            <Heart className="w-4 h-4 fill-pink-500/30" />
           </button>
 
           {/* Text Area Input */}

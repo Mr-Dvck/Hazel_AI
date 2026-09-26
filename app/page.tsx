@@ -40,7 +40,10 @@ export default function HomePage() {
   useEffect(() => {
     const loadedProfile = Storage.getProfile();
     const loadedMessages = Storage.getMessages();
-    const loadedMonsters = Storage.getMonsters();
+    let loadedMonsters = Storage.getMonsters();
+    if (loadedProfile.monsterStyle) {
+      loadedMonsters = Storage.setMonsterStyle(loadedProfile.monsterStyle);
+    }
     const loadedMemories = Storage.getMemories();
 
     setProfile(loadedProfile);
@@ -60,10 +63,14 @@ export default function HomePage() {
     Storage.setProfile(updated);
   };
 
-  // Save/Update Profile Handler (Name, companion, avatar, motto, vibe)
+  // Save/Update Profile Handler (Name, companion, avatar, motto, vibe, monsterStyle)
   const handleSaveProfile = (updatedProfile: UserProfile) => {
     setProfile(updatedProfile);
     Storage.setProfile(updatedProfile);
+    if (updatedProfile.monsterStyle) {
+      const updatedMonsters = Storage.setMonsterStyle(updatedProfile.monsterStyle);
+      setMonsters(updatedMonsters);
+    }
     Storage.syncToServer();
   };
 
@@ -177,7 +184,9 @@ export default function HomePage() {
     setProfile(updatedProfile);
     Storage.setProfile(updatedProfile);
 
-    // Ensure Tier 1 Pufflet is unlocked
+    // Apply selected monster style and unlock Tier 1 of that style
+    const selectedStyle = updatedFields.monsterStyle || 'spooky';
+    Storage.setMonsterStyle(selectedStyle);
     const updatedMonsters = Storage.unlockMonster(1);
     setMonsters(updatedMonsters);
 
@@ -188,19 +197,15 @@ export default function HomePage() {
     });
     setMemories(currentMems);
 
-    // Celebration: Confetti and reveal Pufflet
+    // Celebration: Confetti directly into main interface (no popup modal)
     confetti({
       particleCount: 90,
       spread: 85,
       origin: { y: 0.5 },
-      colors: ['#a78bfa', '#ff2e93', '#00f0ff', '#facc15'],
+      colors: ['#a78bfa', '#ff2e93', '#00f0ff', '#facc15', '#ef4444'],
     });
 
-    const pufflet = updatedMonsters.find((m) => m.id === 1);
-    if (pufflet) {
-      setSelectedMonster(pufflet);
-    }
-
+    // Directly enter main sanctuary interface without automatic monster reveal celebration modal
     setShowOnboarding(false);
   };
 

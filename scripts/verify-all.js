@@ -61,6 +61,38 @@ requiredNames.forEach((name, idx) => {
 });
 console.log('  ✅ Pass: All 10 collectible monsters verified with complete lore & mechanics\n');
 
+// Test 4b: 4 Monster Scariness Styles (Cute, Spooky, Gothic, Nightmare)
+console.log('▶ Test 4b: 4 Monster Scariness Styles Integrity & State Preservation');
+const { MONSTER_STYLE_OPTIONS, MONSTERS_BY_STYLE, getMonstersByStyle } = require('../lib/constants.ts');
+assert.strictEqual(MONSTER_STYLE_OPTIONS.length, 4, 'Must have exactly 4 monster style options');
+const expectedStyles = ['cute', 'spooky', 'gothic', 'nightmare'];
+expectedStyles.forEach((st) => {
+  const styleOpt = MONSTER_STYLE_OPTIONS.find((o) => o.id === st);
+  assert.ok(styleOpt, `Option for ${st} exists`);
+  const monsters = MONSTERS_BY_STYLE[st];
+  assert.strictEqual(monsters.length, 10, `Style ${st} has 10 monsters`);
+  monsters.forEach((m, idx) => {
+    assert.strictEqual(m.id, idx + 1, `${st} monster ${idx + 1} ID match`);
+    assert.strictEqual(m.tier, idx + 1, `${st} monster ${idx + 1} tier match`);
+    assert.ok(m.name && m.title && m.description && m.quote, `${st} monster ${m.name} has complete lore`);
+  });
+});
+
+// Test switching styles preserving unlock state
+const testUnlocks = [
+  { id: 1, unlocked: true, unlockedAt: 1000 },
+  { id: 2, unlocked: true, unlockedAt: 2000 },
+  { id: 3, unlocked: false },
+];
+const switchedToGothic = getMonstersByStyle('gothic', testUnlocks);
+assert.strictEqual(switchedToGothic[0].name, 'Voidling');
+assert.strictEqual(switchedToGothic[0].unlocked, true, 'Voidling preserved unlocked state');
+assert.strictEqual(switchedToGothic[1].name, 'Briarshade');
+assert.strictEqual(switchedToGothic[1].unlocked, true, 'Briarshade preserved unlocked state');
+assert.strictEqual(switchedToGothic[2].name, 'Luminary');
+assert.strictEqual(switchedToGothic[2].unlocked, false, 'Luminary preserved locked state');
+console.log('  ✅ Pass: All 4 monster styles (40 guardians) & unlock-state preservation verified\n');
+
 // Test 5: User Profile Data Structure & Customization Integrity
 console.log('▶ Test 5: User Profile Structure & Personalization Integrity');
 const { INITIAL_PROFILE } = require('../lib/constants.ts');
@@ -133,6 +165,14 @@ assert.strictEqual(testReply.recipient, 'Hazel', 'Recipient is Hazel');
 assert.ok(
   promptWithoutBday.includes("Would you like me to let either of them know how you're feeling? I can send a message right to Tim's computer if you like!"),
   'System prompt includes exact bridge offer directive'
+);
+assert.ok(
+  promptWithoutBday.includes("Strictly NEVER use patronizing, babyish, or condescending pet names"),
+  'System prompt bans condescending pet names'
+);
+assert.ok(
+  promptWithoutBday.includes("NEVER proactively mention Tim, her dad, mom, or family unsolicited"),
+  'System prompt bans unsolicited Tim/bridge mentions'
 );
 console.log('  ✅ Pass: Bridge storage persistence and system prompt bridge directive verified\n');
 

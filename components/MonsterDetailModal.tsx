@@ -85,7 +85,7 @@ export const MonsterDetailModal: React.FC<MonsterDetailModalProps> = ({
                 : 'none',
             }}
           >
-            <MonsterSvg id={monster.id} unlocked={monster.unlocked} size={130} />
+            <MonsterSvg id={monster.id} unlocked={monster.unlocked} style={monster.style} size={130} />
           </div>
         </div>
 

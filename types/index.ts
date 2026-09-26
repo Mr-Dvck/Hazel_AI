@@ -47,6 +47,8 @@ export interface BridgeState {
   lastUpdated: number;
 }
 
+export type MonsterStyle = 'cute' | 'spooky' | 'gothic' | 'nightmare';
+
 export interface Monster {
   id: number;
   name: string;
@@ -60,6 +62,7 @@ export interface Monster {
   color: string;
   glowColor: string;
   quote: string;
+  style?: MonsterStyle;
 }
 
 export type MemoryCategory = 'favorites' | 'superpowers' | 'dreams' | 'safeHarbor';
@@ -79,6 +82,7 @@ export interface UserProfile {
   name: string;
   companionName: string;
   vibeTheme: VibeTheme;
+  monsterStyle?: MonsterStyle;
   isOnboarded: boolean;
   streakDays: number;
   totalMessages: number;
