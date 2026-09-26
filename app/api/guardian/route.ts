@@ -297,7 +297,7 @@ export async function POST(req: NextRequest) {
               : isolationFound
               ? 'Hazel mentioned feeling left out during unstructured school activities (recess/lunch). She is using creative drawing and storytelling to soothe her feelings.'
               : 'Hazel is actively engaging in positive creative pursuits, monster milestones, and friendly conversation. Her resilience indicators are healthy.',
-          recentTriggers: triggers.length > 0 ? triggers : INITIAL_GUARDIAN_INSIGHT.bullyingSafetyAlert.recentTriggers,
+          recentTriggers: triggers,
         },
         familySentiment: {
           overallStatus: familyStatus,

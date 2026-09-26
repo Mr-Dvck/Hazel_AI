@@ -18,7 +18,7 @@
         "detail": "Drawing dragons"
       }
     ],
-    "syncedAt": 1790464269272
+    "syncedAt": 1790464733911
   },
   "hazel_profile_customized": {
     "profile": {
@@ -32,8 +32,8 @@
       "companionAvatar": "🌟",
       "bioOrMotto": "Bold, creative, and invincible! ✨",
       "favoriteColor": "Sunset Amber",
-      "createdAt": 1790205069275,
-      "lastActive": 1790464269275
+      "createdAt": 1790205533913,
+      "lastActive": 1790464733913
     },
     "monsters": [
       {
@@ -43,7 +43,7 @@
       }
     ],
     "memories": [],
-    "syncedAt": 1790464269275
+    "syncedAt": 1790464733913
   },
   "hazel_birthday_user": {
     "profile": {
@@ -57,8 +57,8 @@
       "companionAvatar": "🌟",
       "bioOrMotto": "Bold, creative, and invincible! ✨",
       "favoriteColor": "Sunset Amber",
-      "createdAt": 1790205069275,
-      "lastActive": 1790464269275,
+      "createdAt": 1790205533913,
+      "lastActive": 1790464733913,
       "birthday": "May 14, 2015"
     },
     "monsters": [
@@ -76,7 +76,7 @@
         "detail": "May 14, 2015"
       }
     ],
-    "syncedAt": 1790464271889
+    "syncedAt": 1790464738361
   },
   "hazel_default": {
     "profile": {
@@ -86,7 +86,7 @@
     "monsters": [],
     "memories": [],
     "guardianInsight": {
-      "lastUpdated": 1790464271917,
+      "lastUpdated": 1790464738380,
       "howHazelIsDoing": {
         "currentMoodAndEnergy": "Calm & Resilient",
         "whatsWeighingOnHer": "No heavy emotional burdens or peer friction detected in recent chats.",
@@ -98,16 +98,7 @@
         "severity": "Safe",
         "headline": "No Active Safety Threats Detected",
         "summary": "Hazel is actively engaging in positive creative pursuits, monster milestones, and friendly conversation. Her resilience indicators are healthy.",
-        "recentTriggers": [
-          {
-            "id": "trig-1",
-            "timestamp": 1790334666625,
-            "category": "bullying",
-            "severity": "Mild",
-            "snippet": "Nobody let me sit at the art table today again.",
-            "context": "Cafeteria seating isolation reported after 4th period art project."
-          }
-        ]
+        "recentTriggers": []
       },
       "familySentiment": {
         "overallStatus": "Positive",
@@ -149,6 +140,6 @@
         }
       ]
     },
-    "syncedAt": 1790464271917
+    "syncedAt": 1790464738380
   }
 }

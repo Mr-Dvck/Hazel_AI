@@ -454,6 +454,12 @@ async function testApi() {
     console.log('  ✅ Pass: Companion explains real bridge architecture to personal AI honestly & excitedly\n');
   } finally {
     process.env.OPENROUTER_API_KEY = savedApiKey;
+    try {
+      const { BridgeStorage } = await import('../lib/bridge-storage');
+      BridgeStorage.clearAll();
+    } catch {
+      // ignore
+    }
   }
 
   console.log('🎉 ALL API END-TO-END TESTS PASSED! (14/14 gates green)\n');

@@ -160,6 +160,7 @@ const testReply = BridgeStorage.addReply({
 });
 assert.ok(testReply.id, 'Bridge reply created with ID');
 assert.strictEqual(testReply.recipient, 'Hazel', 'Recipient is Hazel');
+BridgeStorage.clearAll();
 
 // Verify system prompt directive
 assert.ok(
@@ -245,6 +246,36 @@ assert.strictEqual(
   "I pass your message directly to Tim's personal AI, who messages him straight on his computer!",
   'Explains message passes to Tim\'s personal AI when asked "How does it work?"'
 );
+
+const howCanItDoThatRes = generateEmpatheticOfflineStream("How can it do that?", "Hazel", "Sparky", false);
+assert.strictEqual(
+  howCanItDoThatRes.response,
+  "I pass your message directly to Tim's personal AI, who messages him straight on his computer!",
+  'Explains message passes to Tim\'s personal AI when asked "How can it do that?"'
+);
+
+const howDoYouDoItRes = generateEmpatheticOfflineStream("How do you do it?", "Hazel", "Sparky", false);
+assert.strictEqual(
+  howDoYouDoItRes.response,
+  "I pass your message directly to Tim's personal AI, who messages him straight on his computer!",
+  'Explains message passes to Tim\'s personal AI when asked "How do you do it?"'
+);
+
+const sendMsgToMomRes = generateEmpatheticOfflineStream("Can I send a message to Mom?", "Hazel", "Sparky", false);
+assert.ok(
+  sendMsgToMomRes.response.includes("Would you like me to send a note to Tim or Mom? Whenever you want to share something with them, I can send it right away!"),
+  'Offers bridge note when Hazel asks to message Mom'
+);
+
+// Verify INITIAL_GUARDIAN_INSIGHT starts 100% clean and blank without mock alerts
+const { INITIAL_GUARDIAN_INSIGHT } = require('../lib/constants.ts');
+assert.strictEqual(INITIAL_GUARDIAN_INSIGHT.bullyingSafetyAlert.severity, 'Safe', 'Initial insight starts Safe');
+assert.strictEqual(INITIAL_GUARDIAN_INSIGHT.bullyingSafetyAlert.recentTriggers.length, 0, 'No mock triggers in initial insight');
+
+// Verify OnboardingModal has zero Guardian giveaways
+const onboardingSrc = fs.readFileSync(path.join(__dirname, '../components/OnboardingModal.tsx'), 'utf-8');
+assert.ok(!onboardingSrc.includes('Guardian Portal'), 'Onboarding modal has completely purged Guardian Portal button/labels');
+
 
 // CRITICAL REGRESSION TEST: "time" must NOT trigger Tim doctrine false-positive!
 const hardTimeRes = generateEmpatheticOfflineStream("I had a hard time today, why are kids mean?", "Hazel", "Sparky", false);

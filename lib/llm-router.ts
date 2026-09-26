@@ -141,34 +141,47 @@ export function generateEmpatheticOfflineStream(
   let response = '';
 
   const isHowItWorksQuery =
-    /how (do|can) (you|it|we) (do that|message|send|contact|reach|talk)/i.test(userMessage) ||
-    /how does (it|that|this|the note|the bridge) (even )?work/i.test(userMessage) ||
-    /how (do you|can you|can it) (even )?do that/i.test(userMessage) ||
-    /how (can|do) you message (him|tim|mom)/i.test(userMessage) ||
-    /how (do|can) you (send|pass) (a message|messages|notes?)/i.test(userMessage) ||
+    /how (do|can|could|would|does|is) (you|it|we|that|this) (even )?(do that|do it|do this|work|possible|message|send|pass|contact|reach|talk)/i.test(userMessage) ||
+    /how does (it|that|this|the note|the message|the bridge) (even )?(work|get there|reach|arrive)/i.test(userMessage) ||
+    /how (do|can) (you|it) (send|pass|deliver) (a |the )?(message|messages|note|notes)/i.test(userMessage) ||
+    /how (can|do|are) (you|it) (able to )?message (him|tim|mom|them)/i.test(userMessage) ||
+    /how (it|you) can do that/i.test(userMessage) ||
     lower.includes('how do you do that') ||
     lower.includes('how can you do that') ||
     lower.includes('how does it work') ||
     lower.includes('how does that work') ||
+    lower.includes('how is that possible') ||
     lower.includes('how can you message') ||
     lower.includes('how do you message') ||
     lower.includes('how do you send') ||
+    lower.includes('how can you send') ||
     lower.includes('how it can do that');
 
   const isDispatchNote =
     lower.includes('tell tim') ||
     lower.includes('message tim') ||
     lower.includes('send note') ||
+    lower.includes('send a note') ||
+    lower.includes('send messages') ||
+    lower.includes('send a message') ||
     lower.includes("tim's computer") ||
     lower.includes('tell mom') ||
-    lower.includes('message mom');
+    lower.includes('tell my mom') ||
+    lower.includes('message mom') ||
+    lower.includes('message my mom') ||
+    /(send|dispatch|pass) (a |the )?(note|message) to (tim|mom)/i.test(userMessage) ||
+    /message (to )?(tim|mom)/i.test(userMessage) ||
+    /(can|could) (i|we|you) (message|tell) (tim|mom|my mom)/i.test(userMessage) ||
+    /(can|could) (i|we|you) send (tim|mom|my mom) a (note|message)/i.test(userMessage);
 
   const isTimOrOriginQuery =
     /\btim\b/i.test(userMessage) ||
-    /who (made|created|built|programmed) you/i.test(userMessage) ||
+    /who (made|created|built|programmed|invented) you/i.test(userMessage) ||
     /who is tim/i.test(userMessage) ||
+    /who (made|created|built) this/i.test(userMessage) ||
     /(do you know|does).*(\bmom\b|\btim\b)/i.test(userMessage) ||
-    /(\bmom\b|\btim\b).*(make|built|created|programmed|know|told)/i.test(userMessage);
+    /(\bmom\b|\btim\b).*(make|built|created|programmed|know|told)/i.test(userMessage) ||
+    /\b(my mom|mom and tim|tim and mom)\b/i.test(userMessage);
 
   if (detectedBirthday) {
     thinking += `\n*Noticing birthday announcement: ${detectedBirthday}...*\nCelebrating milestone and pinning to persistent memories!`;

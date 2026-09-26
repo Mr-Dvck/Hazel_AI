@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserProfile, VibeTheme, MemoryItem, MonsterStyle } from '@/types';
 import { MONSTER_STYLE_OPTIONS, calculateAge } from '@/lib/constants';
-import { Sparkles, Heart, Palette, ArrowRight, Check, Shield, Calendar, Skull, Ghost, Cloud, Zap } from 'lucide-react';
+import { Sparkles, Heart, Palette, ArrowRight, Check, Calendar, Skull, Ghost, Cloud, Zap } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface OnboardingModalProps {
@@ -137,41 +137,25 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300">
-      {/* Top Header Bar with Brand Logo & Guardian Access for Parents */}
+      {/* Top Header Bar with Brand Logo */}
       <div className="w-full max-w-lg mb-3 flex items-center justify-between px-1">
         <button
           type="button"
           onClick={handleLogoClick}
-          title="Hazel_AI (Click 5x quickly to open Guardian Portal)"
-          className="group flex items-center gap-2.5 text-left focus:outline-none focus:ring-1 focus:ring-pink-400/40 rounded-xl px-2 py-1 -ml-1 transition-all hover:bg-white/5 active:scale-95"
+          title="Hazel_AI"
+          className="group flex items-center gap-2.5 text-left focus:outline-none rounded-xl px-2 py-1 -ml-1 transition-all hover:bg-white/5 active:scale-95"
         >
           <div className="relative flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 via-pink-500 to-cyan-400 p-[1.5px] shadow-neon-pink/30 shadow-md">
             <div className="w-full h-full bg-black/90 rounded-[10px] flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-pink-400 group-hover:rotate-12 transition-transform duration-300" />
             </div>
-            {clickCount > 1 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 text-[9px] font-bold bg-pink-500 text-white rounded-full flex items-center justify-center animate-bounce">
-                {5 - clickCount}
-              </span>
-            )}
           </div>
           <div>
             <div className="text-sm font-bold tracking-tight text-white flex items-center gap-1">
               Hazel<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-300 to-cyan-400">_AI</span>
             </div>
-            <span className="text-[10px] text-gray-400 block -mt-0.5">Safe Sanctuary</span>
+            <span className="text-[10px] text-gray-400 block -mt-0.5">Creative Sanctuary</span>
           </div>
-        </button>
-
-        {/* Discreet Guardian Portal Access for Parents */}
-        <button
-          type="button"
-          onClick={() => router.push('/guardian')}
-          className="flex items-center gap-1.5 text-xs text-purple-300 hover:text-purple-100 bg-purple-950/50 hover:bg-purple-900/60 border border-purple-500/30 px-3 py-1.5 rounded-xl transition-all shadow-sm active:scale-95"
-          title="Guardian Portal for Parents (PIN Protected)"
-        >
-          <Shield className="w-3.5 h-3.5 text-purple-400" />
-          <span className="text-[11px] font-medium">Guardian Portal</span>
         </button>
       </div>
 
@@ -210,7 +194,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 A warm, 100% judgment-free private sanctuary built just for you.
               </p>
               <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/40 border border-emerald-500/30 text-[11px] text-emerald-300">
-                <Shield className="w-3 h-3 text-emerald-400" />
+                <Sparkles className="w-3 h-3 text-emerald-400" />
                 <span>No account required • 100% private &amp; saved on this device</span>
               </div>
             </div>

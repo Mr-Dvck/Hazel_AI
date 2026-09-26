@@ -730,23 +730,14 @@ export const INITIAL_GUARDIAN_INSIGHT: GuardianInsight = {
     hasConversations: false,
   },
   bullyingSafetyAlert: {
-    severity: 'Mild',
-    headline: 'Lunch Table Exclusion Observed',
-    summary: 'Hazel mentioned feeling left out during 5th-grade recess and cafeteria group seating. No physical threats or direct verbal aggression detected, but persistent micro-exclusions are causing social anxiety.',
-    recentTriggers: [
-      {
-        id: 'trig-1',
-        timestamp: Date.now() - 86400000 * 1.5,
-        category: 'bullying',
-        severity: 'Mild',
-        snippet: 'Nobody let me sit at the art table today again.',
-        context: 'Cafeteria seating isolation reported after 4th period art project.',
-      },
-    ],
+    severity: 'Safe',
+    headline: 'Sanctuary Active',
+    summary: 'No active safety threats or peer conflict detected.',
+    recentTriggers: [],
   },
   familySentiment: {
     overallStatus: 'Positive',
-    summary: 'Hazel deeply loves her family and feels safe at home, but occasionally feels hesitant to share school friction out of fear of burdening her parents.',
+    summary: 'Hazel feels warmth and safety in her home environment. Ready to explore her sanctuary and share creative moments.',
     constructiveInsights: [
       'Hazel cherishes quiet evening reading or drawing time with mom & dad.',
       'She craves low-pressure conversations where she can speak without immediately being asked how to "fix" it.',
@@ -760,11 +751,11 @@ export const INITIAL_GUARDIAN_INSIGHT: GuardianInsight = {
   },
   emotionalWeather: {
     currentMood: 'Resilient',
-    score: 78,
+    score: 80,
     trend: 'improving',
-    description: 'Hazel shows remarkable inner resilience and artistic curiosity. While school social dynamics sting, her spirits lift rapidly when engaged in creative storytelling.',
+    description: 'Sanctuary created; awaiting first conversation to map emotional weather.',
   },
-  sessionSummary: 'Hazel is actively exploring her creative sanctuary. Her companion is validating her emotions, celebrating her artwork, and keeping a watchful eye on school social dynamics.',
+  sessionSummary: "Waiting for Hazel's first conversation to synthesize her well-being assessment.",
   actionableSuggestions: [
     {
       category: 'Recess Connection',

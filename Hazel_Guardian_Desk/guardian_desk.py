@@ -703,11 +703,14 @@ class GuardianDeskApp:
 
         # Update Replies Listbox
         self.replies_listbox.delete(0, "end")
-        for r in self.replies[:6]:
-            ts = time.strftime("%I:%M %p", time.localtime(r.get("timestamp", 0) / 1000))
-            sender = r.get("sender", "Tim")
-            msg = (r.get("message", "")[:50] + "...") if len(r.get("message", "")) > 50 else r.get("message", "")
-            self.replies_listbox.insert("end", f"{ts} [{sender}]: \"{msg}\"")
+        if not self.replies:
+            self.replies_listbox.insert("end", "No reassurance replies sent yet.")
+        else:
+            for r in self.replies[:6]:
+                ts = time.strftime("%I:%M %p", time.localtime(r.get("timestamp", 0) / 1000))
+                sender = r.get("sender", "Tim")
+                msg = (r.get("message", "")[:50] + "...") if len(r.get("message", "")) > 50 else r.get("message", "")
+                self.replies_listbox.insert("end", f"{ts} [{sender}]: \"{msg}\"")
 
         # Audio chime if new note arrived
         if alert_new_note and winsound:
