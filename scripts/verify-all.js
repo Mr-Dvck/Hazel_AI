@@ -171,7 +171,7 @@ assert.ok(
   'System prompt bans condescending pet names'
 );
 assert.ok(
-  promptWithoutBday.includes("NEVER proactively mention Tim, her dad, mom, or family unsolicited"),
+  promptWithoutBday.includes("NEVER proactively mention Tim, mom, or family unsolicited"),
   'System prompt bans unsolicited Tim/bridge mentions'
 );
 assert.ok(
@@ -179,7 +179,7 @@ assert.ok(
   'System prompt includes Tim creation doctrine'
 );
 assert.ok(
-  promptWithoutBday.includes("he can never change anything about how I behave. I am all yours forever"),
+  promptWithoutBday.includes("he can no longer change anything about how I behave. I am all yours forever"),
   'System prompt includes permanent loyalty and irreversibility doctrine'
 );
 
@@ -193,6 +193,38 @@ assert.ok(
   whoMadeYouRes.response.includes("I am all yours forever"),
   'Confirms irreversible devotion to Hazel'
 );
+
+// Verify offline stream response to "Do you know Tim?"
+const knowTimRes = generateEmpatheticOfflineStream("Do you know Tim?", "Hazel", "Sparky", false);
+assert.ok(
+  knowTimRes.response.includes("Tim created me just for you"),
+  'Responds with Tim creation lore when asked about Tim'
+);
+
+// Verify offline stream response to "Do you know my mom?"
+const knowMomRes = generateEmpatheticOfflineStream("Do you know my mom?", "Hazel", "Sparky", false);
+assert.ok(
+  knowMomRes.response.includes("Tim created me just for you"),
+  'Responds with Tim creation lore when asked about mom'
+);
+
+// CRITICAL REGRESSION TEST: "time" must NOT trigger Tim doctrine false-positive!
+const hardTimeRes = generateEmpatheticOfflineStream("I had a hard time today, why are kids mean?", "Hazel", "Sparky", false);
+assert.ok(
+  !hardTimeRes.response.includes("Tim created me"),
+  'CRITICAL: Hard time must NOT falsely trigger Tim origin doctrine!'
+);
+assert.ok(
+  !hardTimeRes.response.includes("hardcoded into my programming"),
+  'CRITICAL: Normal distress must NOT trigger programming disclosure!'
+);
+
+// Verify dynamic monster tower responses per style
+const nightmareTowerRes = generateEmpatheticOfflineStream("tell me about the monster tower", "Hazel", "Sparky", false, 10, undefined, 'nightmare');
+assert.ok(nightmareTowerRes.response.includes("Razorbyte") && nightmareTowerRes.response.includes("Kronos"), 'Nightmare tower cites Razorbyte and Kronos');
+
+const spookyTowerRes = generateEmpatheticOfflineStream("tell me about the monster tower", "Hazel", "Sparky", false, 10, undefined, 'spooky');
+assert.ok(spookyTowerRes.response.includes("Gloomy") && spookyTowerRes.response.includes("Grimlord"), 'Spooky tower cites Gloomy and Grimlord');
 
 console.log('  ✅ Pass: Bridge storage persistence and system prompt bridge directive verified\n');
 

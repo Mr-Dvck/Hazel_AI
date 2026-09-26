@@ -190,7 +190,7 @@ export async function POST(req: NextRequest) {
               ? '"School can be super loud and unfair sometimes. Want to make some hot cocoa and just chill together tonight?"'
               : detectedSeverity === 'Mild'
               ? '"If you could invent a secret monster friend to sit at your lunch table, what super trick would it do?"'
-              : '"Hey sweetie, I noticed how hard you worked today. Want to just cozy up with some cocoa and draw together tonight?"',
+              : '"Hey Hazel, I noticed how hard you worked today. Want to just cozy up with some cocoa and draw together tonight?"',
           purpose:
             detectedSeverity !== 'Safe'
               ? 'Creates a safe harbor for decompressing without feeling interrogated.'

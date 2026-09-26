@@ -18,7 +18,7 @@
         "detail": "Drawing dragons"
       }
     ],
-    "syncedAt": 1790463248124
+    "syncedAt": 1790463594357
   },
   "hazel_profile_customized": {
     "profile": {
@@ -32,8 +32,8 @@
       "companionAvatar": "🌟",
       "bioOrMotto": "Bold, creative, and invincible! ✨",
       "favoriteColor": "Sunset Amber",
-      "createdAt": 1790204048126,
-      "lastActive": 1790463248126
+      "createdAt": 1790204394361,
+      "lastActive": 1790463594361
     },
     "monsters": [
       {
@@ -43,7 +43,7 @@
       }
     ],
     "memories": [],
-    "syncedAt": 1790463248126
+    "syncedAt": 1790463594361
   },
   "hazel_birthday_user": {
     "profile": {
@@ -57,8 +57,8 @@
       "companionAvatar": "🌟",
       "bioOrMotto": "Bold, creative, and invincible! ✨",
       "favoriteColor": "Sunset Amber",
-      "createdAt": 1790204048126,
-      "lastActive": 1790463248126,
+      "createdAt": 1790204394361,
+      "lastActive": 1790463594361,
       "birthday": "May 14, 2015"
     },
     "monsters": [
@@ -76,7 +76,7 @@
         "detail": "May 14, 2015"
       }
     ],
-    "syncedAt": 1790463251873
+    "syncedAt": 1790463597291
   },
   "hazel_default": {
     "profile": {
@@ -86,7 +86,7 @@
     "monsters": [],
     "memories": [],
     "guardianInsight": {
-      "lastUpdated": 1790463251893,
+      "lastUpdated": 1790463597313,
       "bullyingSafetyAlert": {
         "severity": "Safe",
         "headline": "No Active Safety Threats Detected",
@@ -94,7 +94,7 @@
         "recentTriggers": [
           {
             "id": "trig-1",
-            "timestamp": 1790333644714,
+            "timestamp": 1790333992500,
             "category": "bullying",
             "severity": "Mild",
             "snippet": "Nobody let me sit at the art table today again.",
@@ -127,7 +127,7 @@
       "actionableSuggestions": [
         {
           "category": "Evening Connection",
-          "conversationStarter": "\"Hey sweetie, I noticed how hard you worked today. Want to just cozy up with some cocoa and draw together tonight?\"",
+          "conversationStarter": "\"Hey Hazel, I noticed how hard you worked today. Want to just cozy up with some cocoa and draw together tonight?\"",
           "purpose": "Provides low-friction emotional safety and silent reassurance."
         },
         {
@@ -142,6 +142,6 @@
         }
       ]
     },
-    "syncedAt": 1790463251893
+    "syncedAt": 1790463597313
   }
 }

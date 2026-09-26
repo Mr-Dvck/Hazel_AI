@@ -42,8 +42,6 @@ export const ChatStage: React.FC<ChatStageProps> = ({
   const [expandedThinkingIds, setExpandedThinkingIds] = useState<Record<string, boolean>>({});
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [showDeskNoteModal, setShowDeskNoteModal] = useState(false);
-  const [deskNoteInput, setDeskNoteInput] = useState('');
   const [isDispatching, setIsDispatching] = useState(false);
   const [dispatchedMap, setDispatchedMap] = useState<Record<string, boolean>>({});
 
@@ -93,8 +91,6 @@ export const ChatStage: React.FC<ChatStageProps> = ({
       if (messageId) {
         setDispatchedMap((prev) => ({ ...prev, [messageId]: true }));
       }
-      setShowDeskNoteModal(false);
-      setDeskNoteInput('');
     } catch (err) {
       console.error('Failed to dispatch desk note:', err);
     } finally {
@@ -271,7 +267,7 @@ export const ChatStage: React.FC<ChatStageProps> = ({
         </div>
       )}
 
-      {/* Input Bar */}
+      {/* Glowing Neon Input Bar */}
       <div className="pt-3 border-t border-white/10 relative">
         {/* Emoji Bar Drawer */}
         {showEmojiPicker && (
@@ -354,86 +350,6 @@ export const ChatStage: React.FC<ChatStageProps> = ({
           </button>
         </div>
       </div>
-
-      {/* Quick Desk Note Dispatch Modal */}
-      <AnimatePresence>
-        {showDeskNoteModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-md bg-obsidian-900 border border-pink-500/40 rounded-3xl p-6 shadow-neon-pink relative overflow-hidden"
-            >
-              <button
-                onClick={() => setShowDeskNoteModal(false)}
-                className="absolute top-4 right-4 p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-gray-300"
-              >
-                <X className="w-4 h-4" />
-              </button>
-
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className="p-2 rounded-xl bg-pink-500/20 text-pink-400">
-                  <Laptop className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-white flex items-center gap-1.5">
-                    <span>Send Note to Tim's Computer</span>
-                    <Heart className="w-4 h-4 text-pink-400 fill-pink-400" />
-                  </h3>
-                  <p className="text-xs text-pink-200/70">
-                    Dispatched straight to Tim & Mom's Guardian Desk inbox
-                  </p>
-                </div>
-              </div>
-
-              {/* Quick Presets */}
-              <div className="space-y-1.5 mb-3">
-                <button
-                  onClick={() => handleDispatchDeskNote("Hey Dad, having a hard day and could use a hug later.")}
-                  disabled={isDispatching}
-                  className="w-full text-left p-2.5 rounded-xl bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-500/40 text-xs text-gray-200 transition-colors"
-                >
-                  💙 "Hey Dad, having a hard day and could use a hug later."
-                </button>
-                <button
-                  onClick={() => handleDispatchDeskNote("Hey Dad & Mom, thinking of you guys! Love you so much.")}
-                  disabled={isDispatching}
-                  className="w-full text-left p-2.5 rounded-xl bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-500/40 text-xs text-gray-200 transition-colors"
-                >
-                  🌸 "Hey Dad & Mom, thinking of you guys! Love you so much."
-                </button>
-                <button
-                  onClick={() => handleDispatchDeskNote("Hey Dad, made something really cool in my sanctuary today!")}
-                  disabled={isDispatching}
-                  className="w-full text-left p-2.5 rounded-xl bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-500/40 text-xs text-gray-200 transition-colors"
-                >
-                  🎨 "Hey Dad, made something really cool in my sanctuary today!"
-                </button>
-              </div>
-
-              {/* Custom Note Input */}
-              <div className="mt-3">
-                <textarea
-                  value={deskNoteInput}
-                  onChange={(e) => setDeskNoteInput(e.target.value)}
-                  placeholder="Or write your own note to Tim's desk..."
-                  rows={3}
-                  className="w-full p-3 rounded-2xl bg-black/60 border border-white/15 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-pink-500/70 resize-none"
-                />
-                <button
-                  onClick={() => handleDispatchDeskNote(deskNoteInput)}
-                  disabled={!deskNoteInput.trim() || isDispatching}
-                  className="mt-2 w-full py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold text-xs uppercase tracking-wider disabled:opacity-50 hover:opacity-95 shadow-md flex items-center justify-center gap-2"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>{isDispatching ? 'Sending to Desk...' : "Send Straight to Tim's Desk"}</span>
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </section>
   );
 };
@@ -642,42 +558,42 @@ const MessageBubble: React.FC<{
                     onClick={() =>
                       onDispatchNote &&
                       onDispatchNote(
-                        "Hey Dad, having a hard time today. Could really use some quiet hugs later.",
+                        "Hey Mom, having a hard time today. Could really use some quiet hugs later.",
                         message.id
                       )
                     }
                     disabled={isDispatching}
                     className="w-full text-left p-2 rounded-xl bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-400/50 text-xs text-pink-100 transition-all flex items-center justify-between group"
                   >
-                    <span>💙 "Hey Dad, having a hard time today. Could use a hug later."</span>
+                    <span>💙 "Hey Mom, having a hard time today. Could use a hug later."</span>
                     <Send className="w-3 h-3 text-pink-400 group-hover:translate-x-0.5 transition-transform" />
                   </button>
                   <button
                     onClick={() =>
                       onDispatchNote &&
                       onDispatchNote(
-                        "Hey Dad & Mom, thinking of you guys and wanted to say hi!",
+                        "Hey Mom & Tim, thinking of you guys and wanted to say hi!",
                         message.id
                       )
                     }
                     disabled={isDispatching}
                     className="w-full text-left p-2 rounded-xl bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-400/50 text-xs text-pink-100 transition-all flex items-center justify-between group"
                   >
-                    <span>🌸 "Hey Dad & Mom, thinking of you guys and wanted to say hi!"</span>
+                    <span>🌸 "Hey Mom & Tim, thinking of you guys and wanted to say hi!"</span>
                     <Send className="w-3 h-3 text-pink-400 group-hover:translate-x-0.5 transition-transform" />
                   </button>
                   <button
                     onClick={() =>
                       onDispatchNote &&
                       onDispatchNote(
-                        "Hey Dad, I made something really cool in my sanctuary today!",
+                        "Hey Mom & Tim, I made something really cool in my sanctuary today!",
                         message.id
                       )
                     }
                     disabled={isDispatching}
                     className="w-full text-left p-2 rounded-xl bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-400/50 text-xs text-pink-100 transition-all flex items-center justify-between group"
                   >
-                    <span>🎨 "Hey Dad, I made something cool in my sanctuary today!"</span>
+                    <span>🎨 "Hey Mom & Tim, I made something cool in my sanctuary today!"</span>
                     <Send className="w-3 h-3 text-pink-400 group-hover:translate-x-0.5 transition-transform" />
                   </button>
                 </div>

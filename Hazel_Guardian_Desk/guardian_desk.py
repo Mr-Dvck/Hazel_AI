@@ -31,7 +31,7 @@ DEFAULT_STATEMENTS = [
     "I'm right downstairs if you want a warm cuddle or hot cocoa.",
     "Whatever happened at school today, you are not alone. We will handle it together.",
     "I'm so proud of your creative courage and kind heart today.",
-    "Take all the quiet sanctuary time you need sweetie. I love you to the moon and back.",
+    "Take all the quiet sanctuary time you need. I love you to the moon and back.",
 ]
 
 

@@ -35,7 +35,8 @@ export async function POST(req: NextRequest) {
         profile.companionName || 'Sparky',
         images.length > 0,
         computedAge,
-        profile.birthday
+        profile.birthday,
+        profile.monsterStyle || 'cute'
       );
 
       const stream = new ReadableStream({

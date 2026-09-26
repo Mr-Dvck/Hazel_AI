@@ -270,7 +270,7 @@ async function testApi() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       sender: 'Tim (Dad)',
-      message: 'You are so safe, loved, and wonderful just as you are. I am right downstairs sweetie.',
+      message: 'You are so safe, loved, and wonderful just as you are. I am right downstairs.',
       noteId: dispatchData.note.id,
       reassuranceType: 'love',
     }),
