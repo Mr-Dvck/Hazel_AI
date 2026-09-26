@@ -59,6 +59,7 @@ class GuardianDeskApp:
         self.is_connected = False
         self.reassurance_statements = self.load_statements()
         self.polling_active = True
+        self.insight = None
 
         # Styles
         self.setup_styles()
@@ -198,6 +199,31 @@ class GuardianDeskApp:
         tk.Label(self.card_stats, text="BRIDGE INBOX", font=("Segoe UI", 8, "bold"), fg=self.colors["text_muted"], bg=self.colors["bg_card"]).pack(anchor="w")
         self.lbl_stats = tk.Label(self.card_stats, text="0 Notes Dispatched", font=("Segoe UI", 11, "bold"), fg=self.colors["pink"], bg=self.colors["bg_card"])
         self.lbl_stats.pack(anchor="w")
+
+        # 2b. Live Session Summary Banner Frame
+        summary_frame = tk.Frame(self.root, bg=self.colors["bg_card"], padx=15, pady=8, highlightthickness=1, highlightbackground=self.colors["border"])
+        summary_frame.pack(fill="x", padx=20, pady=(0, 6))
+
+        sum_hdr = tk.Frame(summary_frame, bg=self.colors["bg_card"])
+        sum_hdr.pack(fill="x")
+        tk.Label(sum_hdr, text="✨ LIVE COMPANION SESSION SUMMARY", font=("Segoe UI", 8, "bold"), fg=self.colors["purple"], bg=self.colors["bg_card"]).pack(side="left")
+        self.lbl_sync_time = tk.Label(sum_hdr, text="Syncing...", font=("Segoe UI", 8), fg=self.colors["text_muted"], bg=self.colors["bg_card"])
+        self.lbl_sync_time.pack(side="right")
+
+        self.txt_summary = tk.Text(
+            summary_frame,
+            height=2,
+            bg=self.colors["bg_card"],
+            fg="#e5e7eb",
+            font=("Segoe UI", 9),
+            relief="flat",
+            wrap="word",
+            highlightthickness=0,
+            borderwidth=0,
+        )
+        self.txt_summary.pack(fill="x", pady=(3, 0))
+        self.txt_summary.insert("1.0", "Hazel is in her creative sanctuary. Her companion is validating her emotions and standing by.")
+        self.txt_summary.config(state="disabled")
 
         # 3. Main Split Body (Left: Inbox, Right: Composer & Statements)
         body = tk.Frame(self.root, bg=self.colors["bg_main"], padx=20, pady=5)
@@ -472,6 +498,36 @@ class GuardianDeskApp:
     def manual_refresh(self):
         threading.Thread(target=self.fetch_all_data, daemon=True).start()
 
+    def load_offline_disk_state(self):
+        candidate_dirs = [
+            os.path.join(APP_DIR, "..", "data"),
+            "D:\\Hazel_AI\\data",
+            os.path.join(os.path.expanduser("~"), "Desktop", "Hazel_AI", "data"),
+        ]
+        for cdir in candidate_dirs:
+            if not os.path.exists(cdir):
+                continue
+            bpath = os.path.join(cdir, "bridge_state.json")
+            if os.path.exists(bpath):
+                try:
+                    with open(bpath, "r", encoding="utf-8") as f:
+                        bdata = json.load(f)
+                        self.notes = bdata.get("notes", [])
+                        self.replies = bdata.get("replies", [])
+                except Exception:
+                    pass
+            spath = os.path.join(cdir, "sync_state.json")
+            if os.path.exists(spath):
+                try:
+                    with open(spath, "r", encoding="utf-8") as f:
+                        sdata = json.load(f)
+                        hdata = sdata.get("hazel_default", {})
+                        if "guardianInsight" in hdata:
+                            self.insight = hdata["guardianInsight"]
+                except Exception:
+                    pass
+            break
+
     def fetch_all_data(self):
         try:
             # 1. Fetch Notes
@@ -499,16 +555,63 @@ class GuardianDeskApp:
                 data = json.loads(resp.read().decode("utf-8"))
                 self.replies = data.get("replies", [])
 
+            # 3. Fetch Live Guardian Insight & Sync State
+            try:
+                sync_url = f"{self.server_url}/api/sync?userId=hazel_default"
+                req_sync = urllib.request.Request(sync_url, headers={"User-Agent": "HazelGuardianDesk/1.0"})
+                with urllib.request.urlopen(req_sync, timeout=4) as resp_sync:
+                    sync_data = json.loads(resp_sync.read().decode("utf-8"))
+                    if sync_data.get("found") and "guardianInsight" in sync_data.get("data", {}):
+                        self.insight = sync_data["data"]["guardianInsight"]
+            except Exception:
+                pass
+
             self.is_connected = True
 
             # Update UI on Main Thread
             self.root.after(0, lambda: self.update_ui(new_note_arrived))
         except Exception as e:
             self.is_connected = False
+            self.load_offline_disk_state()
             self.root.after(0, self.update_offline_ui)
 
     def update_ui(self, alert_new_note=False):
         self.conn_badge.config(text="● Online & Synced", fg=self.colors["green"])
+        self.lbl_sync_time.config(text=f"Synced {time.strftime('%I:%M:%S %p')}")
+
+        # Update Live Mood
+        if self.insight and "emotionalWeather" in self.insight:
+            ew = self.insight["emotionalWeather"]
+            mood = ew.get("currentMood", "Resilient")
+            score = ew.get("score", 80)
+            self.lbl_mood.config(text=f"{mood} (Score: {score}/100)")
+            if score >= 75:
+                self.lbl_mood.config(fg=self.colors["green"])
+            elif score >= 50:
+                self.lbl_mood.config(fg=self.colors["amber"])
+            else:
+                self.lbl_mood.config(fg="#ef4444")
+
+        # Update Live Safety
+        if self.insight and "bullyingSafetyAlert" in self.insight:
+            sa = self.insight["bullyingSafetyAlert"]
+            sev = sa.get("severity", "Safe")
+            hl = sa.get("headline", "Sanctuary Active")
+            color = self.colors["green"] if sev == "Safe" else (self.colors["amber"] if sev in ("Mild", "Moderate") else "#ef4444")
+            self.lbl_safety.config(text=f"{sev} • {hl}", fg=color)
+
+        # Update Live Session Summary
+        if self.insight:
+            summary = (
+                self.insight.get("sessionSummary")
+                or self.insight.get("bullyingSafetyAlert", {}).get("summary")
+                or self.insight.get("emotionalWeather", {}).get("description")
+                or "Hazel is in her creative sanctuary. Her companion is validating her emotions and standing by."
+            )
+            self.txt_summary.config(state="normal")
+            self.txt_summary.delete("1.0", "end")
+            self.txt_summary.insert("1.0", summary)
+            self.txt_summary.config(state="disabled")
 
         # Update stats
         self.lbl_stats.config(text=f"{len(self.notes)} Notes • {len(self.replies)} Delivered")
@@ -543,7 +646,11 @@ class GuardianDeskApp:
                 pass
 
     def update_offline_ui(self):
-        self.conn_badge.config(text="● Waiting for Hazel Server (localhost:3000)", fg=self.colors["amber"])
+        if self.notes or self.insight:
+            self.conn_badge.config(text="● Offline (Local State Loaded)", fg=self.colors["amber"])
+            self.update_ui(alert_new_note=False)
+        else:
+            self.conn_badge.config(text="● Waiting for Hazel Server (localhost:3000)", fg=self.colors["amber"])
 
     def polling_loop(self):
         while self.polling_active:

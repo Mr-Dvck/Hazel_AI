@@ -1,4 +1,8 @@
 @echo off
 title Hazel Guardian Desk
 cd /d "%~dp0"
-start "" pythonw guardian_desk.py
+if exist "C:\Python314\pythonw.exe" (
+    start "" "C:\Python314\pythonw.exe" guardian_desk.py
+) else (
+    start "" pythonw guardian_desk.py
+)

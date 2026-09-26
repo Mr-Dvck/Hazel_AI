@@ -1,0 +1,147 @@
+{
+  "hazel_test_user": {
+    "profile": {
+      "name": "Hazel",
+      "companionName": "Sparky"
+    },
+    "monsters": [
+      {
+        "id": 1,
+        "name": "Pufflet",
+        "unlocked": true
+      }
+    ],
+    "memories": [
+      {
+        "id": "m1",
+        "title": "Art",
+        "detail": "Drawing dragons"
+      }
+    ],
+    "syncedAt": 1790461430706
+  },
+  "hazel_profile_customized": {
+    "profile": {
+      "name": "Hazel Rose",
+      "companionName": "Astra",
+      "vibeTheme": "sunset-violet",
+      "isOnboarded": true,
+      "streakDays": 3,
+      "totalMessages": 15,
+      "avatarEmoji": "🐉",
+      "companionAvatar": "🌟",
+      "bioOrMotto": "Bold, creative, and invincible! ✨",
+      "favoriteColor": "Sunset Amber",
+      "createdAt": 1790202230709,
+      "lastActive": 1790461430709
+    },
+    "monsters": [
+      {
+        "id": 1,
+        "name": "Pufflet",
+        "unlocked": true
+      }
+    ],
+    "memories": [],
+    "syncedAt": 1790461430710
+  },
+  "hazel_birthday_user": {
+    "profile": {
+      "name": "Hazel Rose",
+      "companionName": "Astra",
+      "vibeTheme": "sunset-violet",
+      "isOnboarded": true,
+      "streakDays": 3,
+      "totalMessages": 15,
+      "avatarEmoji": "🐉",
+      "companionAvatar": "🌟",
+      "bioOrMotto": "Bold, creative, and invincible! ✨",
+      "favoriteColor": "Sunset Amber",
+      "createdAt": 1790202230709,
+      "lastActive": 1790461430709,
+      "birthday": "May 14, 2015"
+    },
+    "monsters": [
+      {
+        "id": 1,
+        "name": "Pufflet",
+        "unlocked": true
+      }
+    ],
+    "memories": [
+      {
+        "id": "bday-mem",
+        "category": "favorites",
+        "title": "Birthday 🎂",
+        "detail": "May 14, 2015"
+      }
+    ],
+    "syncedAt": 1790461433587
+  },
+  "hazel_default": {
+    "profile": {
+      "name": "Hazel",
+      "companionName": "Sparky"
+    },
+    "monsters": [],
+    "memories": [],
+    "guardianInsight": {
+      "lastUpdated": 1790461433612,
+      "bullyingSafetyAlert": {
+        "severity": "Safe",
+        "headline": "No Active Safety Threats Detected",
+        "summary": "Hazel is actively engaging in positive creative pursuits, monster milestones, and friendly conversation. Her resilience indicators are healthy.",
+        "recentTriggers": [
+          {
+            "id": "trig-1",
+            "timestamp": 1790331828343,
+            "category": "bullying",
+            "severity": "Mild",
+            "snippet": "Nobody let me sit at the art table today again.",
+            "context": "Cafeteria seating isolation reported after 4th period art project."
+          }
+        ]
+      },
+      "familySentiment": {
+        "overallStatus": "Positive",
+        "summary": "Hazel brought up home and family moments in 1 recent chats. She seeks gentle presence from mom and dad, especially during unwinding routines.",
+        "constructiveInsights": [
+          "Hazel values unhurried parent presence during quiet evening routines (reading, drawing, relaxing).",
+          "Open-ended curiosity (\"Tell me about what you imagined today\") unlocks more openness than asking \"How was school?\".",
+          "Praising her bravery and empathy provides strong emotional armor against playground cliques."
+        ],
+        "whatHazelAppreciates": [
+          "Warm bedtime storytelling & check-ins",
+          "Comfort snacks when coming home from school",
+          "Having her art and creativity celebrated on the desk or fridge",
+          "Zero pressure to \"just brush it off\" when school feels hard"
+        ]
+      },
+      "emotionalWeather": {
+        "currentMood": "Resilient",
+        "score": 87,
+        "trend": "improving",
+        "description": "Hazel displays strong innate creativity and bouncing resilience. She bounces back quickly when validated."
+      },
+      "sessionSummary": "Hazel is actively engaging in positive creative pursuits, monster milestones, and friendly conversation. Her resilience indicators are healthy.",
+      "actionableSuggestions": [
+        {
+          "category": "Evening Connection",
+          "conversationStarter": "\"Hey sweetie, I noticed how hard you worked today. Want to just cozy up with some cocoa and draw together tonight?\"",
+          "purpose": "Provides low-friction emotional safety and silent reassurance."
+        },
+        {
+          "category": "Affirming Resilience & Core Worth",
+          "conversationStarter": "\"You know what I love about you? Even when things feel loud or confusing, your kindness stays real. You're one of a kind, Hazel.\"",
+          "purpose": "Builds intrinsic self-esteem insulated from playground popularity contests."
+        },
+        {
+          "category": "Playful Unpacking",
+          "conversationStarter": "\"Do you want to do high-tide/low-tide tonight? (One thing that was awesome today, and one thing that washed away.)\"",
+          "purpose": "Encourages her to unpack experiences naturally through imagination and positive reflection."
+        }
+      ]
+    },
+    "syncedAt": 1790461433612
+  }
+}

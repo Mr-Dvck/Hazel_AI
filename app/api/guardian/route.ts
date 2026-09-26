@@ -251,6 +251,14 @@ export async function POST(req: NextRequest) {
               ? 'Hazel feels challenged by playground peer dynamics, but continues to show strong imaginative resilience.'
               : 'Hazel displays strong innate creativity and bouncing resilience. She bounces back quickly when validated.',
         },
+        sessionSummary:
+          detectedSeverity === 'Critical'
+            ? 'Hazel expressed heavy feelings of self-doubt and emotional overload. We strongly advise gentle, unconditional parental connection and cuddles tonight without pressing for details.'
+            : detectedSeverity === 'Moderate'
+            ? 'Hazel brought up negative peer interactions and teasing at school. She is actively processing feelings of unfairness and seeking reassurance from her creative space.'
+            : isolationFound
+            ? 'Hazel mentioned feeling left out during unstructured school activities (recess/lunch). She is using creative drawing and storytelling to soothe her feelings.'
+            : 'Hazel is actively engaging in positive creative pursuits, monster milestones, and friendly conversation. Her resilience indicators are healthy.',
         actionableSuggestions,
       };
 

@@ -65,8 +65,21 @@ export default function GuardianDeskPage() {
         setReplies(repliesData.replies || []);
       }
 
-      // 3. Load Guardian Insight
-      const curInsight = Storage.getGuardianInsight();
+      // 3. Load Guardian Insight (Local or Sync endpoint)
+      let curInsight = Storage.getGuardianInsight();
+      if (!curInsight) {
+        try {
+          const syncRes = await fetch('/api/sync?userId=hazel_default');
+          if (syncRes.ok) {
+            const syncData = await syncRes.json();
+            if (syncData.found && syncData.data?.guardianInsight) {
+              curInsight = syncData.data.guardianInsight;
+            }
+          }
+        } catch {
+          // ignore
+        }
+      }
       setInsight(curInsight);
     } catch (err) {
       console.error('Failed to fetch bridge data:', err);
@@ -149,10 +162,9 @@ export default function GuardianDeskPage() {
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-pink-500 to-purple-600 p-[2px] shadow-neon-pink">
-              <div className="w-full h-full bg-black/90 rounded-[14px] flex items-center justify-center">
-                <Laptop className="w-5 h-5 text-pink-400" />
-              </div>
+            <div className="w-10 h-10 rounded-2xl overflow-hidden border border-pink-500/40 shadow-neon-pink flex-shrink-0 bg-black/90">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/guardian_desk_logo.png" alt="Guardian Desk Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -247,6 +259,28 @@ export default function GuardianDeskPage() {
             <span className="text-xs font-mono text-emerald-400">
               Active Sync
             </span>
+          </div>
+        </div>
+
+        {/* Live Companion Session Summary Banner */}
+        <div className="p-4 rounded-2xl bg-black/60 border border-purple-500/25 shadow-md flex items-start gap-3">
+          <div className="p-2 rounded-xl bg-purple-500/20 text-purple-300 mt-0.5">
+            <Sparkles className="w-4 h-4" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <p className="text-[11px] font-bold text-purple-300 uppercase tracking-wider">
+                Live Companion Session Summary
+              </p>
+              <span className="text-[10px] text-gray-400 font-medium">
+                Real-Time Sanctuary Sync
+              </span>
+            </div>
+            <p className="text-xs text-gray-200 leading-relaxed">
+              {insight?.sessionSummary ||
+                insight?.bullyingSafetyAlert.summary ||
+                "Hazel is in her creative sanctuary. Her companion is validating her emotions, celebrating her artwork, and keeping a watchful eye on school social dynamics."}
+            </p>
           </div>
         </div>
 

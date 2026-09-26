@@ -79,6 +79,7 @@ export default function HomePage() {
         const data = await res.json();
         if (data.insight) {
           Storage.setGuardianInsight(data.insight);
+          Storage.syncToServer();
         }
       }
     } catch (e) {

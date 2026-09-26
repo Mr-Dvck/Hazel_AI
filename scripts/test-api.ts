@@ -306,9 +306,54 @@ async function testApi() {
   assert.strictEqual(statusData.status, 'active', 'Status is active');
   assert.ok(statusData.summary.totalNotes >= 1, 'Total notes recorded');
   assert.ok(statusData.summary.totalReplies >= 1, 'Total replies recorded');
-  console.log('  ✅ Pass: Bridge status overview endpoint verified\n');
+  // Test 12: Live Session Summary & Guardian Desk Sync Integration
+  console.log('▶ Test 12: Live Session Summary & Guardian Desk Sync Integration');
+  const { POST: guardianAnalyzePost } = await import('../app/api/guardian/route');
+  const guardianReq = new Request('http://localhost/api/guardian', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'analyze',
+      pin: '1234',
+      messages: [
+        { role: 'user', content: 'I drew a magical unicorn with Dad today!' },
+        { role: 'assistant', content: 'That sounds so wonderful!' },
+      ],
+    }),
+  });
+  const guardianRes = await guardianAnalyzePost(guardianReq as any);
+  const guardianData = await guardianRes.json();
+  assert.ok(guardianData.success, 'Guardian analysis succeeds');
+  assert.ok(guardianData.insight?.sessionSummary, 'Guardian insight includes sessionSummary');
+  assert.ok(guardianData.insight.sessionSummary.length > 20, 'Session summary contains thoughtful text');
 
-  console.log('🎉 ALL API END-TO-END TESTS PASSED! (11/11 gates green)\n');
+  // Verify sync with guardian insight
+  const syncWithInsightReq = new Request('http://localhost/api/sync', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId: 'hazel_default',
+      profile: { name: 'Hazel', companionName: 'Sparky' },
+      monsters: [],
+      memories: [],
+      guardianInsight: guardianData.insight,
+    }),
+  });
+  const syncWithInsightRes = await syncPostHandler(syncWithInsightReq as any);
+  assert.strictEqual(syncWithInsightRes.status, 200, 'Sync with guardian insight returns 200');
+
+  const retrieveSyncReq = new Request('http://localhost/api/sync?userId=hazel_default', { method: 'GET' });
+  const retrieveSyncRes = await syncGetHandler(retrieveSyncReq as any);
+  const retrieveSyncData = await retrieveSyncRes.json();
+  assert.ok(retrieveSyncData.found, 'Sync snapshot found');
+  assert.strictEqual(
+    retrieveSyncData.data.guardianInsight.sessionSummary,
+    guardianData.insight.sessionSummary,
+    'Session summary retrieved accurately by Guardian Desk'
+  );
+  console.log('  ✅ Pass: Live session summary synthesis and sync endpoint verified\n');
+
+  console.log('🎉 ALL API END-TO-END TESTS PASSED! (12/12 gates green)\n');
 }
 
 testApi().catch((err) => {

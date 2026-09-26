@@ -120,6 +120,7 @@ export interface GuardianInsight {
     trend: 'improving' | 'steady' | 'needs_boost';
     description: string;
   };
+  sessionSummary?: string;
   actionableSuggestions: {
     category: string;
     conversationStarter: string;

@@ -1,6 +1,102 @@
 {
   "notes": [
     {
+      "id": "bn-1790461433596-zv3m",
+      "sender": "hazel",
+      "senderName": "Hazel",
+      "recipient": "tim_computer",
+      "text": "Hey Dad, having a tough day and could use a hug later.",
+      "category": "feeling",
+      "mood": "vulnerable",
+      "timestamp": 1790461433596,
+      "read": true,
+      "replied": true
+    },
+    {
+      "id": "bn-1790461427204-1l8e",
+      "sender": "hazel",
+      "senderName": "Hazel",
+      "recipient": "tim_computer",
+      "text": "Testing bridge note storage",
+      "category": "feeling",
+      "mood": "testing",
+      "timestamp": 1790461427204,
+      "read": true,
+      "replied": true
+    },
+    {
+      "id": "bn-1790461371177-3r0z",
+      "sender": "hazel",
+      "senderName": "Hazel",
+      "recipient": "tim_computer",
+      "text": "Hey Dad, having a tough day and could use a hug later.",
+      "category": "feeling",
+      "mood": "vulnerable",
+      "timestamp": 1790461371177,
+      "read": true,
+      "replied": true
+    },
+    {
+      "id": "bn-1790461364759-0i7r",
+      "sender": "hazel",
+      "senderName": "Hazel",
+      "recipient": "tim_computer",
+      "text": "Testing bridge note storage",
+      "category": "feeling",
+      "mood": "testing",
+      "timestamp": 1790461364759,
+      "read": true,
+      "replied": true
+    },
+    {
+      "id": "bn-1790461352613-espc",
+      "sender": "hazel",
+      "senderName": "Hazel",
+      "recipient": "tim_computer",
+      "text": "Hey Dad, having a tough day and could use a hug later.",
+      "category": "feeling",
+      "mood": "vulnerable",
+      "timestamp": 1790461352613,
+      "read": true,
+      "replied": true
+    },
+    {
+      "id": "bn-1790461345938-tzxq",
+      "sender": "hazel",
+      "senderName": "Hazel",
+      "recipient": "tim_computer",
+      "text": "Testing bridge note storage",
+      "category": "feeling",
+      "mood": "testing",
+      "timestamp": 1790461345938,
+      "read": true,
+      "replied": true
+    },
+    {
+      "id": "bn-1790461097459-pxxo",
+      "sender": "hazel",
+      "senderName": "Hazel",
+      "recipient": "tim_computer",
+      "text": "Hey Dad, having a tough day and could use a hug later.",
+      "category": "feeling",
+      "mood": "vulnerable",
+      "timestamp": 1790461097459,
+      "read": true,
+      "replied": true
+    },
+    {
+      "id": "bn-1790461090835-o3a0",
+      "sender": "hazel",
+      "senderName": "Hazel",
+      "recipient": "tim_computer",
+      "text": "Testing bridge note storage",
+      "category": "feeling",
+      "mood": "testing",
+      "timestamp": 1790461090835,
+      "read": true,
+      "replied": true
+    },
+    {
       "id": "bn-1790461012320-lmd4",
       "sender": "hazel",
       "senderName": "Hazel",
@@ -51,6 +147,94 @@
   ],
   "replies": [
     {
+      "id": "br-1790461433605-q636",
+      "noteId": "bn-1790461433596-zv3m",
+      "sender": "Tim (Dad)",
+      "recipient": "Hazel",
+      "message": "You are so safe, loved, and wonderful just as you are. I am right downstairs sweetie.",
+      "timestamp": 1790461433605,
+      "deliveredToHazel": true,
+      "readByHazel": false,
+      "reassuranceType": "love"
+    },
+    {
+      "id": "br-1790461427206-ma5g",
+      "noteId": "bn-1790461427204-1l8e",
+      "sender": "Tim (Dad)",
+      "recipient": "Hazel",
+      "message": "Testing reassurance reply from Dad",
+      "timestamp": 1790461427206,
+      "deliveredToHazel": true,
+      "readByHazel": false,
+      "reassuranceType": "love"
+    },
+    {
+      "id": "br-1790461371182-ya0m",
+      "noteId": "bn-1790461371177-3r0z",
+      "sender": "Tim (Dad)",
+      "recipient": "Hazel",
+      "message": "You are so safe, loved, and wonderful just as you are. I am right downstairs sweetie.",
+      "timestamp": 1790461371182,
+      "deliveredToHazel": true,
+      "readByHazel": false,
+      "reassuranceType": "love"
+    },
+    {
+      "id": "br-1790461364761-57aa",
+      "noteId": "bn-1790461364759-0i7r",
+      "sender": "Tim (Dad)",
+      "recipient": "Hazel",
+      "message": "Testing reassurance reply from Dad",
+      "timestamp": 1790461364761,
+      "deliveredToHazel": true,
+      "readByHazel": false,
+      "reassuranceType": "love"
+    },
+    {
+      "id": "br-1790461352619-2gdz",
+      "noteId": "bn-1790461352613-espc",
+      "sender": "Tim (Dad)",
+      "recipient": "Hazel",
+      "message": "You are so safe, loved, and wonderful just as you are. I am right downstairs sweetie.",
+      "timestamp": 1790461352619,
+      "deliveredToHazel": true,
+      "readByHazel": false,
+      "reassuranceType": "love"
+    },
+    {
+      "id": "br-1790461345940-0ntx",
+      "noteId": "bn-1790461345938-tzxq",
+      "sender": "Tim (Dad)",
+      "recipient": "Hazel",
+      "message": "Testing reassurance reply from Dad",
+      "timestamp": 1790461345940,
+      "deliveredToHazel": true,
+      "readByHazel": false,
+      "reassuranceType": "love"
+    },
+    {
+      "id": "br-1790461097467-7p8t",
+      "noteId": "bn-1790461097459-pxxo",
+      "sender": "Tim (Dad)",
+      "recipient": "Hazel",
+      "message": "You are so safe, loved, and wonderful just as you are. I am right downstairs sweetie.",
+      "timestamp": 1790461097467,
+      "deliveredToHazel": true,
+      "readByHazel": false,
+      "reassuranceType": "love"
+    },
+    {
+      "id": "br-1790461090837-elzc",
+      "noteId": "bn-1790461090835-o3a0",
+      "sender": "Tim (Dad)",
+      "recipient": "Hazel",
+      "message": "Testing reassurance reply from Dad",
+      "timestamp": 1790461090837,
+      "deliveredToHazel": true,
+      "readByHazel": false,
+      "reassuranceType": "love"
+    },
+    {
       "id": "br-1790461012325-oza9",
       "noteId": "bn-1790461012320-lmd4",
       "sender": "Tim (Dad)",
@@ -95,5 +279,5 @@
       "reassuranceType": "love"
     }
   ],
-  "lastUpdated": 1790461012327
+  "lastUpdated": 1790461433607
 }

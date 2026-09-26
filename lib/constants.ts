@@ -220,6 +220,7 @@ export const INITIAL_GUARDIAN_INSIGHT: GuardianInsight = {
     trend: 'improving',
     description: 'Hazel shows remarkable inner resilience and artistic curiosity. While school social dynamics sting, her spirits lift rapidly when engaged in creative storytelling.',
   },
+  sessionSummary: 'Hazel is actively exploring her creative sanctuary. Her companion is validating her emotions, celebrating her artwork, and keeping a watchful eye on school social dynamics.',
   actionableSuggestions: [
     {
       category: 'Recess Connection',
