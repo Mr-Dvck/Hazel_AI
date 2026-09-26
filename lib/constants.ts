@@ -9,8 +9,7 @@ export const INITIAL_MONSTERS: Monster[] = [
     description: 'A warm, buoyant cloud creature with rosy cheeks that smells like lavender and cinnamon buns. Whispers words of pure comfort.',
     unlockRequirement: 'Complete Onboarding & meet your companion',
     requiredMessages: 0,
-    unlocked: true, // unlocked on onboarding
-    unlockedAt: Date.now(),
+    unlocked: false, // unlocked upon completing onboarding
     color: '#a78bfa', // soft purple
     glowColor: 'rgba(167, 139, 250, 0.5)',
     quote: '"Whenever the world feels too noisy, wrap yourself in soft thoughts."',

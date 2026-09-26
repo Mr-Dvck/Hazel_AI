@@ -402,9 +402,125 @@ function renderMonster(id: number) {
 }
 
 function renderSilhouette(id: number) {
-  return (
-    <svg viewBox="0 0 100 100" className="w-full h-full opacity-40">
-      <circle cx="50" cy="50" r="28" fill="#6b7280" />
-    </svg>
-  );
+  const fill = '#4b5563';
+  const stroke = '#6b7280';
+
+  switch (id) {
+    case 1:
+      // Pufflet: cloud puff silhouette
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full opacity-50">
+          <path
+            d="M 28 65 C 18 65 14 55 20 45 C 16 35 28 25 38 30 C 44 20 62 20 68 30 C 78 25 88 35 84 45 C 92 55 86 65 76 65 Z"
+            fill={fill}
+            stroke={stroke}
+            strokeWidth="2"
+          />
+        </svg>
+      );
+    case 2:
+      // Bramble: moss sprout with leaves silhouette
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full opacity-50">
+          <circle cx="50" cy="58" r="24" fill={fill} stroke={stroke} strokeWidth="2" />
+          <path d="M 50 35 C 42 22 30 26 36 38 C 42 42 48 37 50 35 Z" fill={fill} />
+          <path d="M 50 35 C 58 20 72 24 66 38 C 60 42 52 37 50 35 Z" fill={fill} />
+        </svg>
+      );
+    case 3:
+      // Glimmer: 5-point star sprite silhouette
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full opacity-50">
+          <polygon
+            points="50,15 59,38 84,39 63,54 71,78 50,63 29,78 37,54 16,39 41,38"
+            fill={fill}
+            stroke={stroke}
+            strokeWidth="2"
+            strokeLinejoin="round"
+          />
+        </svg>
+      );
+    case 4:
+      // Bumble-Bop: horned jelly dome silhouette
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full opacity-50">
+          <path d="M 38 32 C 34 22 28 24 32 36" stroke={stroke} strokeWidth="3" strokeLinecap="round" fill="none" />
+          <circle cx="30" cy="23" r="3.5" fill={fill} />
+          <path d="M 62 32 C 66 22 72 24 68 36" stroke={stroke} strokeWidth="3" strokeLinecap="round" fill="none" />
+          <circle cx="70" cy="23" r="3.5" fill={fill} />
+          <path
+            d="M 24 66 C 22 42 36 32 50 32 C 64 32 78 42 76 66 C 72 72 66 67 60 71 C 54 67 46 67 40 71 C 34 67 28 72 24 66 Z"
+            fill={fill}
+            stroke={stroke}
+            strokeWidth="2"
+          />
+        </svg>
+      );
+    case 5:
+      // Echo: crystal bat silhouette
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full opacity-50">
+          <polygon points="12,38 32,45 28,68 18,52" fill={fill} stroke={stroke} strokeWidth="1.5" />
+          <polygon points="88,38 68,45 72,68 82,52" fill={fill} stroke={stroke} strokeWidth="1.5" />
+          <ellipse cx="50" cy="55" rx="16" ry="18" fill={fill} stroke={stroke} strokeWidth="2" />
+          <polygon points="40,40 44,22 48,38" fill={fill} />
+          <polygon points="60,40 56,22 52,38" fill={fill} />
+        </svg>
+      );
+    case 6:
+      // Zephyr: winged cloud silhouette
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full opacity-50">
+          <path d="M 28 48 C 14 36 12 55 26 62 Z" fill={fill} stroke={stroke} strokeWidth="1.5" />
+          <path d="M 72 48 C 86 36 88 55 74 62 Z" fill={fill} stroke={stroke} strokeWidth="1.5" />
+          <circle cx="50" cy="52" r="22" fill={fill} stroke={stroke} strokeWidth="2" />
+          <path d="M 48 30 C 50 20 58 24 54 32" stroke={stroke} strokeWidth="2.5" fill="none" strokeLinecap="round" />
+        </svg>
+      );
+    case 7:
+      // Pyra: ember fox with flame ears silhouette
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full opacity-50">
+          <path d="M 38 42 C 32 20 25 22 34 35 Z" fill={fill} stroke={stroke} strokeWidth="1.5" />
+          <path d="M 62 42 C 68 20 75 22 66 35 Z" fill={fill} stroke={stroke} strokeWidth="1.5" />
+          <circle cx="50" cy="55" r="22" fill={fill} stroke={stroke} strokeWidth="2" />
+        </svg>
+      );
+    case 8:
+      // Cosmo: mini dragon with horns and wings silhouette
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full opacity-50">
+          <path d="M 25 50 C 10 32 18 64 30 58 Z" fill={fill} />
+          <path d="M 75 50 C 90 32 82 64 70 58 Z" fill={fill} />
+          <polygon points="38,36 34,20 42,32" fill={fill} />
+          <polygon points="62,36 66,20 58,32" fill={fill} />
+          <circle cx="50" cy="54" r="23" fill={fill} stroke={stroke} strokeWidth="2" />
+        </svg>
+      );
+    case 9:
+      // Aegis: armored guardian helm silhouette
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full opacity-50">
+          <polygon points="18,48 30,36 34,60 22,66" fill={fill} />
+          <polygon points="82,48 70,36 66,60 78,66" fill={fill} />
+          <circle cx="50" cy="52" r="24" fill={fill} stroke={stroke} strokeWidth="2" />
+          <path d="M 32 40 Q 50 32 68 40 L 64 45 Q 50 38 36 45 Z" fill={stroke} />
+        </svg>
+      );
+    case 10:
+      // Solara: golden crowned sunshine titan silhouette
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full opacity-50">
+          <circle cx="50" cy="54" r="32" fill={fill} opacity="0.4" />
+          <polygon points="50,14 43,28 32,18 36,34 50,30 64,34 68,18 57,28" fill={stroke} />
+          <circle cx="50" cy="54" r="22" fill={fill} stroke={stroke} strokeWidth="2" />
+        </svg>
+      );
+    default:
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full opacity-40">
+          <circle cx="50" cy="50" r="28" fill={fill} />
+        </svg>
+      );
+  }
 }

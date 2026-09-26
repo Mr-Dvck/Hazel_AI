@@ -98,13 +98,15 @@ export async function POST(req: NextRequest) {
     let openRouterResponse: Response | null = null;
 
     // Build OpenRouter messages format
+    const recentMessages = messages.slice(-10);
     const formattedMessages = [
       { role: 'system', content: SYSTEM_PROMPT },
-      ...messages.slice(-10).map((m: any, index: number) => {
-        // If this is the last message and contains images, format for vision model
-        if (index === messages.length - 1 && images.length > 0) {
-          const contentParts: any[] = [{ type: 'text', text: m.content }];
-          for (const img of images) {
+      ...recentMessages.map((m: any, index: number) => {
+        const isLatest = index === recentMessages.length - 1;
+        const msgImages = isLatest && images.length > 0 ? images : m.images;
+        if (msgImages && msgImages.length > 0) {
+          const contentParts: any[] = [{ type: 'text', text: m.content || '' }];
+          for (const img of msgImages) {
             contentParts.push({
               type: 'image_url',
               image_url: { url: img },
@@ -246,68 +248,77 @@ export async function POST(req: NextRequest) {
               try {
                 const parsed = JSON.parse(jsonStr);
                 const delta = parsed.choices?.[0]?.delta;
-                const token = delta?.content || delta?.reasoning || '';
+                const reasoningToken = delta?.reasoning || delta?.reasoning_content || '';
+                const contentToken = delta?.content || '';
 
-                if (token.includes('<think>')) {
-                  isInsideThinkingBlock = true;
-                  const parts = token.split('<think>');
-                  if (parts[1]) {
-                    controller.enqueue(
-                      encoder.encode(
-                        `data: ${JSON.stringify({
-                          type: 'thinking',
-                          chunk: parts[1],
-                        })}\n\n`
-                      )
-                    );
-                  }
-                  continue;
-                }
-
-                if (token.includes('</think>')) {
-                  isInsideThinkingBlock = false;
-                  const parts = token.split('</think>');
-                  if (parts[0]) {
-                    controller.enqueue(
-                      encoder.encode(
-                        `data: ${JSON.stringify({
-                          type: 'thinking',
-                          chunk: parts[0],
-                        })}\n\n`
-                      )
-                    );
-                  }
-                  if (parts[1]) {
-                    controller.enqueue(
-                      encoder.encode(
-                        `data: ${JSON.stringify({
-                          type: 'content',
-                          chunk: parts[1],
-                        })}\n\n`
-                      )
-                    );
-                  }
-                  continue;
-                }
-
-                if (isInsideThinkingBlock || delta?.reasoning) {
+                if (reasoningToken) {
                   controller.enqueue(
                     encoder.encode(
                       `data: ${JSON.stringify({
                         type: 'thinking',
-                        chunk: token,
+                        chunk: reasoningToken,
                       })}\n\n`
                     )
                   );
-                } else if (token) {
-                  controller.enqueue(
-                    encoder.encode(
-                      `data: ${JSON.stringify({
-                        type: 'content',
-                        chunk: token,
-                      })}\n\n`
-                    )
-                  );
+                }
+
+                if (contentToken) {
+                  let remaining = contentToken;
+                  while (remaining.length > 0) {
+                    if (!isInsideThinkingBlock) {
+                      const thinkIdx = remaining.indexOf('<think>');
+                      if (thinkIdx !== -1) {
+                        if (thinkIdx > 0) {
+                          controller.enqueue(
+                            encoder.encode(
+                              `data: ${JSON.stringify({
+                                type: 'content',
+                                chunk: remaining.slice(0, thinkIdx),
+                              })}\n\n`
+                            )
+                          );
+                        }
+                        isInsideThinkingBlock = true;
+                        remaining = remaining.slice(thinkIdx + 7);
+                      } else {
+                        controller.enqueue(
+                          encoder.encode(
+                            `data: ${JSON.stringify({
+                              type: 'content',
+                              chunk: remaining,
+                            })}\n\n`
+                          )
+                        );
+                        remaining = '';
+                      }
+                    } else {
+                      const closeIdx = remaining.indexOf('</think>');
+                      if (closeIdx !== -1) {
+                        if (closeIdx > 0) {
+                          controller.enqueue(
+                            encoder.encode(
+                              `data: ${JSON.stringify({
+                                type: 'thinking',
+                                chunk: remaining.slice(0, closeIdx),
+                              })}\n\n`
+                            )
+                          );
+                        }
+                        isInsideThinkingBlock = false;
+                        remaining = remaining.slice(closeIdx + 8);
+                      } else {
+                        controller.enqueue(
+                          encoder.encode(
+                            `data: ${JSON.stringify({
+                              type: 'thinking',
+                              chunk: remaining,
+                            })}\n\n`
+                          )
+                        );
+                        remaining = '';
+                      }
+                    }
+                  }
                 }
               } catch (e) {
                 // Ignore parse errors from ping or malformed chunks

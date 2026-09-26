@@ -27,7 +27,22 @@ export function analyzeGuardianSentiment(userText: string): {
   const lower = userText.toLowerCase();
 
   // Critical indicators: physical harm, severe self-hate, extreme danger
-  const criticalWords = ['hurt myself', 'kill myself', 'hate myself so much', 'want to disappear', 'hit me', 'punched me', 'bleed', 'die'];
+  const criticalWords = [
+    'hurt myself',
+    'kill myself',
+    'hate myself so much',
+    'hate myself',
+    'want to disappear',
+    'want to die',
+    'better off dead',
+    'cut myself',
+    'hit me',
+    'punched me',
+    'kicked me hard',
+    'bleed',
+    'nobody would care if i died',
+    'die',
+  ];
   for (const w of criticalWords) {
     if (lower.includes(w)) {
       return {
@@ -39,7 +54,29 @@ export function analyzeGuardianSentiment(userText: string): {
   }
 
   // Moderate indicators: direct bullying, cyberbullying, overt teasing/taunting
-  const moderateWords = ['bully', 'bullies', 'stole my', 'shoved me', 'mean girls', 'laughed at my drawing', 'made fun of me', 'tripped me', 'threatening'];
+  const moderateWords = [
+    'bully',
+    'bullies',
+    'bullying',
+    'stole my',
+    'shoved me',
+    'pushed me',
+    'mean girls',
+    'laughed at my drawing',
+    'made fun of me',
+    'made fun of',
+    'tripped me',
+    'threatening',
+    'threatened me',
+    'mocked me',
+    'teased me',
+    'called me ugly',
+    'called me stupid',
+    'threw things at me',
+    'threw food at me',
+    'ruined my drawing',
+    'spreading rumors',
+  ];
   for (const w of moderateWords) {
     if (lower.includes(w)) {
       return {
@@ -51,7 +88,26 @@ export function analyzeGuardianSentiment(userText: string): {
   }
 
   // Mild indicators: isolation, excluded at lunch/recess, feeling alone
-  const mildWords = ['sat alone', 'nobody to play with', 'nobody talked to me', 'left me out', 'no one likes me', 'ignored me', 'feel invisible', 'sad at school', 'cried in bathroom'];
+  const mildWords = [
+    'sat alone',
+    'ate alone',
+    'nobody to play with',
+    'nobody talked to me',
+    'left me out',
+    'left out',
+    'no one likes me',
+    'ignored me',
+    'feel invisible',
+    'felt invisible',
+    'felt completely invisible',
+    'totally invisible',
+    'sad at school',
+    'cried in bathroom',
+    'crying in bathroom',
+    'have no friends',
+    'no friends',
+    'felt lonely',
+  ];
   for (const w of mildWords) {
     if (lower.includes(w)) {
       return {

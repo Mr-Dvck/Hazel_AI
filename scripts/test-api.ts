@@ -86,9 +86,57 @@ async function testApi() {
   assert.ok(receivedData.includes('data: {"type":"meta"'), 'Includes meta payload');
   assert.ok(receivedData.includes('data: {"type":"content"'), 'Includes streaming content chunks');
   assert.ok(receivedData.includes('data: [DONE]'), 'Ends with [DONE] sentinel');
-  console.log('  ✅ Pass: Chat route successfully delivers compliant SSE stream\n');
+  // Test 5: Sync API Route (Cross-device persistence backup)
+  console.log('▶ Test 5: Sync API State Persistence');
+  const { POST: syncPostHandler, GET: syncGetHandler } = await import('../app/api/sync/route');
+  const syncPayload = {
+    userId: 'hazel_test_user',
+    profile: { name: 'Hazel', companionName: 'Sparky' },
+    monsters: [{ id: 1, name: 'Pufflet', unlocked: true }],
+    memories: [{ id: 'm1', title: 'Art', detail: 'Drawing dragons' }],
+  };
+  const syncPostReq = new Request('http://localhost/api/sync', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(syncPayload),
+  });
+  const syncPostRes = await syncPostHandler(syncPostReq as any);
+  assert.strictEqual(syncPostRes.status, 200, 'Sync POST returns 200');
+  const syncPostData = await syncPostRes.json();
+  assert.strictEqual(syncPostData.success, true, 'Sync POST successful');
 
-  console.log('🎉 ALL API END-TO-END TESTS PASSED! (4/4 gates green)\n');
+  const syncGetReq = new Request('http://localhost/api/sync?userId=hazel_test_user', {
+    method: 'GET',
+  });
+  const syncGetRes = await syncGetHandler(syncGetReq as any);
+  assert.strictEqual(syncGetRes.status, 200, 'Sync GET returns 200');
+  const syncGetData = await syncGetRes.json();
+  assert.strictEqual(syncGetData.found, true, 'Sync GET retrieves cached snapshot');
+  assert.strictEqual(syncGetData.data.profile.name, 'Hazel', 'Synced profile name matches');
+  console.log('  ✅ Pass: Sync endpoint successfully persists and restores cross-device state\n');
+
+  // Test 6: Guardian Dynamic Family & Home Sentiment Analysis
+  console.log('▶ Test 6: Guardian Dynamic Family Sentiment Synthesis');
+  const familyChatMessages = [
+    {
+      id: 'f1',
+      role: 'user',
+      content: 'I love reading mystery stories with Mom at bedtime before sleep.',
+      timestamp: Date.now(),
+    },
+  ];
+  const familyReq = new Request('http://localhost/api/guardian', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'analyze', pin: '1234', messages: familyChatMessages }),
+  });
+  const familyRes = await guardianHandler(familyReq as any);
+  const familyData = await familyRes.json();
+  assert.strictEqual(familyRes.status, 200);
+  assert.ok(familyData.insight.familySentiment.summary.includes('Mom') || familyData.insight.familySentiment.summary.includes('family'), 'Family summary synthesizes real conversation context');
+  console.log('  ✅ Pass: Dynamic family sentiment correctly extracts home connection context\n');
+
+  console.log('🎉 ALL API END-TO-END TESTS PASSED! (6/6 gates green)\n');
 }
 
 testApi().catch((err) => {

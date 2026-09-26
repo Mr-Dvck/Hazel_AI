@@ -57,6 +57,25 @@ export default function HomePage() {
     Storage.setProfile(updated);
   };
 
+  // Background guardian safety evaluation pass (non-intrusive, silent)
+  const runBackgroundGuardianEvaluation = async (msgs: ChatMessage[]) => {
+    try {
+      const res = await fetch('/api/guardian', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'analyze', pin: '1234', messages: msgs }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.insight) {
+          Storage.setGuardianInsight(data.insight);
+        }
+      }
+    } catch (e) {
+      // Non-blocking silent background pass
+    }
+  };
+
   // Complete Onboarding
   const handleCompleteOnboarding = (
     updatedFields: Partial<UserProfile>,
@@ -81,6 +100,19 @@ export default function HomePage() {
       currentMems = Storage.addMemory(mem);
     });
     setMemories(currentMems);
+
+    // Celebration: Confetti and reveal Pufflet
+    confetti({
+      particleCount: 90,
+      spread: 85,
+      origin: { y: 0.5 },
+      colors: ['#a78bfa', '#ff2e93', '#00f0ff', '#facc15'],
+    });
+
+    const pufflet = updatedMonsters.find((m) => m.id === 1);
+    if (pufflet) {
+      setSelectedMonster(pufflet);
+    }
 
     setShowOnboarding(false);
   };
@@ -136,6 +168,9 @@ export default function HomePage() {
 
     // Check unlocks
     checkMonsterUnlocks(nextMsgCount, monsters);
+
+    // Run non-intrusive background guardian evaluation pass
+    runBackgroundGuardianEvaluation(nextMessages);
 
     setIsLoading(true);
 

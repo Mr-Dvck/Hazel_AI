@@ -70,40 +70,66 @@ export const ChatStage: React.FC<ChatStageProps> = ({
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    Array.from(files).forEach((file) => {
-      if (!file.type.startsWith('image/')) return;
+  // Client-side canvas image downscaling to prevent payload overage and latency
+  const compressImageFile = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
       const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        if (uploadEvent.target?.result) {
-          setSelectedImages((prev) => [...prev, uploadEvent.target!.result as string]);
-        }
+      reader.onload = (e) => {
+        const img = new window.Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 1200;
+          let { width, height } = img;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.82));
+          } else {
+            resolve(e.target?.result as string);
+          }
+        };
+        img.onerror = () => resolve(e.target?.result as string);
+        img.src = e.target?.result as string;
       };
       reader.readAsDataURL(file);
     });
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith('image/')) continue;
+      const optimizedUrl = await compressImageFile(file);
+      setSelectedImages((prev) => [...prev, optimizedUrl]);
+    }
 
     e.target.value = '';
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
     const files = e.dataTransfer.files;
     if (!files) return;
 
-    Array.from(files).forEach((file) => {
-      if (!file.type.startsWith('image/')) return;
-      const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        if (uploadEvent.target?.result) {
-          setSelectedImages((prev) => [...prev, uploadEvent.target!.result as string]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith('image/')) continue;
+      const optimizedUrl = await compressImageFile(file);
+      setSelectedImages((prev) => [...prev, optimizedUrl]);
+    }
   };
 
   const quickPrompts = [
@@ -353,6 +379,15 @@ const MessageBubble: React.FC<{
           </div>
         )}
 
+        {/* Thinking Pulse State during initial generation */}
+        {isStreaming && !message.content && !message.thinking && (
+          <div className="flex items-center gap-2 text-xs font-semibold text-purple-300 animate-pulse bg-purple-950/50 border border-purple-500/30 rounded-2xl px-3.5 py-2 my-1 w-fit">
+            <Brain className="w-4 h-4 text-purple-400 animate-spin" style={{ animationDuration: '3s' }} />
+            <Sparkles className="w-3.5 h-3.5 text-pink-400 animate-pulse" />
+            <span>Thinking with deep compassion...</span>
+          </div>
+        )}
+
         {/* Collapsible Thinking State */}
         {message.thinking && (
           <div className="mb-3 rounded-2xl bg-black/60 border border-purple-500/20 overflow-hidden">
@@ -379,14 +414,40 @@ const MessageBubble: React.FC<{
           </div>
         )}
 
-        {/* Main Content Body */}
-        <div className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words">
-          {message.content}
-          {isStreaming && (
-            <span className="inline-block w-2 h-4 ml-1 bg-pink-400 animate-pulse align-middle rounded-sm" />
-          )}
+        {/* Main Content Body with Fluid Word-by-Word Streaming */}
+        <div className="text-xs sm:text-sm leading-relaxed">
+          <StreamingText text={message.content} isStreaming={isStreaming} />
         </div>
       </div>
     </motion.div>
+  );
+};
+
+// Fluid word-by-word streaming component using Framer Motion
+const StreamingText: React.FC<{ text: string; isStreaming: boolean }> = ({ text, isStreaming }) => {
+  if (!isStreaming) {
+    return <span className="whitespace-pre-wrap break-words">{text}</span>;
+  }
+  const chunks = text.split(/(\s+)/);
+  return (
+    <span className="whitespace-pre-wrap break-words">
+      {chunks.map((chunk, idx) => {
+        if (/^\s+$/.test(chunk)) {
+          return <span key={idx}>{chunk}</span>;
+        }
+        return (
+          <motion.span
+            key={idx}
+            initial={{ opacity: 0, y: 3 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.15 }}
+            className="inline-block"
+          >
+            {chunk}
+          </motion.span>
+        );
+      })}
+      <span className="inline-block w-2 h-4 ml-1 bg-pink-400 animate-pulse align-middle rounded-sm" />
+    </span>
   );
 };
