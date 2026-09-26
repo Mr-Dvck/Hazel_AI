@@ -341,5 +341,34 @@ assert.ok(nameQuery.response.includes("Lumina"), 'Offline engine introduces itse
 
 console.log('  ✅ Pass: Dynamic companion names & Reset to Beginning verified across UI and engine\n');
 
-console.log('🎉 ALL AUTOMATED TESTS PASSED SUCCESSFULLY! (9/9 test gates green)\n');
+// Test 10: Clean Slate Initial Memories & Interactive Memory Elaboration Verification
+console.log('▶ Test 10: Clean Slate Initial Memories & Interactive Memory Elaboration Verification');
+const { INITIAL_MEMORIES } = require('../lib/constants.ts');
+const memoryBankSrc = fs.readFileSync(path.join(__dirname, '../components/MemoryBank.tsx'), 'utf-8');
+const pageSrc = fs.readFileSync(path.join(__dirname, '../app/page.tsx'), 'utf-8');
+const storageSrc = fs.readFileSync(path.join(__dirname, '../lib/storage.ts'), 'utf-8');
+
+// 1. Assert INITIAL_MEMORIES is a clean slate empty array
+assert.strictEqual(INITIAL_MEMORIES.length, 0, 'INITIAL_MEMORIES must be empty array ([]) to avoid seeding fake cards');
+
+// 2. Assert OnboardingModal inputs start completely blank and purged fallback strings
+assert.ok(onboardingSrc.includes("const [favorite1, setFavorite1] = useState('');"), 'favorite1 starts blank');
+assert.ok(onboardingSrc.includes("const [favorite2, setFavorite2] = useState('');"), 'favorite2 starts blank');
+assert.ok(onboardingSrc.includes("const [favorite3, setFavorite3] = useState('');"), 'favorite3 starts blank');
+assert.ok(!onboardingSrc.includes("'Loves drawing and reading'"), 'Purged hardcoded favorite1 fallback');
+assert.ok(!onboardingSrc.includes("'Hot cocoa and cozy quiet time'"), 'Purged hardcoded favorite2 fallback');
+assert.ok(!onboardingSrc.includes("'Inventing secret kingdoms and creature designs'"), 'Purged hardcoded favorite3 fallback');
+
+// 3. Assert MemoryBank provides + Add Memory, interactive card clicking, and elaboration modal
+assert.ok(memoryBankSrc.includes('+ Add Memory'), 'MemoryBank renders clear + Add Memory button');
+assert.ok(memoryBankSrc.includes('onUpdateMemory'), 'MemoryBank supports onUpdateMemory prop');
+assert.ok(memoryBankSrc.includes('handleOpenEdit'), 'MemoryBank supports clicking card to open edit');
+assert.ok(memoryBankSrc.includes('Edit &amp; Elaborate Memory') || memoryBankSrc.includes('Edit & Elaborate Memory'), 'MemoryBank renders Edit & Elaborate modal');
+assert.ok(storageSrc.includes('updateMemory:'), 'Storage provides updateMemory method');
+assert.ok(pageSrc.includes('onUpdateMemory={handleUpdateMemory}'), 'page.tsx connects onUpdateMemory to MemoryBank');
+
+console.log('  ✅ Pass: Clean slate memories, optional onboarding inputs, and interactive memory elaboration verified\n');
+
+console.log('🎉 ALL AUTOMATED TESTS PASSED SUCCESSFULLY! (10/10 test gates green)\n');
+
 

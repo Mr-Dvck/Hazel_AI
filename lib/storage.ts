@@ -147,6 +147,12 @@ export const Storage = {
     Storage.setMemories(updated);
     return updated;
   },
+  updateMemory: (updatedMemory: MemoryItem): MemoryItem[] => {
+    const memories = Storage.getMemories();
+    const updated = memories.map((m) => (m.id === updatedMemory.id ? updatedMemory : m));
+    Storage.setMemories(updated);
+    return updated;
+  },
 
   getGuardianInsight: (): GuardianInsight => getItem<GuardianInsight>(STORAGE_KEYS.GUARDIAN, INITIAL_GUARDIAN_INSIGHT),
   setGuardianInsight: (insight: GuardianInsight): void => setItem(STORAGE_KEYS.GUARDIAN, insight),

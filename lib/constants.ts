@@ -685,40 +685,7 @@ export const INITIAL_PROFILE: UserProfile = {
   favoriteColor: 'Neon Purple & Pink',
 };
 
-export const INITIAL_MEMORIES: MemoryItem[] = [
-  {
-    id: 'mem-1',
-    category: 'favorites',
-    title: 'Favorite Vibe & Colors',
-    detail: 'Loves deep neon purples, glowing sparkles, and cozy warm hoodies.',
-    timestamp: Date.now() - 86400000 * 2,
-    color: '#a855f7',
-  },
-  {
-    id: 'mem-2',
-    category: 'superpowers',
-    title: 'Incredible Imagination',
-    detail: 'Invents vivid imaginary worlds, draws fantastical creatures, and notices details others miss.',
-    timestamp: Date.now() - 86400000 * 2,
-    color: '#38bdf8',
-  },
-  {
-    id: 'mem-3',
-    category: 'dreams',
-    title: 'Secret Inventor & Artist',
-    detail: 'Wants to design an illustrated storybook featuring brave, kind creatures who protect each other.',
-    timestamp: Date.now() - 86400000,
-    color: '#fbbf24',
-  },
-  {
-    id: 'mem-4',
-    category: 'safeHarbor',
-    title: 'Comfort Remedies',
-    detail: 'Hot cocoa with tiny marshmallows, sketching quietly, listening to gentle lo-fi piano.',
-    timestamp: Date.now() - 86400000,
-    color: '#ec4899',
-  },
-];
+export const INITIAL_MEMORIES: MemoryItem[] = [];
 
 export const INITIAL_GUARDIAN_INSIGHT: GuardianInsight = {
   lastUpdated: Date.now(),

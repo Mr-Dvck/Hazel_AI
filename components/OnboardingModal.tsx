@@ -28,9 +28,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   const [birthday, setBirthday] = useState('');
   const [monsterStyle, setMonsterStyle] = useState<MonsterStyle>('spooky'); // Great default for Hazel who is a dark kid!
   const [vibeTheme, setVibeTheme] = useState<VibeTheme>('cyber-pink');
-  const [favorite1, setFavorite1] = useState('Drawing cute dragons and reading mystery books');
-  const [favorite2, setFavorite2] = useState('Hot cocoa with marshmallows on cozy rainy days');
-  const [favorite3, setFavorite3] = useState('My plushies and designing secret kingdoms');
+  const [favorite1, setFavorite1] = useState('');
+  const [favorite2, setFavorite2] = useState('');
+  const [favorite3, setFavorite3] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -40,9 +40,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       setBirthday('');
       setMonsterStyle('spooky');
       setVibeTheme('cyber-pink');
-      setFavorite1('Drawing cute dragons and reading mystery books');
-      setFavorite2('Hot cocoa with marshmallows on cozy rainy days');
-      setFavorite3('My plushies and designing secret kingdoms');
+      setFavorite1('');
+      setFavorite2('');
+      setFavorite3('');
     }
   }, [isOpen]);
 
@@ -106,32 +106,40 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       colors: ['#ff2e93', '#00f0ff', '#facc15', '#a855f7', '#ef4444'],
     });
 
-    const memories: Omit<MemoryItem, 'id' | 'timestamp'>[] = [
-      {
+    const memories: Omit<MemoryItem, 'id' | 'timestamp'>[] = [];
+
+    if (favorite1.trim()) {
+      memories.push({
         category: 'favorites',
         title: 'Creative Passion',
-        detail: favorite1 || 'Loves drawing and reading',
+        detail: favorite1.trim(),
         color: '#f472b6',
-      },
-      {
+      });
+    }
+
+    if (favorite2.trim()) {
+      memories.push({
         category: 'safeHarbor',
         title: 'Cozy Comfort',
-        detail: favorite2 || 'Hot cocoa and cozy quiet time',
+        detail: favorite2.trim(),
         color: '#a855f7',
-      },
-      {
+      });
+    }
+
+    if (favorite3.trim()) {
+      memories.push({
         category: 'dreams',
         title: 'Secret World & Projects',
-        detail: favorite3 || 'Inventing secret kingdoms and creature designs',
+        detail: favorite3.trim(),
         color: '#fbbf24',
-      },
-    ];
+      });
+    }
 
     if (birthday.trim()) {
       memories.push({
         category: 'favorites',
         title: 'Birthday Celebration 🎂',
-        detail: `Hazel's birthday: ${birthday.trim()}! A milestone day to celebrate her imagination and courage.`,
+        detail: `${name.trim() || 'Hazel'}'s birthday: ${birthday.trim()}! A milestone day to celebrate her imagination and courage.`,
         color: '#f59e0b',
       });
     }
@@ -516,9 +524,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   type="text"
                   value={favorite1}
                   onChange={(e) => setFavorite1(e.target.value)}
-                  placeholder="e.g. Drawing imaginary dragons, reading fantasy books..."
-                  className="w-full px-3.5 py-2.5 rounded-2xl bg-black/60 border border-white/20 text-xs text-white focus:outline-none focus:border-pink-500"
-                  required
+                  placeholder="e.g. Drawing imaginary dragons, reading fantasy books, gaming..."
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-black/60 border border-white/20 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-pink-500"
                 />
               </div>
 
@@ -530,9 +537,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   type="text"
                   value={favorite2}
                   onChange={(e) => setFavorite2(e.target.value)}
-                  placeholder="e.g. Hot cocoa with tiny marshmallows, warm blanket..."
-                  className="w-full px-3.5 py-2.5 rounded-2xl bg-black/60 border border-white/20 text-xs text-white focus:outline-none focus:border-purple-400"
-                  required
+                  placeholder="e.g. Hot cocoa with tiny marshmallows, warm blanket, quiet time..."
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-black/60 border border-white/20 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-400"
                 />
               </div>
 
@@ -544,9 +550,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   type="text"
                   value={favorite3}
                   onChange={(e) => setFavorite3(e.target.value)}
-                  placeholder="e.g. Designing a video game, building a treehouse..."
-                  className="w-full px-3.5 py-2.5 rounded-2xl bg-black/60 border border-white/20 text-xs text-white focus:outline-none focus:border-amber-400"
-                  required
+                  placeholder="e.g. Designing a video game, building a treehouse, art studio..."
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-black/60 border border-white/20 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-400"
                 />
               </div>
             </div>

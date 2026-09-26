@@ -454,12 +454,21 @@ export default function HomePage() {
   const handleAddMemory = (memory: Omit<MemoryItem, 'id' | 'timestamp'>) => {
     const updated = Storage.addMemory(memory);
     setMemories(updated);
+    Storage.syncToServer();
   };
 
   // Delete Memory Handler
   const handleDeleteMemory = (id: string) => {
     const updated = Storage.deleteMemory(id);
     setMemories(updated);
+    Storage.syncToServer();
+  };
+
+  // Update & Elaborate Memory Handler
+  const handleUpdateMemory = (memory: MemoryItem) => {
+    const updated = Storage.updateMemory(memory);
+    setMemories(updated);
+    Storage.syncToServer();
   };
 
   const unlockedCount = monsters.filter((m) => m.unlocked).length;
@@ -560,6 +569,7 @@ export default function HomePage() {
             memories={memories}
             onAddMemory={handleAddMemory}
             onDeleteMemory={handleDeleteMemory}
+            onUpdateMemory={handleUpdateMemory}
             profile={profile}
           />
         </div>
