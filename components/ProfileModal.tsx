@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { UserProfile, VibeTheme } from '@/types';
+import { calculateAge } from '@/lib/constants';
 import {
   Sparkles,
   Heart,
@@ -44,6 +45,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     profile.bioOrMotto || 'Kind, brave, and full of imagination! ✨'
   );
   const [favoriteColor, setFavoriteColor] = useState(profile.favoriteColor || 'Neon Pink');
+  const [birthday, setBirthday] = useState(profile.birthday || '');
   const [activeTab, setActiveTab] = useState<'profile' | 'companion' | 'vibe' | 'stats'>('profile');
   const [isSaved, setIsSaved] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -58,6 +60,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       setCompanionAvatar(profile.companionAvatar || '✨');
       setBioOrMotto(profile.bioOrMotto || 'Kind, brave, and full of imagination! ✨');
       setFavoriteColor(profile.favoriteColor || 'Neon Pink');
+      setBirthday(profile.birthday || '');
       setIsSaved(false);
       setErrorMessage(null);
     }
@@ -153,6 +156,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       companionAvatar,
       bioOrMotto: bioOrMotto.trim() || 'Kind, brave, and full of imagination! ✨',
       favoriteColor,
+      birthday: birthday.trim() || undefined,
       lastActive: Date.now(),
     };
 
@@ -354,6 +358,27 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   ))}
                 </div>
               </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-pink-300">
+                    When is your birthday so we can celebrate and grow together? 🎂
+                  </label>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30">
+                    Age {calculateAge(birthday)}
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  value={birthday}
+                  onChange={(e) => setBirthday(e.target.value)}
+                  placeholder="e.g. May 14, 2015 or October 25"
+                  className="w-full px-4 py-2.5 rounded-2xl bg-black/60 border border-white/20 text-xs text-white focus:outline-none focus:border-pink-500 shadow-inner"
+                />
+                <p className="text-[11px] text-gray-400 mt-1">
+                  Sparky uses your birthday to celebrate milestones and grow alongside you! (Currently computed age: {calculateAge(birthday)} years old)
+                </p>
+              </div>
             </div>
           )}
 
@@ -484,6 +509,25 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   </div>
                   <div className="text-sm font-bold text-white truncate">{formattedDate}</div>
                   <p className="text-[10px] text-gray-400 mt-0.5">Sanctuary inception</p>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 col-span-2 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-pink-500/20 border border-pink-500/30 flex items-center justify-center text-xl">
+                      🎂
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold text-white flex items-center gap-2">
+                        <span>Sanctuary Age: {calculateAge(profile.birthday)} Years Old</span>
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          {profile.birthday ? 'Synchronized' : 'Defaults to 10'}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-gray-400 mt-0.5">
+                        {profile.birthday ? `Birthday set to ${profile.birthday}` : 'Birthday not set yet — Sparky will ask in chat!'}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 

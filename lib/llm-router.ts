@@ -1,4 +1,4 @@
-import { SYSTEM_PROMPT } from './constants';
+import { SYSTEM_PROMPT, detectBirthdayFromText } from './constants';
 
 export interface ChatRequestMessage {
   role: 'user' | 'assistant' | 'system';
@@ -126,16 +126,24 @@ export function generateEmpatheticOfflineStream(
   userMessage: string,
   hazelName: string = 'Hazel',
   companionName: string = 'Sparky',
-  imagesPresent: boolean = false
-): { thinking: string; response: string } {
+  imagesPresent: boolean = false,
+  computedAge: number = 10,
+  birthday?: string
+): { thinking: string; response: string; detectedBirthday?: string } {
   const lower = userMessage.toLowerCase();
   const sentiment = analyzeGuardianSentiment(userMessage);
+  const detectedBirthday = detectBirthdayFromText(userMessage);
 
-  let thinking = `*Analyzing Hazel's emotional state...*\nDetecting tone: ${sentiment.tag === 'safe' ? 'Curious & expressive' : 'Vulnerable, seeking safety & comfort'}.\nReflecting Hazel's age (10) and creative nature. Formulating a warm, validating, non-condescending sibling tone with zero judgment.`;
+  let thinking = `*Analyzing Hazel's emotional state...*\nDetecting tone: ${sentiment.tag === 'safe' ? 'Curious & expressive' : 'Vulnerable, seeking safety & comfort'}.\nReflecting Hazel's age (${computedAge}) and creative nature. Formulating a warm, validating, non-condescending sibling tone with zero judgment.`;
 
   let response = '';
 
-  if (imagesPresent) {
+  if (detectedBirthday) {
+    thinking += `\n*Noticing birthday announcement: ${detectedBirthday}...*\nCelebrating milestone and pinning to persistent memories!`;
+    response = `OH YAY!! 🎂🎉 I am writing that down into our Memory Bank right now: your special day is **${detectedBirthday}**! I will make sure we celebrate with confetti, drawings, and all the magical creature parties every year! What is your absolute favorite cake flavor or birthday wish?`;
+  } else if (!birthday && (lower.includes('birthday') || lower.includes('bday') || lower.includes('how old'))) {
+    response = `I know you're ${computedAge} right now and doing such amazing things, but when is your exact birthday? 🎂 Tell me so I can circle it in our sanctuary calendar and make sure we celebrate with all 10 monsters!`;
+  } else if (imagesPresent) {
     thinking += `\n*Examining visual upload...*\nNoticing colors, expressive strokes, and imaginative composition.`;
     response = `WHOA, look at this! 🎨✨ Hazel, the detail in this is incredible! I love the colors and the personality you put into it—it feels completely alive. You have such a distinct, awesome creative voice. Tell me everything: what inspired you to make this? I want to know all the lore behind it!`;
   } else if (sentiment.tag === 'critical_alert') {
@@ -154,5 +162,5 @@ Remember who you are: you are smart, you have a huge, kind heart, and you have a
     response = `I love the way your mind works, Hazel! That is so fascinating. You always notice things with such original curiosity. Tell me more about that—what's your favorite part about it?`;
   }
 
-  return { thinking, response };
+  return { thinking, response, detectedBirthday: detectedBirthday || undefined };
 }

@@ -54,6 +54,7 @@ export interface UserProfile {
   companionAvatar?: string;
   bioOrMotto?: string;
   favoriteColor?: string;
+  birthday?: string;
 }
 
 export interface GuardianIncident {

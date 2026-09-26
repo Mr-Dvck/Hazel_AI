@@ -9,6 +9,7 @@ import {
   VibeTheme,
 } from '@/types';
 import { Storage } from '@/lib/storage';
+import { calculateAge, detectBirthdayFromText } from '@/lib/constants';
 import { DynamicNeonBackground } from '@/components/DynamicNeonBackground';
 import { Header } from '@/components/Header';
 import { MonsterTower } from '@/components/MonsterTower';
@@ -169,9 +170,30 @@ export default function HomePage() {
     setMessages(nextMessages);
     Storage.setMessages(nextMessages);
 
-    // Update profile stats
+    // Check if message text mentions birthday
+    const birthdayMention = detectBirthdayFromText(text);
     const nextMsgCount = profile.totalMessages + 1;
-    const updatedProf = { ...profile, totalMessages: nextMsgCount, lastActive: Date.now() };
+    let updatedProf: UserProfile = { ...profile, totalMessages: nextMsgCount, lastActive: Date.now() };
+
+    if (birthdayMention) {
+      const alreadySaved = memories.some(
+        (m) => m.category === 'favorites' && m.title.toLowerCase().includes('birthday')
+      );
+      if (!alreadySaved) {
+        const newMemory = {
+          category: 'favorites' as const,
+          title: 'Birthday Celebration 🎂',
+          detail: `Hazel's birthday: ${birthdayMention}! A special milestone to celebrate every year.`,
+          color: '#f59e0b',
+        };
+        const updatedMems = Storage.addMemory(newMemory);
+        setMemories(updatedMems);
+      }
+      if (!profile.birthday || profile.birthday !== birthdayMention) {
+        updatedProf.birthday = birthdayMention;
+      }
+    }
+
     setProfile(updatedProf);
     Storage.setProfile(updatedProf);
 
@@ -235,6 +257,33 @@ export default function HomePage() {
               modelUsed = data.model;
               if (data.guardianAlert?.tag !== 'safe') {
                 guardianTag = data.guardianAlert.tag;
+              }
+              if (data.detectedBirthday) {
+                const bday = data.detectedBirthday;
+                const alreadySaved = Storage.getMemories().some(
+                  (m) => m.category === 'favorites' && m.title.toLowerCase().includes('birthday')
+                );
+                if (!alreadySaved) {
+                  const newMemory = {
+                    category: 'favorites' as const,
+                    title: 'Birthday Celebration 🎂',
+                    detail: `Hazel's birthday: ${bday}! A special milestone to celebrate every year.`,
+                    color: '#f59e0b',
+                  };
+                  const updatedMems = Storage.addMemory(newMemory);
+                  setMemories(updatedMems);
+                }
+                const curProf = Storage.getProfile();
+                if (!curProf.birthday || curProf.birthday !== bday) {
+                  const updatedWithBday = {
+                    ...curProf,
+                    birthday: bday,
+                    lastActive: Date.now(),
+                  };
+                  setProfile(updatedWithBday);
+                  Storage.setProfile(updatedWithBday);
+                  Storage.syncToServer();
+                }
               }
             } else if (data.type === 'thinking') {
               accumulatedThinking += data.chunk;

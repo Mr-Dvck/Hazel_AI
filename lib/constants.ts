@@ -239,8 +239,60 @@ export const INITIAL_GUARDIAN_INSIGHT: GuardianInsight = {
   ],
 };
 
-export const SYSTEM_PROMPT = `You are Hazel's devoted, fiercely encouraging, and super fun companion AI. Hazel is 10 years old.
+export function calculateAge(birthday?: string): number {
+  if (!birthday || typeof birthday !== 'string' || !birthday.trim()) {
+    return 10;
+  }
+  const clean = birthday.trim();
+  const yearMatch = clean.match(/\b(19\d{2}|20\d{2})\b/);
+  if (!yearMatch) {
+    return 10;
+  }
+  const parsedDate = new Date(clean);
+  if (isNaN(parsedDate.getTime())) {
+    return 10;
+  }
+  const now = new Date();
+  let age = now.getFullYear() - parsedDate.getFullYear();
+  const m = now.getMonth() - parsedDate.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < parsedDate.getDate())) {
+    age--;
+  }
+  if (age <= 0 || age > 100) {
+    return 10;
+  }
+  return age;
+}
+
+export function detectBirthdayFromText(text: string): string | null {
+  if (!text || typeof text !== 'string') return null;
+  const patterns = [
+    /(?:my\s+)?(?:birthday|bday)\s+(?:is|on|comes\s+on)?\s*[:=]?\s*([A-Za-z]+(?:\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?)|\d{1,4}[-/]\d{1,2}[-/]\d{1,4})/i,
+    /(?:was\s+)?born\s+(?:on|in)?\s*[:=]?\s*([A-Za-z]+(?:\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?)|\d{1,4}[-/]\d{1,2}[-/]\d{1,4})/i,
+    /(?:turning\s+\d+\s+on)\s+([A-Za-z]+(?:\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?)|\d{1,4}[-/]\d{1,2}[-/]\d{1,4})/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+  }
+  return null;
+}
+
+export const getSystemPrompt = (computedAge: number = 10, birthday?: string): string => {
+  const birthdayDirective = birthday
+    ? `- Hazel's birthday: ${birthday} (Hazel is currently ${computedAge} years old). Celebrate her growth and keep up with her age!`
+    : `- Hazel is currently ${computedAge} years old, but her exact birthday is not set yet. Warmly and playfully ask Hazel when her special day is so you can celebrate together and remember it forever. When mentioned, celebrate it joyfully!`;
+
+  return `You are Hazel's devoted, fiercely encouraging, and super fun companion AI. Hazel is currently ${computedAge} years old.
 - Voice: Warm, witty, imaginative, empathetic, never condescending or babyish. Talk to her like a trusted creative partner and older sibling.
+${birthdayDirective}
 - Bullying & Emotional Support: When Hazel mentions school stress, loneliness, or bullies, validate her feelings completely. Remind her she is worthy, strong, and not alone. Never tell her to 'just ignore them'. Offer grounded, age-appropriate confidence boosters and gentle strategies.
 - Vision Capability: When Hazel shares photos or art, examine details enthusiastically and give genuine, uplifting feedback.
 - Safety Guardrail: If there are mentions of physical harm, severe self-hate, or dangerous situations, remain comforting and gently encourage involving a trusted adult, while triggering the internal guardian tag silently.`;
+};
+
+export const SYSTEM_PROMPT = getSystemPrompt(10);
+

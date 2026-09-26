@@ -342,8 +342,9 @@ const MessageBubble: React.FC<{
     >
       {/* Sender Header */}
       <div className="flex items-center gap-2 mb-1 px-1 text-[11px] text-gray-400">
-        <span className="font-semibold text-gray-300">
-          {isUser ? profile.name : profile.companionName}
+        <span className="font-semibold text-gray-300 flex items-center gap-1">
+          <span>{isUser ? profile.avatarEmoji || '🦄' : profile.companionAvatar || '✨'}</span>
+          <span>{isUser ? profile.name : profile.companionName}</span>
         </span>
         <span>•</span>
         <span>

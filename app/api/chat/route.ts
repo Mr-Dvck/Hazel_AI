@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { SYSTEM_PROMPT } from '@/lib/constants';
+import { SYSTEM_PROMPT, calculateAge, detectBirthdayFromText, getSystemPrompt } from '@/lib/constants';
 import {
   ALL_MODELS,
   analyzeGuardianSentiment,
@@ -17,8 +17,10 @@ export async function POST(req: NextRequest) {
     const lastMessage = messages[messages.length - 1];
     const userText = typeof lastMessage?.content === 'string' ? lastMessage.content : '';
 
-    // Silently evaluate safety / guardian markers
+    // Silently evaluate safety / guardian markers & detect birthday
     const guardianSentiment = analyzeGuardianSentiment(userText);
+    const detectedBirthday = detectBirthdayFromText(userText);
+    const computedAge = calculateAge(profile.birthday);
 
     const apiKey = process.env.OPENROUTER_API_KEY;
 
@@ -31,18 +33,21 @@ export async function POST(req: NextRequest) {
         userText,
         profile.name || 'Hazel',
         profile.companionName || 'Sparky',
-        images.length > 0
+        images.length > 0,
+        computedAge,
+        profile.birthday
       );
 
       const stream = new ReadableStream({
         async start(controller) {
-          // Send metadata & guardian flag
+          // Send metadata & guardian flag & detected birthday
           controller.enqueue(
             encoder.encode(
               `data: ${JSON.stringify({
                 type: 'meta',
                 model: 'Hazel-Compassion-Engine (Built-in)',
                 guardianAlert: guardianSentiment,
+                detectedBirthday: detectedBirthday || undefined,
               })}\n\n`
             )
           );
@@ -99,7 +104,7 @@ export async function POST(req: NextRequest) {
 
     // Build OpenRouter messages format
     const recentMessages = messages.slice(-10);
-    const companionPrompt = `${SYSTEM_PROMPT}\n- You are chatting with ${profile.name || 'Hazel'}.\n- Your companion name is ${profile.companionName || 'Sparky'}.${profile.bioOrMotto ? `\n- Hazel's personal motto: "${profile.bioOrMotto}".` : ''}${profile.favoriteColor ? `\n- Hazel's favorite color vibe: ${profile.favoriteColor}.` : ''}`;
+    const companionPrompt = `${getSystemPrompt(computedAge, profile.birthday)}\n- You are chatting with ${profile.name || 'Hazel'}.\n- Your companion name is ${profile.companionName || 'Sparky'}.${profile.bioOrMotto ? `\n- Hazel's personal motto: "${profile.bioOrMotto}".` : ''}${profile.favoriteColor ? `\n- Hazel's favorite color vibe: ${profile.favoriteColor}.` : ''}`;
 
     const formattedMessages = [
       { role: 'system', content: companionPrompt },
@@ -157,7 +162,9 @@ export async function POST(req: NextRequest) {
         userText,
         profile.name || 'Hazel',
         profile.companionName || 'Sparky',
-        images.length > 0
+        images.length > 0,
+        computedAge,
+        profile.birthday
       );
 
       const stream = new ReadableStream({
@@ -168,6 +175,7 @@ export async function POST(req: NextRequest) {
                 type: 'meta',
                 model: 'Hazel-Compassion-Engine (Fallback Active)',
                 guardianAlert: guardianSentiment,
+                detectedBirthday: detectedBirthday || undefined,
               })}\n\n`
             )
           );
@@ -222,6 +230,7 @@ export async function POST(req: NextRequest) {
               type: 'meta',
               model: activeModel,
               guardianAlert: guardianSentiment,
+              detectedBirthday: detectedBirthday || undefined,
             })}\n\n`
           )
         );

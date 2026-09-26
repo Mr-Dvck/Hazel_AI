@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sparkles, Shield, Trash2, Heart, Palette } from 'lucide-react';
 import { VibeTheme, UserProfile } from '@/types';
+import { calculateAge } from '@/lib/constants';
 
 interface HeaderProps {
   profile: UserProfile;
@@ -83,11 +84,14 @@ export const Header: React.FC<HeaderProps> = ({
               Safe Sanctuary
             </span>
           </div>
-          <p className="text-[11px] text-gray-400 flex items-center gap-1">
+          <p className="text-[11px] text-gray-400 flex items-center gap-1.5">
             Devoted companion for{' '}
             <span className="text-pink-300 font-semibold group-hover/profile:underline flex items-center gap-1">
               {profile.name}
               <span>{profile.avatarEmoji || '🦄'}</span>
+            </span>
+            <span className="text-[9px] text-purple-300 bg-purple-900/40 px-1.5 py-0.5 rounded-full border border-purple-500/25">
+              Age {calculateAge(profile.birthday)}
             </span>
           </p>
         </button>
@@ -128,7 +132,10 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <span className="text-sm">{profile.avatarEmoji || '🦄'}</span>
           <span className="font-semibold text-pink-200 hidden sm:inline">{profile.name}</span>
-          <span className="text-[10px] text-pink-400 hidden md:inline">• Edit</span>
+          <span className="text-[10px] text-pink-300 bg-pink-900/50 px-1.5 py-0.5 rounded-md border border-pink-500/30 hidden md:inline">
+            Age {calculateAge(profile.birthday)}
+          </span>
+          <span className="text-[10px] text-pink-400 hidden lg:inline">• Edit</span>
         </button>
         {/* Vibe Selector */}
         <div className="relative">

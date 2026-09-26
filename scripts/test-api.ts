@@ -180,7 +180,58 @@ async function testApi() {
   assert.strictEqual(retrieveProfileData.data.profile.vibeTheme, 'sunset-violet', 'Customized vibe theme verified');
   console.log('  ✅ Pass: Profile customizations (name, companion, avatar, motto, vibe) seamlessly persist and synchronize\n');
 
-  console.log('🎉 ALL API END-TO-END TESTS PASSED! (7/7 gates green)\n');
+  // Test 8: Birthday Conversational Detection & Cross-Device Sync
+  console.log('▶ Test 8: Birthday Detection & Profile Age Integration');
+  const birthdayChatReq = new Request('http://localhost/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: [{ role: 'user', content: 'My birthday is May 14th, 2015! I am so excited!' }],
+      profile: { name: 'Hazel', companionName: 'Sparky' },
+    }),
+  });
+  const birthdayChatRes = await chatHandler(birthdayChatReq as any);
+  assert.strictEqual(birthdayChatRes.status, 200, 'Birthday chat stream returns 200');
+
+  const bdayReader = birthdayChatRes.body?.getReader();
+  assert.ok(bdayReader, 'Birthday readable stream available');
+  const bdayDecoder = new TextDecoder();
+  let bdayStreamData = '';
+  while (true) {
+    const { done, value } = await bdayReader.read();
+    if (done) break;
+    bdayStreamData += bdayDecoder.decode(value);
+  }
+  assert.ok(bdayStreamData.includes('detectedBirthday'), 'SSE meta event includes detectedBirthday');
+  assert.ok(bdayStreamData.includes('May 14th, 2015'), 'Detected birthday accurately matches user text');
+
+  // Verify sync with birthday
+  const profileWithBirthday = {
+    ...customizedProfile,
+    birthday: 'May 14, 2015',
+  };
+  const bdaySyncReq = new Request('http://localhost/api/sync', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId: 'hazel_birthday_user',
+      profile: profileWithBirthday,
+      monsters: [{ id: 1, name: 'Pufflet', unlocked: true }],
+      memories: [{ id: 'bday-mem', category: 'favorites', title: 'Birthday 🎂', detail: 'May 14, 2015' }],
+    }),
+  });
+  const bdaySyncRes = await syncPostHandler(bdaySyncReq as any);
+  assert.strictEqual(bdaySyncRes.status, 200, 'Sync with birthday returns 200');
+
+  const retrieveBdayReq = new Request('http://localhost/api/sync?userId=hazel_birthday_user', {
+    method: 'GET',
+  });
+  const retrieveBdayRes = await syncGetHandler(retrieveBdayReq as any);
+  const retrieveBdayData = await retrieveBdayRes.json();
+  assert.strictEqual(retrieveBdayData.data.profile.birthday, 'May 14, 2015', 'Birthday stored and retrieved successfully');
+  console.log('  ✅ Pass: Birthday detection in chat and state sync verified\n');
+
+  console.log('🎉 ALL API END-TO-END TESTS PASSED! (8/8 gates green)\n');
 }
 
 testApi().catch((err) => {

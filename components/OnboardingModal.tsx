@@ -24,6 +24,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   const [lastClickTime, setLastClickTime] = useState(0);
   const [name, setName] = useState('Hazel');
   const [companionName, setCompanionName] = useState('Sparky');
+  const [birthday, setBirthday] = useState('');
   const [vibeTheme, setVibeTheme] = useState<VibeTheme>('cyber-pink');
   const [favorite1, setFavorite1] = useState('Drawing cute dragons and reading mystery books');
   const [favorite2, setFavorite2] = useState('Hot cocoa with marshmallows on cozy rainy days');
@@ -110,11 +111,21 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       },
     ];
 
+    if (birthday.trim()) {
+      memories.push({
+        category: 'favorites',
+        title: 'Birthday Celebration 🎂',
+        detail: `Hazel's birthday: ${birthday.trim()}! A milestone day to celebrate her imagination and courage.`,
+        color: '#f59e0b',
+      });
+    }
+
     onComplete(
       {
         name: name.trim() || 'Hazel',
         companionName: companionName.trim() || 'Sparky',
         vibeTheme,
+        birthday: birthday.trim() || undefined,
         isOnboarded: true,
       },
       memories
@@ -228,6 +239,25 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   className="w-full px-4 py-3 rounded-2xl bg-black/60 border border-white/20 text-sm text-white focus:outline-none focus:border-cyan-400 shadow-inner"
                   required
                 />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-pink-300">
+                    When is your birthday so we can celebrate and grow together? 🎂
+                  </label>
+                  <span className="text-[10px] text-gray-400 font-normal">Optional (defaults to 10)</span>
+                </div>
+                <input
+                  type="text"
+                  value={birthday}
+                  onChange={(e) => setBirthday(e.target.value)}
+                  placeholder="e.g. May 14, 2015 (or leave blank to skip)"
+                  className="w-full px-4 py-3 rounded-2xl bg-black/60 border border-white/20 text-sm text-white focus:outline-none focus:border-pink-500 shadow-inner"
+                />
+                <p className="text-[11px] text-gray-400 mt-1">
+                  You can skip this if you don't know it right now—Sparky will celebrate you being 10!
+                </p>
               </div>
             </div>
 

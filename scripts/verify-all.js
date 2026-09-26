@@ -74,4 +74,35 @@ assert.strictEqual(typeof INITIAL_PROFILE.streakDays, 'number', 'Streak must be 
 assert.strictEqual(typeof INITIAL_PROFILE.totalMessages, 'number', 'Total messages must be a number');
 console.log('  ✅ Pass: User profile schema supports full personalization, avatars & stats\n');
 
-console.log('🎉 ALL AUTOMATED TESTS PASSED SUCCESSFULLY! (5/5 test gates green)\n');
+// Test 6: Birthday Calculation & Dynamic Age Adaptation
+console.log('▶ Test 6: Birthday Calculation & Dynamic Age Adaptation');
+const { calculateAge, detectBirthdayFromText, getSystemPrompt } = require('../lib/constants.ts');
+
+// Case 1: Unknown or empty birthday defaults to 10
+assert.strictEqual(calculateAge(undefined), 10, 'Undefined birthday defaults to 10');
+assert.strictEqual(calculateAge(''), 10, 'Empty birthday defaults to 10');
+assert.strictEqual(calculateAge('   '), 10, 'Whitespace birthday defaults to 10');
+assert.strictEqual(calculateAge('invalid-date'), 10, 'Invalid birthday string defaults to 10');
+assert.strictEqual(calculateAge('May 14'), 10, 'Date without year defaults to 10');
+
+// Case 2: Valid birthday with year
+const computedAge = calculateAge('2015-05-14');
+assert.ok(computedAge >= 10 && computedAge <= 12, 'Calculates reasonable age for 2015 birth year');
+
+// Case 3: Birthday detection from conversational text
+assert.strictEqual(detectBirthdayFromText("My birthday is May 14th"), 'May 14th', 'Detects birthday from natural phrasing');
+assert.strictEqual(detectBirthdayFromText("I was born on 2015-10-25"), '2015-10-25', 'Detects born on phrasing');
+assert.strictEqual(detectBirthdayFromText("bday is October 12, 2014"), 'October 12, 2014', 'Detects bday is phrasing');
+assert.strictEqual(detectBirthdayFromText("I just love painting stars"), null, 'Returns null when no birthday mentioned');
+
+// Case 4: Dynamic System Prompt includes computed age and birthday directives
+const promptWithoutBday = getSystemPrompt(10, undefined);
+assert.ok(promptWithoutBday.includes('Hazel is currently 10 years old'), 'Prompt includes computed age');
+assert.ok(promptWithoutBday.includes('ask Hazel when her special day is'), 'Prompt instructs companion to ask for birthday if unknown');
+
+const promptWithBday = getSystemPrompt(11, 'May 14, 2015');
+assert.ok(promptWithBday.includes('Hazel is currently 11 years old'), 'Prompt includes updated age');
+assert.ok(promptWithBday.includes("Hazel's birthday: May 14, 2015"), 'Prompt includes exact birthday');
+console.log('  ✅ Pass: Dynamic age calculation, text extraction, and prompt adaptation verified\n');
+
+console.log('🎉 ALL AUTOMATED TESTS PASSED SUCCESSFULLY! (6/6 test gates green)\n');
