@@ -262,26 +262,92 @@ export default function GuardianDeskPage() {
           </div>
         </div>
 
-        {/* Live Companion Session Summary Banner */}
-        <div className="p-4 rounded-2xl bg-black/60 border border-purple-500/25 shadow-md flex items-start gap-3">
-          <div className="p-2 rounded-xl bg-purple-500/20 text-purple-300 mt-0.5">
-            <Sparkles className="w-4 h-4" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-2 mb-1">
-              <p className="text-[11px] font-bold text-purple-300 uppercase tracking-wider">
-                Live Companion Session Summary
-              </p>
-              <span className="text-[10px] text-gray-400 font-medium">
-                Real-Time Sanctuary Sync
-              </span>
+        {/* Prominent High-Visibility Section: How Hazel Is Actually Doing */}
+        <div className="p-5 rounded-3xl bg-gradient-to-r from-purple-950/60 via-pink-950/30 to-black/80 border border-pink-500/30 shadow-neon-pink/20">
+          <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-pink-500/20 text-pink-300">
+                <Sparkles className="w-5 h-5 text-pink-400" />
+              </div>
+              <div>
+                <h2 className="text-base font-black text-white tracking-wide flex items-center gap-2">
+                  <span>How Hazel Is Actually Doing</span>
+                  <span className="text-[10px] font-semibold text-pink-300 px-2 py-0.5 rounded-full bg-pink-500/15 border border-pink-500/30">
+                    Real-Time AI Synthesis
+                  </span>
+                </h2>
+                <p className="text-[11px] text-gray-400">
+                  Unvarnished emotional well-being assessment synthesized from real chat conversations
+                </p>
+              </div>
             </div>
-            <p className="text-xs text-gray-200 leading-relaxed">
-              {insight?.sessionSummary ||
-                insight?.bullyingSafetyAlert.summary ||
-                "Hazel is in her creative sanctuary. Her companion is validating her emotions, celebrating her artwork, and keeping a watchful eye on school social dynamics."}
-            </p>
+            <span className="text-[10px] text-gray-400 font-mono">
+              Last updated: {insight?.lastUpdated ? new Date(insight.lastUpdated).toLocaleTimeString() : 'Just now'}
+            </span>
           </div>
+
+          {insight?.howHazelIsDoing?.hasConversations === false ? (
+            <div className="p-4 rounded-2xl bg-black/40 border border-white/5 text-center">
+              <p className="text-xs text-gray-300 italic">
+                "Waiting for Hazel's first conversation to synthesize her well-being assessment."
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+              {/* Pillar 1: Current Mood & Energy */}
+              <div className="p-3.5 rounded-2xl bg-black/50 border border-purple-500/20">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-purple-300 uppercase tracking-wider mb-1.5">
+                  <Smile className="w-4 h-4 text-purple-400" />
+                  <span>Current Mood & Energy</span>
+                </div>
+                <p className="text-sm font-bold text-white">
+                  {insight?.howHazelIsDoing?.currentMoodAndEnergy || insight?.emotionalWeather?.currentMood || 'Thoughtful & Calm'}
+                </p>
+                <p className="text-[11px] text-gray-400 mt-1 leading-snug">
+                  Resilience Index: <strong className="text-pink-300">{insight?.emotionalWeather?.score || 80}/100</strong>
+                </p>
+              </div>
+
+              {/* Pillar 2: What's Weighing On Her */}
+              <div className="p-3.5 rounded-2xl bg-black/50 border border-amber-500/20">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-300 uppercase tracking-wider mb-1.5">
+                  <Shield className="w-4 h-4 text-amber-400" />
+                  <span>What's Weighing On Her</span>
+                </div>
+                <p className="text-xs text-gray-200 leading-relaxed">
+                  {insight?.howHazelIsDoing?.whatsWeighingOnHer ||
+                    insight?.bullyingSafetyAlert?.summary ||
+                    'No school or friend friction reported.'}
+                </p>
+              </div>
+
+              {/* Pillar 3: What's Bringing Her Joy */}
+              <div className="p-3.5 rounded-2xl bg-black/50 border border-cyan-500/20">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-cyan-300 uppercase tracking-wider mb-1.5">
+                  <Heart className="w-4 h-4 text-cyan-400" />
+                  <span>What's Bringing Her Joy</span>
+                </div>
+                <p className="text-xs text-gray-200 leading-relaxed">
+                  {insight?.howHazelIsDoing?.whatsBringingHerJoy ||
+                    insight?.familySentiment?.summary ||
+                    'Drawing imaginative creatures, monster lore, and quiet bedtime unwinding.'}
+                </p>
+              </div>
+
+              {/* Pillar 4: Parent Executive Summary */}
+              <div className="p-3.5 rounded-2xl bg-black/50 border border-pink-500/20">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-pink-300 uppercase tracking-wider mb-1.5">
+                  <Sparkles className="w-4 h-4 text-pink-400" />
+                  <span>Parent Executive Summary</span>
+                </div>
+                <p className="text-xs text-pink-100 font-medium leading-relaxed">
+                  {insight?.howHazelIsDoing?.parentExecutiveSummary ||
+                    insight?.sessionSummary ||
+                    "Hazel is doing well! She is engaging creatively and feeling safe in her space. Acknowledge her ideas and keep encouraging her imagination."}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Main Content: Left Column (Inbox & Details) + Right Column (Reply Composer & Statement Manager) */}
@@ -302,9 +368,9 @@ export default function GuardianDeskPage() {
               {notes.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center p-6">
                   <Heart className="w-10 h-10 text-pink-500/40 mb-2" />
-                  <p className="text-xs text-gray-400">No notes dispatched from Hazel yet.</p>
-                  <p className="text-[11px] text-gray-500 mt-1">
-                    When Hazel taps "Send Note to Tim's computer", it appears instantly here!
+                  <p className="text-xs text-gray-300 font-medium">No notes dispatched yet.</p>
+                  <p className="text-[11px] text-gray-500 mt-1 max-w-xs">
+                    When Hazel sends a note to your desk, it will arrive here in real time.
                   </p>
                 </div>
               ) : (

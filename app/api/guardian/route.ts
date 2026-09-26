@@ -212,8 +212,73 @@ export async function POST(req: NextRequest) {
         },
       ];
 
+      let howHazelIsDoing: {
+        currentMoodAndEnergy: string;
+        whatsWeighingOnHer: string;
+        whatsBringingHerJoy: string;
+        parentExecutiveSummary: string;
+        hasConversations: boolean;
+      };
+
+      if (userMsgs.length === 0) {
+        howHazelIsDoing = {
+          currentMoodAndEnergy: 'Awaiting Conversation',
+          whatsWeighingOnHer: 'No school or friend friction reported.',
+          whatsBringingHerJoy: 'Sanctuary created; awaiting first creative share.',
+          parentExecutiveSummary: "Waiting for Hazel's first conversation to synthesize her well-being assessment.",
+          hasConversations: false,
+        };
+      } else {
+        const moodEnergy =
+          detectedSeverity === 'Critical'
+            ? 'Withdrawn & Overwhelmed (Low Energy)'
+            : detectedSeverity === 'Moderate'
+            ? 'Anxious & Processing Conflict'
+            : isolationFound
+            ? 'Thoughtful & Seeking Belonging'
+            : creativeMentions.length > 0
+            ? 'Expressive & Creative (High Energy)'
+            : positiveCount > 2
+            ? 'Joyful & Playful'
+            : 'Calm & Resilient';
+
+        const weighingOnHer =
+          detectedSeverity === 'Critical'
+            ? 'Severe emotional overload and self-doubt. Needs immediate gentle, non-judgmental presence.'
+            : bullyingFound
+            ? 'Teasing and playground peer conflict reported at school. She is carrying feelings of hurt and unfairness.'
+            : isolationFound
+            ? 'Feeling left out or invisible during unstructured lunch/recess times with peers.'
+            : 'No heavy emotional burdens or peer friction detected in recent chats.';
+
+        const bringingJoy =
+          creativeMentions.length > 0
+            ? 'Deeply immersed in artwork, storytelling, and monster milestones. Creative imagination is lighting up her world.'
+            : familyMentions.length > 0
+            ? 'Cherishes warm home moments, bedtime check-ins, and quiet time with family.'
+            : 'Exploring her companion sanctuary and building confidence through friendly conversation.';
+
+        const parentSummary =
+          detectedSeverity === 'Critical'
+            ? 'Hazel is carrying an elevated emotional load right now. Offer quiet cuddle time, hot cocoa, and unconditional love without prying for answers.'
+            : bullyingFound
+            ? 'Hazel had a rough encounter at school today. Focus on validating her feelings and reminding her she is brave, creative, and safe at home.'
+            : isolationFound
+            ? 'Hazel felt slightly lonely or excluded today. Low-pressure shared time (reading, drawing, relaxing) will help refill her emotional cup.'
+            : 'Hazel is doing well! She is engaging creatively and feeling safe in her space. Acknowledge her ideas and keep encouraging her imagination.';
+
+        howHazelIsDoing = {
+          currentMoodAndEnergy: moodEnergy,
+          whatsWeighingOnHer: weighingOnHer,
+          whatsBringingHerJoy: bringingJoy,
+          parentExecutiveSummary: parentSummary,
+          hasConversations: true,
+        };
+      }
+
       const updatedInsight: GuardianInsight = {
         lastUpdated: Date.now(),
+        howHazelIsDoing,
         bullyingSafetyAlert: {
           severity: detectedSeverity === 'Safe' ? (triggers.length > 0 ? 'Mild' : 'Safe') : detectedSeverity,
           headline:

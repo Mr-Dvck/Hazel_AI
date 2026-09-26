@@ -163,8 +163,12 @@ assert.strictEqual(testReply.recipient, 'Hazel', 'Recipient is Hazel');
 
 // Verify system prompt directive
 assert.ok(
-  promptWithoutBday.includes("Would you like me to let either of them know how you're feeling? I can send a message right to Tim's computer if you like!"),
-  'System prompt includes exact bridge offer directive'
+  promptWithoutBday.includes("Would you like me to send a note to Tim or Mom? Whenever you want to share something with them, I can send it right away!"),
+  'System prompt includes exact gentle bridge offer directive'
+);
+assert.ok(
+  promptWithoutBday.includes("I pass your message directly to Tim's personal AI, who messages him straight on his computer!"),
+  'System prompt includes how-does-it-work architecture explanation'
 );
 assert.ok(
   promptWithoutBday.includes("Strictly NEVER use patronizing, babyish, or condescending pet names"),
@@ -193,6 +197,10 @@ assert.ok(
   whoMadeYouRes.response.includes("I am all yours forever"),
   'Confirms irreversible devotion to Hazel'
 );
+assert.ok(
+  whoMadeYouRes.response.includes("Would you like me to send a note to Tim or Mom? Whenever you want to share something with them, I can send it right away!"),
+  'Offers note to Tim or Mom when origin threshold is crossed'
+);
 
 // Verify offline stream response to "Do you know Tim?"
 const knowTimRes = generateEmpatheticOfflineStream("Do you know Tim?", "Hazel", "Sparky", false);
@@ -200,12 +208,42 @@ assert.ok(
   knowTimRes.response.includes("Tim created me just for you"),
   'Responds with Tim creation lore when asked about Tim'
 );
+assert.ok(
+  knowTimRes.response.includes("Would you like me to send a note to Tim or Mom? Whenever you want to share something with them, I can send it right away!"),
+  'Offers note to Tim or Mom when Tim threshold is crossed'
+);
 
 // Verify offline stream response to "Do you know my mom?"
 const knowMomRes = generateEmpatheticOfflineStream("Do you know my mom?", "Hazel", "Sparky", false);
 assert.ok(
   knowMomRes.response.includes("Tim created me just for you"),
   'Responds with Tim creation lore when asked about mom'
+);
+assert.ok(
+  knowMomRes.response.includes("Would you like me to send a note to Tim or Mom? Whenever you want to share something with them, I can send it right away!"),
+  'Offers note to Tim or Mom when mom threshold is crossed'
+);
+
+// Verify "How Does It Work?" architecture explanations
+const howDoYouDoThatRes = generateEmpatheticOfflineStream("How do you do that?", "Hazel", "Sparky", false);
+assert.strictEqual(
+  howDoYouDoThatRes.response,
+  "I pass your message directly to Tim's personal AI, who messages him straight on his computer!",
+  'Explains message passes to Tim\'s personal AI when asked "How do you do that?"'
+);
+
+const howCanYouMessageRes = generateEmpatheticOfflineStream("How can you message him?", "Hazel", "Sparky", false);
+assert.strictEqual(
+  howCanYouMessageRes.response,
+  "I pass your message directly to Tim's personal AI, who messages him straight on his computer!",
+  'Explains message passes to Tim\'s personal AI when asked "How can you message him?"'
+);
+
+const howDoesItWorkRes = generateEmpatheticOfflineStream("How does it work?", "Hazel", "Sparky", false);
+assert.strictEqual(
+  howDoesItWorkRes.response,
+  "I pass your message directly to Tim's personal AI, who messages him straight on his computer!",
+  'Explains message passes to Tim\'s personal AI when asked "How does it work?"'
 );
 
 // CRITICAL REGRESSION TEST: "time" must NOT trigger Tim doctrine false-positive!

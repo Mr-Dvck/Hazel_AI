@@ -272,18 +272,34 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             </div>
 
             <div className="space-y-3 pt-2">
-              <div className="p-4 rounded-2xl bg-black/60 border border-pink-500/30 shadow-inner">
-                <label className="block text-xs font-bold uppercase tracking-wider text-pink-300 mb-2 flex items-center gap-2">
+              <div className="p-4 rounded-2xl bg-black/60 border border-pink-500/30 shadow-inner space-y-2.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-pink-300 flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-pink-400" />
                   <span>Enter Your Birthday</span>
                 </label>
+
+                {/* Touch-Friendly Native Date Input with dark scheme */}
+                <input
+                  type="date"
+                  value={/^\d{4}-\d{2}-\d{2}$/.test(birthday) ? birthday : ''}
+                  onChange={(e) => {
+                    if (e.target.value) setBirthday(e.target.value);
+                  }}
+                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/20 text-sm text-white focus:outline-none focus:border-pink-400 shadow-inner [color-scheme:dark] cursor-pointer min-h-[44px]"
+                />
+
+                <div className="flex items-center gap-2 py-0.5">
+                  <div className="h-px bg-white/10 flex-1" />
+                  <span className="text-[10px] uppercase font-bold text-gray-500">or type as text</span>
+                  <div className="h-px bg-white/10 flex-1" />
+                </div>
+
                 <input
                   type="text"
                   value={birthday}
                   onChange={(e) => setBirthday(e.target.value)}
                   placeholder="e.g. May 14, 2015 (or October 25)"
-                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/20 text-sm text-white focus:outline-none focus:border-pink-400 shadow-inner"
-                  autoFocus
+                  className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/20 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-pink-400 shadow-inner min-h-[44px]"
                 />
 
                 {birthday.trim() ? (
@@ -294,7 +310,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     </span>
                   </div>
                 ) : (
-                  <p className="text-[11px] text-gray-400 mt-2">
+                  <p className="text-[11px] text-gray-400 mt-1">
                     Tip: You can include the year (e.g. 2015) so Sparky always tracks your exact age!
                   </p>
                 )}
@@ -349,7 +365,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               </p>
             </div>
 
-            <div className="space-y-2.5 max-h-[310px] overflow-y-auto pr-1 custom-scrollbar">
+            <div className="grid grid-cols-2 gap-2 sm:gap-2.5 max-h-[340px] overflow-y-auto pr-1 custom-scrollbar">
               {MONSTER_STYLE_OPTIONS.map((opt) => {
                 const isSelected = monsterStyle === opt.id;
                 return (
@@ -357,20 +373,20 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                     key={opt.id}
                     type="button"
                     onClick={() => setMonsterStyle(opt.id)}
-                    className={`w-full p-3 rounded-2xl border text-left transition-all ${
+                    className={`p-2.5 sm:p-3 rounded-2xl border text-left transition-all min-h-[105px] flex flex-col justify-between ${
                       isSelected
                         ? `bg-white/15 ${opt.borderColor} shadow-lg scale-[1.01]`
                         : 'bg-white/5 border-white/10 hover:bg-white/10'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <span className="text-xl">{opt.icon}</span>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-white">{opt.name}</span>
+                    <div>
+                      <div className="flex items-start justify-between gap-1">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <span className="text-xl sm:text-2xl">{opt.icon}</span>
+                          <div>
+                            <span className="text-xs sm:text-sm font-bold text-white block leading-tight">{opt.name}</span>
                             <span
-                              className="text-[9px] font-bold px-2 py-0.5 rounded-full border"
+                              className="text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded-full border inline-block mt-0.5"
                               style={{
                                 color: opt.previewColor,
                                 borderColor: `${opt.previewColor}50`,
@@ -380,18 +396,19 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                               {opt.badge}
                             </span>
                           </div>
-                          <p className="text-[11px] text-gray-400 mt-0.5">{opt.tagline}</p>
                         </div>
+                        {isSelected && (
+                          <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-pink-500 text-white flex items-center justify-center flex-shrink-0 shadow-neon-pink">
+                            <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 stroke-[3]" />
+                          </div>
+                        )}
                       </div>
-                      {isSelected && (
-                        <div className="w-5 h-5 rounded-full bg-pink-500 text-white flex items-center justify-center flex-shrink-0">
-                          <Check className="w-3 h-3 stroke-[3]" />
-                        </div>
-                      )}
+                      <p className="text-[10px] sm:text-[11px] text-gray-300 mt-1.5 leading-snug line-clamp-2">{opt.tagline}</p>
                     </div>
-                    <div className="mt-2 pt-2 border-t border-white/5 flex items-center gap-1.5 text-[10px] text-gray-400">
-                      <span className="text-gray-300 font-semibold">Guardians:</span>
-                      <span className="truncate">{opt.sampleMonsters.join(', ')}...</span>
+
+                    <div className="mt-2 pt-1.5 border-t border-white/5 flex items-center gap-1 text-[9px] sm:text-[10px] text-gray-400">
+                      <span className="text-gray-300 font-semibold flex-shrink-0">Guardians:</span>
+                      <span className="truncate">{opt.sampleMonsters.slice(0, 2).join(', ')}...</span>
                     </div>
                   </button>
                 );

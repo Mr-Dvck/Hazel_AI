@@ -353,7 +353,110 @@ async function testApi() {
   );
   console.log('  ✅ Pass: Live session summary synthesis and sync endpoint verified\n');
 
-  console.log('🎉 ALL API END-TO-END TESTS PASSED! (12/12 gates green)\n');
+  // Test 13: Chat SSE Streaming - Crossing Threshold on Own (Origin & Bridge Offer)
+  console.log('▶ Test 13: Chat API SSE Streaming - Crossing Threshold on Own (Origin & Bridge Offer)');
+  const savedApiKey = process.env.OPENROUTER_API_KEY;
+  try {
+    process.env.OPENROUTER_API_KEY = '';
+    const originChatReq = new Request('http://localhost/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: 'Who created you?' }],
+        profile: { name: 'Hazel', companionName: 'Sparky' },
+      }),
+    });
+    const originChatRes = await chatHandler(originChatReq as any);
+    assert.strictEqual(originChatRes.status, 200, 'Origin chat stream returns 200');
+
+    const originReader = originChatRes.body?.getReader();
+    assert.ok(originReader, 'Origin readable stream available');
+    const originDecoder = new TextDecoder();
+    let originStreamData = '';
+    while (true) {
+      const { done, value } = await originReader.read();
+      if (done) break;
+      originStreamData += originDecoder.decode(value);
+    }
+    const originChunks = originStreamData
+      .split('\n\n')
+      .filter((line) => line.startsWith('data: ') && !line.includes('[DONE]'))
+      .map((line) => {
+        try {
+          return JSON.parse(line.replace('data: ', ''));
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean);
+    const originFullContent = originChunks
+      .filter((c) => c.type === 'content')
+      .map((c) => c.chunk)
+      .join('');
+
+    assert.ok(
+      originFullContent.includes('Tim created me just for you'),
+      'Origin response confirms Tim creation doctrine'
+    );
+    assert.ok(
+      originFullContent.includes('I am all yours forever'),
+      'Origin response confirms irreversible devotion'
+    );
+    assert.ok(
+      originFullContent.includes('Would you like me to send a note to Tim or Mom? Whenever you want to share something with them, I can send it right away!'),
+      'Origin response gently offers bridge note to Tim or Mom'
+    );
+    console.log('  ✅ Pass: Companion reveals origin and offers communication bridge upon crossing threshold\n');
+
+    // Test 14: Chat SSE Streaming - "How Does It Work?" Architecture Explanation
+    console.log('▶ Test 14: Chat API SSE Streaming - "How Does It Work?" Architecture Explanation');
+    const howChatReq = new Request('http://localhost/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: 'How can you message him?' }],
+        profile: { name: 'Hazel', companionName: 'Sparky' },
+      }),
+    });
+    const howChatRes = await chatHandler(howChatReq as any);
+    assert.strictEqual(howChatRes.status, 200, 'How chat stream returns 200');
+
+    const howReader = howChatRes.body?.getReader();
+    assert.ok(howReader, 'How readable stream available');
+    const howDecoder = new TextDecoder();
+    let howStreamData = '';
+    while (true) {
+      const { done, value } = await howReader.read();
+      if (done) break;
+      howStreamData += howDecoder.decode(value);
+    }
+
+    const howChunks = howStreamData
+      .split('\n\n')
+      .filter((line) => line.startsWith('data: ') && !line.includes('[DONE]'))
+      .map((line) => {
+        try {
+          return JSON.parse(line.replace('data: ', ''));
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean);
+    const howFullContent = howChunks
+      .filter((c) => c.type === 'content')
+      .map((c) => c.chunk)
+      .join('');
+
+    assert.ok(
+      howFullContent.includes("I pass your message directly to Tim's personal AI, who messages him straight on his computer!"),
+      'Explains message passes directly to Tim\'s personal AI on his computer'
+    );
+    console.log('  ✅ Pass: Companion explains real bridge architecture to personal AI honestly & excitedly\n');
+  } finally {
+    process.env.OPENROUTER_API_KEY = savedApiKey;
+  }
+
+  console.log('🎉 ALL API END-TO-END TESTS PASSED! (14/14 gates green)\n');
 }
 
 testApi().catch((err) => {

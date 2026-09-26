@@ -18,7 +18,7 @@
         "detail": "Drawing dragons"
       }
     ],
-    "syncedAt": 1790463594357
+    "syncedAt": 1790464269272
   },
   "hazel_profile_customized": {
     "profile": {
@@ -32,8 +32,8 @@
       "companionAvatar": "🌟",
       "bioOrMotto": "Bold, creative, and invincible! ✨",
       "favoriteColor": "Sunset Amber",
-      "createdAt": 1790204394361,
-      "lastActive": 1790463594361
+      "createdAt": 1790205069275,
+      "lastActive": 1790464269275
     },
     "monsters": [
       {
@@ -43,7 +43,7 @@
       }
     ],
     "memories": [],
-    "syncedAt": 1790463594361
+    "syncedAt": 1790464269275
   },
   "hazel_birthday_user": {
     "profile": {
@@ -57,8 +57,8 @@
       "companionAvatar": "🌟",
       "bioOrMotto": "Bold, creative, and invincible! ✨",
       "favoriteColor": "Sunset Amber",
-      "createdAt": 1790204394361,
-      "lastActive": 1790463594361,
+      "createdAt": 1790205069275,
+      "lastActive": 1790464269275,
       "birthday": "May 14, 2015"
     },
     "monsters": [
@@ -76,7 +76,7 @@
         "detail": "May 14, 2015"
       }
     ],
-    "syncedAt": 1790463597291
+    "syncedAt": 1790464271889
   },
   "hazel_default": {
     "profile": {
@@ -86,7 +86,14 @@
     "monsters": [],
     "memories": [],
     "guardianInsight": {
-      "lastUpdated": 1790463597313,
+      "lastUpdated": 1790464271917,
+      "howHazelIsDoing": {
+        "currentMoodAndEnergy": "Calm & Resilient",
+        "whatsWeighingOnHer": "No heavy emotional burdens or peer friction detected in recent chats.",
+        "whatsBringingHerJoy": "Cherishes warm home moments, bedtime check-ins, and quiet time with family.",
+        "parentExecutiveSummary": "Hazel is doing well! She is engaging creatively and feeling safe in her space. Acknowledge her ideas and keep encouraging her imagination.",
+        "hasConversations": true
+      },
       "bullyingSafetyAlert": {
         "severity": "Safe",
         "headline": "No Active Safety Threats Detected",
@@ -94,7 +101,7 @@
         "recentTriggers": [
           {
             "id": "trig-1",
-            "timestamp": 1790333992500,
+            "timestamp": 1790334666625,
             "category": "bullying",
             "severity": "Mild",
             "snippet": "Nobody let me sit at the art table today again.",
@@ -142,6 +149,6 @@
         }
       ]
     },
-    "syncedAt": 1790463597313
+    "syncedAt": 1790464271917
   }
 }

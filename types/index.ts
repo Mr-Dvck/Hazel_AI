@@ -104,8 +104,17 @@ export interface GuardianIncident {
   context: string;
 }
 
+export interface HowHazelIsDoing {
+  currentMoodAndEnergy: string;
+  whatsWeighingOnHer: string;
+  whatsBringingHerJoy: string;
+  parentExecutiveSummary: string;
+  hasConversations: boolean;
+}
+
 export interface GuardianInsight {
   lastUpdated: number;
+  howHazelIsDoing?: HowHazelIsDoing;
   bullyingSafetyAlert: {
     severity: 'Safe' | 'Mild' | 'Moderate' | 'Critical';
     headline: string;

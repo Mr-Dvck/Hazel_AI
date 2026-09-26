@@ -39,8 +39,8 @@ class GuardianDeskApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Hazel Guardian Desk — Reassurance Console")
-        self.root.geometry("1100x750")
-        self.root.minsize(950, 650)
+        self.root.geometry("1150x820")
+        self.root.minsize(980, 720)
         self.root.configure(bg="#090a12")
 
         # Set Window Icon
@@ -200,30 +200,77 @@ class GuardianDeskApp:
         self.lbl_stats = tk.Label(self.card_stats, text="0 Notes Dispatched", font=("Segoe UI", 11, "bold"), fg=self.colors["pink"], bg=self.colors["bg_card"])
         self.lbl_stats.pack(anchor="w")
 
-        # 2b. Live Session Summary Banner Frame
-        summary_frame = tk.Frame(self.root, bg=self.colors["bg_card"], padx=15, pady=8, highlightthickness=1, highlightbackground=self.colors["border"])
-        summary_frame.pack(fill="x", padx=20, pady=(0, 6))
+        # 2b. Prominent Section: How Hazel Is Actually Doing
+        self.how_frame = tk.Frame(self.root, bg=self.colors["bg_card"], padx=15, pady=8, highlightthickness=1, highlightbackground="#ec4899")
+        self.how_frame.pack(fill="x", padx=20, pady=(0, 6))
 
-        sum_hdr = tk.Frame(summary_frame, bg=self.colors["bg_card"])
-        sum_hdr.pack(fill="x")
-        tk.Label(sum_hdr, text="✨ LIVE COMPANION SESSION SUMMARY", font=("Segoe UI", 8, "bold"), fg=self.colors["purple"], bg=self.colors["bg_card"]).pack(side="left")
-        self.lbl_sync_time = tk.Label(sum_hdr, text="Syncing...", font=("Segoe UI", 8), fg=self.colors["text_muted"], bg=self.colors["bg_card"])
+        how_hdr = tk.Frame(self.how_frame, bg=self.colors["bg_card"])
+        how_hdr.pack(fill="x", pady=(0, 4))
+
+        tk.Label(
+            how_hdr,
+            text="✨ HOW HAZEL IS ACTUALLY DOING",
+            font=("Segoe UI", 9, "bold"),
+            fg=self.colors["pink"],
+            bg=self.colors["bg_card"],
+        ).pack(side="left")
+
+        tk.Label(
+            how_hdr,
+            text="Real-Time AI Synthesis • Unvarnished Well-Being Assessment",
+            font=("Segoe UI", 8),
+            fg=self.colors["text_muted"],
+            bg=self.colors["bg_card"],
+        ).pack(side="left", padx=8)
+
+        self.lbl_sync_time = tk.Label(how_hdr, text="Syncing...", font=("Segoe UI", 8), fg=self.colors["text_muted"], bg=self.colors["bg_card"])
         self.lbl_sync_time.pack(side="right")
 
-        self.txt_summary = tk.Text(
-            summary_frame,
-            height=2,
+        # Waiting banner label (shown when hasConversations is False or waiting)
+        self.lbl_h_waiting = tk.Label(
+            self.how_frame,
+            text="\"Waiting for Hazel's first conversation to synthesize her well-being assessment.\"",
+            font=("Segoe UI", 9, "italic"),
+            fg=self.colors["text_muted"],
             bg=self.colors["bg_card"],
-            fg="#e5e7eb",
-            font=("Segoe UI", 9),
-            relief="flat",
-            wrap="word",
-            highlightthickness=0,
-            borderwidth=0,
+            pady=8,
         )
-        self.txt_summary.pack(fill="x", pady=(3, 0))
-        self.txt_summary.insert("1.0", "Hazel is in her creative sanctuary. Her companion is validating her emotions and standing by.")
-        self.txt_summary.config(state="disabled")
+
+        # 4-card container
+        self.cards_container = tk.Frame(self.how_frame, bg=self.colors["bg_card"])
+        self.cards_container.pack(fill="x")
+
+        # Card 1: Current Mood & Energy
+        c1 = tk.Frame(self.cards_container, bg="#181428", highlightthickness=1, highlightbackground="#7c3aed", padx=8, pady=6)
+        c1.pack(side="left", fill="both", expand=True, padx=3)
+        tk.Label(c1, text="😊 Current Mood & Energy", font=("Segoe UI", 8, "bold"), fg="#c084fc", bg="#181428").pack(anchor="w")
+        self.txt_h_mood = tk.Text(c1, height=3, bg="#181428", fg="#ffffff", font=("Segoe UI", 8), relief="flat", wrap="word", highlightthickness=0, borderwidth=0)
+        self.txt_h_mood.pack(fill="both", expand=True, pady=(2, 0))
+        self.txt_h_mood.config(state="disabled")
+
+        # Card 2: What's Weighing On Her
+        c2 = tk.Frame(self.cards_container, bg="#241a15", highlightthickness=1, highlightbackground="#d97706", padx=8, pady=6)
+        c2.pack(side="left", fill="both", expand=True, padx=3)
+        tk.Label(c2, text="🛡️ What's Weighing On Her", font=("Segoe UI", 8, "bold"), fg="#fcd34d", bg="#241a15").pack(anchor="w")
+        self.txt_h_weighing = tk.Text(c2, height=3, bg="#241a15", fg="#f3f4f6", font=("Segoe UI", 8), relief="flat", wrap="word", highlightthickness=0, borderwidth=0)
+        self.txt_h_weighing.pack(fill="both", expand=True, pady=(2, 0))
+        self.txt_h_weighing.config(state="disabled")
+
+        # Card 3: What's Bringing Her Joy
+        c3 = tk.Frame(self.cards_container, bg="#122329", highlightthickness=1, highlightbackground="#06b6d4", padx=8, pady=6)
+        c3.pack(side="left", fill="both", expand=True, padx=3)
+        tk.Label(c3, text="💖 What's Bringing Her Joy", font=("Segoe UI", 8, "bold"), fg="#67e8f9", bg="#122329").pack(anchor="w")
+        self.txt_h_joy = tk.Text(c3, height=3, bg="#122329", fg="#f3f4f6", font=("Segoe UI", 8), relief="flat", wrap="word", highlightthickness=0, borderwidth=0)
+        self.txt_h_joy.pack(fill="both", expand=True, pady=(2, 0))
+        self.txt_h_joy.config(state="disabled")
+
+        # Card 4: Parent Executive Summary
+        c4 = tk.Frame(self.cards_container, bg="#261222", highlightthickness=1, highlightbackground="#ec4899", padx=8, pady=6)
+        c4.pack(side="left", fill="both", expand=True, padx=3)
+        tk.Label(c4, text="✨ Parent Executive Summary", font=("Segoe UI", 8, "bold"), fg="#f472b6", bg="#261222").pack(anchor="w")
+        self.txt_h_summary = tk.Text(c4, height=3, bg="#261222", fg="#fce7f3", font=("Segoe UI", 8), relief="flat", wrap="word", highlightthickness=0, borderwidth=0)
+        self.txt_h_summary.pack(fill="both", expand=True, pady=(2, 0))
+        self.txt_h_summary.config(state="disabled")
 
         # 3. Main Split Body (Left: Inbox, Right: Composer & Statements)
         body = tk.Frame(self.root, bg=self.colors["bg_main"], padx=20, pady=5)
@@ -575,6 +622,12 @@ class GuardianDeskApp:
             self.load_offline_disk_state()
             self.root.after(0, self.update_offline_ui)
 
+    def _set_text_widget(self, widget, text):
+        widget.config(state="normal")
+        widget.delete("1.0", "end")
+        widget.insert("1.0", text)
+        widget.config(state="disabled")
+
     def update_ui(self, alert_new_note=False):
         self.conn_badge.config(text="● Online & Synced", fg=self.colors["green"])
         self.lbl_sync_time.config(text=f"Synced {time.strftime('%I:%M:%S %p')}")
@@ -600,18 +653,33 @@ class GuardianDeskApp:
             color = self.colors["green"] if sev == "Safe" else (self.colors["amber"] if sev in ("Mild", "Moderate") else "#ef4444")
             self.lbl_safety.config(text=f"{sev} • {hl}", fg=color)
 
-        # Update Live Session Summary
-        if self.insight:
-            summary = (
-                self.insight.get("sessionSummary")
-                or self.insight.get("bullyingSafetyAlert", {}).get("summary")
-                or self.insight.get("emotionalWeather", {}).get("description")
-                or "Hazel is in her creative sanctuary. Her companion is validating her emotions and standing by."
-            )
-            self.txt_summary.config(state="normal")
-            self.txt_summary.delete("1.0", "end")
-            self.txt_summary.insert("1.0", summary)
-            self.txt_summary.config(state="disabled")
+        # Update How Hazel Is Actually Doing
+        how_data = self.insight.get("howHazelIsDoing") if self.insight else None
+        has_convs = True
+        if how_data and how_data.get("hasConversations") is False:
+            has_convs = False
+        elif not self.insight:
+            has_convs = False
+
+        if not has_convs:
+            self.cards_container.pack_forget()
+            self.lbl_h_waiting.pack(fill="x", pady=8)
+        else:
+            self.lbl_h_waiting.pack_forget()
+            self.cards_container.pack(fill="x")
+
+            mood_text = (how_data.get("currentMoodAndEnergy") if how_data else None) or (self.insight.get("emotionalWeather", {}).get("currentMood") if self.insight else "Thoughtful & Calm")
+            res_score = self.insight.get("emotionalWeather", {}).get("score", 80) if self.insight else 80
+            self._set_text_widget(self.txt_h_mood, f"{mood_text}\nResilience: {res_score}/100")
+
+            weigh_text = (how_data.get("whatsWeighingOnHer") if how_data else None) or (self.insight.get("bullyingSafetyAlert", {}).get("summary") if self.insight else "No school or friend friction reported.")
+            self._set_text_widget(self.txt_h_weighing, weigh_text)
+
+            joy_text = (how_data.get("whatsBringingHerJoy") if how_data else None) or (self.insight.get("familySentiment", {}).get("summary") if self.insight else "Drawing imaginative creatures, monster lore, and quiet bedtime unwinding.")
+            self._set_text_widget(self.txt_h_joy, joy_text)
+
+            exec_text = (how_data.get("parentExecutiveSummary") if how_data else None) or (self.insight.get("sessionSummary") if self.insight else "Hazel is doing well! She is engaging creatively and feeling safe in her space. Acknowledge her ideas and keep encouraging her imagination.")
+            self._set_text_widget(self.txt_h_summary, exec_text)
 
         # Update stats
         self.lbl_stats.config(text=f"{len(self.notes)} Notes • {len(self.replies)} Delivered")
@@ -620,15 +688,18 @@ class GuardianDeskApp:
         # Update Notes Listbox
         cur_sel = self.notes_listbox.curselection()
         self.notes_listbox.delete(0, "end")
-        for n in self.notes:
-            ts = time.strftime("%I:%M %p", time.localtime(n.get("timestamp", 0) / 1000))
-            sender = n.get("senderName", "Hazel")
-            status = " [Replied]" if n.get("replied") else " [NEW]"
-            text_preview = (n.get("text", "")[:45] + "...") if len(n.get("text", "")) > 45 else n.get("text", "")
-            self.notes_listbox.insert("end", f"{ts} - {sender}{status}: \"{text_preview}\"")
+        if not self.notes:
+            self.notes_listbox.insert("end", "No notes dispatched yet. When Hazel sends a note to your desk, it will arrive here in real time.")
+        else:
+            for n in self.notes:
+                ts = time.strftime("%I:%M %p", time.localtime(n.get("timestamp", 0) / 1000))
+                sender = n.get("senderName", "Hazel")
+                status = " [Replied]" if n.get("replied") else " [NEW]"
+                text_preview = (n.get("text", "")[:45] + "...") if len(n.get("text", "")) > 45 else n.get("text", "")
+                self.notes_listbox.insert("end", f"{ts} - {sender}{status}: \"{text_preview}\"")
 
-        if cur_sel and cur_sel[0] < self.notes_listbox.size():
-            self.notes_listbox.selection_set(cur_sel[0])
+            if cur_sel and cur_sel[0] < self.notes_listbox.size():
+                self.notes_listbox.selection_set(cur_sel[0])
 
         # Update Replies Listbox
         self.replies_listbox.delete(0, "end")
@@ -648,9 +719,9 @@ class GuardianDeskApp:
     def update_offline_ui(self):
         if self.notes or self.insight:
             self.conn_badge.config(text="● Offline (Local State Loaded)", fg=self.colors["amber"])
-            self.update_ui(alert_new_note=False)
         else:
             self.conn_badge.config(text="● Waiting for Hazel Server (localhost:3000)", fg=self.colors["amber"])
+        self.update_ui(alert_new_note=False)
 
     def polling_loop(self):
         while self.polling_active:

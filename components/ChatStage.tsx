@@ -5,6 +5,7 @@ import { ChatMessage, UserProfile } from '@/types';
 import {
   Send,
   Paperclip,
+  Camera,
   Image as ImageIcon,
   Sparkles,
   ChevronDown,
@@ -267,8 +268,8 @@ export const ChatStage: React.FC<ChatStageProps> = ({
         </div>
       )}
 
-      {/* Glowing Neon Input Bar */}
-      <div className="pt-3 border-t border-white/10 relative">
+      {/* Glowing Neon Input Bar with Safe Area Inset Padding */}
+      <div className="pt-2 sm:pt-3 border-t border-white/10 relative pb-[env(safe-area-inset-bottom)]">
         {/* Emoji Bar Drawer */}
         {showEmojiPicker && (
           <div className="absolute bottom-full mb-2 left-0 bg-black/90 border border-white/20 rounded-2xl p-2 flex items-center gap-1.5 shadow-2xl backdrop-blur-xl z-20">
@@ -279,7 +280,7 @@ export const ChatStage: React.FC<ChatStageProps> = ({
                   setInputText((prev) => prev + emoji);
                   setShowEmojiPicker(false);
                 }}
-                className="w-8 h-8 rounded-xl hover:bg-white/15 flex items-center justify-center text-base transition-transform hover:scale-125"
+                className="w-10 h-10 rounded-xl hover:bg-white/15 flex items-center justify-center text-lg transition-transform hover:scale-125"
               >
                 {emoji}
               </button>
@@ -287,7 +288,7 @@ export const ChatStage: React.FC<ChatStageProps> = ({
           </div>
         )}
 
-        <div className={`flex items-center gap-2 bg-obsidian-900/90 border rounded-full px-3 py-1.5 shadow-inner transition-all ${
+        <div className={`flex items-center gap-1.5 sm:gap-2 bg-obsidian-900/90 border rounded-full px-2 sm:px-3 py-1 sm:py-1.5 shadow-inner transition-all ${
           profile.vibeTheme === 'cyber-blue'
             ? 'border-cyan-400/60 shadow-[0_0_20px_rgba(0,240,255,0.35)] focus-within:border-cyan-300 focus-within:shadow-[0_0_30px_rgba(0,240,255,0.6)]'
             : profile.vibeTheme === 'cosmic-emerald'
@@ -296,7 +297,7 @@ export const ChatStage: React.FC<ChatStageProps> = ({
             ? 'border-purple-400/60 shadow-[0_0_20px_rgba(168,85,247,0.35)] focus-within:border-purple-300 focus-within:shadow-[0_0_30px_rgba(168,85,247,0.6)]'
             : 'border-pink-500/60 shadow-[0_0_20px_rgba(255,46,147,0.35)] focus-within:border-pink-400 focus-within:shadow-[0_0_30px_rgba(255,46,147,0.6)]'
         }`}>
-          {/* Prominent Picture & Artwork Upload Button */}
+          {/* Prominent Camera / Picture & Artwork Upload Button (Touch-Friendly 44px) */}
           <input
             ref={fileInputRef}
             type="file"
@@ -309,20 +310,22 @@ export const ChatStage: React.FC<ChatStageProps> = ({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             title="Attach a drawing, painting, or photo"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-pink-400/60 transition-all hover:scale-105 active:scale-95 shadow-sm"
+            aria-label="Upload photo or artwork"
+            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold bg-white/10 hover:bg-white/20 active:bg-pink-500/30 text-white border border-white/20 hover:border-pink-400/60 transition-all hover:scale-105 active:scale-95 shadow-sm min-h-[44px] min-w-[44px]"
           >
-            <ImageIcon className="w-4 h-4 text-pink-400" />
+            <Camera className="w-5 h-5 text-pink-400 flex-shrink-0" />
             <span className="hidden sm:inline font-medium">Add Picture</span>
           </button>
 
-          {/* Quick Emoji Picker Button */}
+          {/* Quick Emoji Picker Button (Touch-Friendly 44px) */}
           <button
             type="button"
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className="p-2 rounded-full text-gray-400 hover:text-amber-400 hover:bg-white/5 transition-colors"
+            className="min-h-[44px] min-w-[44px] p-2 rounded-full text-gray-400 hover:text-amber-400 hover:bg-white/5 transition-colors flex items-center justify-center"
             title="Add cheer emoji"
+            aria-label="Add emoji"
           >
-            <Smile className="w-4 h-4" />
+            <Smile className="w-5 h-5" />
           </button>
 
           {/* Text Area Input */}
@@ -330,17 +333,18 @@ export const ChatStage: React.FC<ChatStageProps> = ({
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={`Talk to ${profile.companionName}... (Enter to send, Shift+Enter for new line)`}
+            placeholder={`Talk to ${profile.companionName}...`}
             rows={1}
             className="flex-1 bg-transparent border-0 text-xs sm:text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-0 resize-none py-2 max-h-28 custom-scrollbar"
           />
 
-          {/* Send Button */}
+          {/* Send Button (Touch-Friendly 44px) */}
           <button
             type="button"
             onClick={handleSend}
             disabled={(!inputText.trim() && selectedImages.length === 0) || isLoading}
-            className={`p-2.5 rounded-full transition-all duration-200 flex items-center justify-center ${
+            aria-label="Send message"
+            className={`min-h-[44px] min-w-[44px] p-2.5 rounded-full transition-all duration-200 flex items-center justify-center flex-shrink-0 ${
               (inputText.trim() || selectedImages.length > 0) && !isLoading
                 ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-neon-pink hover:scale-105 active:scale-95'
                 : 'bg-white/5 text-gray-600 cursor-not-allowed'
@@ -446,6 +450,8 @@ const MessageBubble: React.FC<{
     !isStreaming &&
     (message.content.includes("I can send a message right to Tim's computer") ||
       message.content.includes("send a message right to Tim's computer") ||
+      message.content.includes("send a note to Tim or Mom") ||
+      message.content.includes("share something with them, I can send it right away") ||
       message.isBridgeOffer);
 
   return (

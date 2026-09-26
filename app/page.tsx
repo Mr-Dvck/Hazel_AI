@@ -445,7 +445,7 @@ export default function HomePage() {
   const unlockedCount = monsters.filter((m) => m.unlocked).length;
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-hidden text-gray-100">
+    <div className="relative h-[100dvh] min-h-[100dvh] flex flex-col overflow-hidden text-gray-100 pb-[env(safe-area-inset-bottom)]">
       {/* Dynamic Background */}
       <DynamicNeonBackground theme={profile.vibeTheme} />
 
@@ -459,50 +459,50 @@ export default function HomePage() {
         onOpenProfile={() => setShowProfileModal(true)}
       />
 
-      {/* Mobile Tab Switcher */}
-      <div className="md:hidden relative z-20 flex items-center justify-around border-b border-white/10 bg-black/70 backdrop-blur-md px-2 py-2">
+      {/* Mobile Tab Switcher (Large touch targets & glowing thumb-accessible tabs) */}
+      <div className="md:hidden relative z-20 flex items-center justify-around border-b border-white/10 bg-black/80 backdrop-blur-lg px-2 py-1.5 shadow-lg">
         <button
           onClick={() => setMobileTab('tower')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl min-h-[44px] text-xs font-bold transition-all ${
             mobileTab === 'tower'
-              ? 'bg-amber-400/20 text-amber-300 border border-amber-400/30'
-              : 'text-gray-400'
+              ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40 shadow-[0_0_15px_rgba(251,191,36,0.3)]'
+              : 'text-gray-400 hover:text-gray-200'
           }`}
         >
-          <Trophy className="w-3.5 h-3.5" />
+          <Trophy className="w-4 h-4 text-amber-400" />
           <span>Tower ({unlockedCount})</span>
         </button>
 
         <button
           onClick={() => setMobileTab('chat')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl min-h-[44px] text-xs font-bold transition-all mx-1.5 ${
             mobileTab === 'chat'
-              ? 'bg-pink-500/20 text-pink-300 border border-pink-500/30'
-              : 'text-gray-400'
+              ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40 shadow-[0_0_15px_rgba(255,46,147,0.3)]'
+              : 'text-gray-400 hover:text-gray-200'
           }`}
         >
-          <MessageSquare className="w-3.5 h-3.5" />
+          <MessageSquare className="w-4 h-4 text-pink-400" />
           <span>Chat Stage</span>
         </button>
 
         <button
           onClick={() => setMobileTab('memory')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl min-h-[44px] text-xs font-bold transition-all ${
             mobileTab === 'memory'
-              ? 'bg-cyan-400/20 text-cyan-300 border border-cyan-400/30'
-              : 'text-gray-400'
+              ? 'bg-cyan-400/20 text-cyan-300 border border-cyan-400/40 shadow-[0_0_15px_rgba(0,240,255,0.3)]'
+              : 'text-gray-400 hover:text-gray-200'
           }`}
         >
-          <Bookmark className="w-3.5 h-3.5" />
+          <Bookmark className="w-4 h-4 text-cyan-400" />
           <span>Memories ({memories.length})</span>
         </button>
       </div>
 
       {/* 3-Column Sleek Neon Layout Stage */}
       <main className="relative z-10 flex-1 w-full max-w-[1700px] mx-auto p-2 sm:p-4 md:p-6 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 md:gap-5 min-h-0 overflow-hidden">
-        {/* Left Column: Monster Milestone Tower (2.5 cols on desktop) */}
+        {/* Left Column: Monster Milestone Tower */}
         <div
-          className={`md:col-span-3 lg:col-span-3 h-[calc(100vh-140px)] md:h-[calc(100vh-100px)] ${
+          className={`md:col-span-3 lg:col-span-3 h-[calc(100dvh-130px)] md:h-[calc(100vh-100px)] ${
             mobileTab === 'tower' ? 'block' : 'hidden md:block'
           }`}
         >
@@ -513,9 +513,9 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Center Column: Main Chat Stage (6.5 cols on desktop) */}
+        {/* Center Column: Main Chat Stage */}
         <div
-          className={`md:col-span-6 lg:col-span-6 h-[calc(100vh-140px)] md:h-[calc(100vh-100px)] ${
+          className={`md:col-span-6 lg:col-span-6 h-[calc(100dvh-130px)] md:h-[calc(100vh-100px)] ${
             mobileTab === 'chat' ? 'block' : 'hidden md:block'
           }`}
         >
@@ -529,9 +529,9 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Right Column: Persistent Memory Bank (3 cols on desktop) */}
+        {/* Right Column: Persistent Memory Bank */}
         <div
-          className={`md:col-span-3 lg:col-span-3 h-[calc(100vh-140px)] md:h-[calc(100vh-100px)] ${
+          className={`md:col-span-3 lg:col-span-3 h-[calc(100dvh-130px)] md:h-[calc(100vh-100px)] ${
             mobileTab === 'memory' ? 'block' : 'hidden md:block'
           }`}
         >
