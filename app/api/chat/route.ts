@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
 
     // Build OpenRouter messages format
     const recentMessages = messages.slice(-10);
-    const companionPrompt = `${getSystemPrompt(computedAge, profile.birthday)}\n- You are chatting with ${profile.name || 'Hazel'}.\n- Your companion name is ${profile.companionName || 'Sparky'}.${profile.bioOrMotto ? `\n- Hazel's personal motto: "${profile.bioOrMotto}".` : ''}${profile.favoriteColor ? `\n- Hazel's favorite color vibe: ${profile.favoriteColor}.` : ''}`;
+    const companionPrompt = `${getSystemPrompt(computedAge, profile.birthday, profile.companionName, profile.name)}\n- You are chatting with ${profile.name || 'Hazel'}.\n- Your companion name is ${profile.companionName || 'Sparky'}.${profile.bioOrMotto ? `\n- ${profile.name || 'Hazel'}'s personal motto: "${profile.bioOrMotto}".` : ''}${profile.favoriteColor ? `\n- ${profile.name || 'Hazel'}'s favorite color vibe: ${profile.favoriteColor}.` : ''}`;
 
     const formattedMessages = [
       { role: 'system', content: companionPrompt },

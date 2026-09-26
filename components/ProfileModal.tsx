@@ -17,6 +17,7 @@ import {
   Calendar,
   Smile,
   Ghost,
+  Trash2,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -27,6 +28,7 @@ interface ProfileModalProps {
   totalMonstersCount: number;
   onClose: () => void;
   onSave: (updatedProfile: UserProfile) => void;
+  onResetToBeginning?: () => void;
 }
 
 export const ProfileModal: React.FC<ProfileModalProps> = ({
@@ -36,6 +38,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   totalMonstersCount,
   onClose,
   onSave,
+  onResetToBeginning,
 }) => {
   const [name, setName] = useState(profile.name);
   const [companionName, setCompanionName] = useState(profile.companionName);
@@ -241,7 +244,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             }`}
           >
             <Bot className="w-3.5 h-3.5" />
-            <span>Companion ({companionName || 'Sparky'})</span>
+            <span>Companion ({companionName.trim() || profile.companionName || 'Companion'})</span>
           </button>
 
           <button
@@ -350,7 +353,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   className="w-full px-4 py-2.5 rounded-2xl bg-black/60 border border-white/20 text-xs text-white focus:outline-none focus:border-cyan-400 shadow-inner"
                 />
                 <p className="text-[11px] text-gray-400 mt-1">
-                  Sparky remembers your motto and brings it up when you need an encouraging boost!
+                  {(companionName.trim() || profile.companionName || 'Your companion')} remembers your motto and brings it up when you need an encouraging boost!
                 </p>
               </div>
 
@@ -404,7 +407,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     className="w-full px-4 py-2 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-pink-500 shadow-inner min-h-[44px]"
                   />
                   <p className="text-[11px] text-gray-400">
-                    Sparky uses your birthday to celebrate milestones and grow alongside you! (Currently computed age: {calculateAge(birthday)} years old)
+                    {(companionName.trim() || profile.companionName || 'Your companion')} uses your birthday to celebrate milestones and grow alongside you! (Currently computed age: {calculateAge(birthday)} years old)
                   </p>
                 </div>
               </div>
@@ -454,7 +457,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 <span className="text-2xl">{companionAvatar}</span>
                 <div className="text-xs text-purple-200">
                   <p className="font-semibold text-white">
-                    {companionName || 'Sparky'} is ready to talk!
+                    {companionName.trim() || profile.companionName || 'Your companion'} is ready to talk!
                   </p>
                   <p className="text-[11px] text-purple-300 mt-0.5 leading-relaxed">
                     Always loyal, completely judgment-free, and here whenever you want to share stories,
@@ -622,7 +625,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                         </span>
                       </div>
                       <p className="text-[10px] text-gray-400 mt-0.5">
-                        {profile.birthday ? `Birthday set to ${profile.birthday}` : 'Birthday not set yet — Sparky will ask in chat!'}
+                        {profile.birthday ? `Birthday set to ${profile.birthday}` : `Birthday not set yet — ${profile.companionName || 'your companion'} will ask in chat!`}
                       </p>
                     </div>
                   </div>
@@ -640,21 +643,34 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
           )}
 
           {/* Modal Footer Actions */}
-          <div className="pt-3 border-t border-white/10 flex items-center justify-end gap-2.5">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 bg-white/5 hover:bg-white/10 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2.5 rounded-2xl font-bold text-xs uppercase tracking-wider text-white bg-gradient-to-r from-pink-500 via-purple-600 to-cyan-500 hover:opacity-95 shadow-neon-pink flex items-center gap-2 active:scale-95 transition-all"
-            >
-              <Check className="w-4 h-4" />
-              <span>Save Profile ✨</span>
-            </button>
+          <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2.5">
+            {onResetToBeginning ? (
+              <button
+                type="button"
+                onClick={onResetToBeginning}
+                className="px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-red-400 bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 hover:border-red-500/60 transition-all flex items-center gap-1.5 active:scale-95"
+                title="Return to the beginning (Reset all settings to default)"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                <span>Reset to Beginning</span>
+              </button>
+            ) : <div />}
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 bg-white/5 hover:bg-white/10 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-2.5 rounded-2xl font-bold text-xs uppercase tracking-wider text-white bg-gradient-to-r from-pink-500 via-purple-600 to-cyan-500 hover:opacity-95 shadow-neon-pink flex items-center gap-2 active:scale-95 transition-all"
+              >
+                <Check className="w-4 h-4" />
+                <span>Save Profile ✨</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>

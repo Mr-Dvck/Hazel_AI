@@ -310,5 +310,36 @@ assert.ok(fs.existsSync(shortcutPath), 'Hazel Guardian Desk.lnk desktop shortcut
 
 console.log('  ✅ Pass: Standalone Windows desktop app, assets, and .lnk shortcut verified\n');
 
-console.log('🎉 ALL AUTOMATED TESTS PASSED SUCCESSFULLY! (8/8 test gates green)\n');
+// Test 9: Dynamic Companion Name Audit & Reset to Beginning Verification
+console.log('▶ Test 9: Dynamic Companion Name Audit & Reset to Beginning Verification');
+const profileSrc = fs.readFileSync(path.join(__dirname, '../components/ProfileModal.tsx'), 'utf-8');
+const headerSrc = fs.readFileSync(path.join(__dirname, '../components/Header.tsx'), 'utf-8');
+
+// Assert zero hardcoded Sparky in OnboardingModal copy
+assert.ok(!onboardingSrc.includes('Sparky wants to celebrate'), 'OnboardingModal purged hardcoded Sparky in birthday intro');
+assert.ok(!onboardingSrc.includes('so Sparky always tracks'), 'OnboardingModal purged hardcoded Sparky in birthday tip');
+assert.ok(!onboardingSrc.includes('so Sparky will always remember'), 'OnboardingModal purged hardcoded Sparky in 3 things love step');
+
+// Assert zero hardcoded Sparky in ProfileModal copy
+assert.ok(!profileSrc.includes('Sparky remembers your motto'), 'ProfileModal purged hardcoded Sparky in motto');
+assert.ok(!profileSrc.includes('Sparky uses your birthday'), 'ProfileModal purged hardcoded Sparky in birthday');
+assert.ok(!profileSrc.includes('Sparky will ask in chat'), 'ProfileModal purged hardcoded Sparky in chat prompt');
+
+// Assert reset to beginning buttons exist in Header and ProfileModal
+assert.ok(headerSrc.includes('onResetToBeginning'), 'Header supports onResetToBeginning');
+assert.ok(headerSrc.includes('Reset All'), 'Header renders Reset All button');
+assert.ok(profileSrc.includes('onResetToBeginning'), 'ProfileModal supports onResetToBeginning');
+assert.ok(profileSrc.includes('Reset to Beginning'), 'ProfileModal renders Reset to Beginning button');
+
+// Assert getSystemPrompt accepts dynamic companionName
+const customPrompt = getSystemPrompt(10, undefined, 'Lumina', 'Hazel');
+assert.ok(customPrompt.includes('named Lumina'), 'getSystemPrompt correctly uses dynamic companion name');
+
+// Assert generateEmpatheticOfflineStream uses companionName
+const nameQuery = generateEmpatheticOfflineStream("What is your name?", "Hazel", "Lumina", false);
+assert.ok(nameQuery.response.includes("Lumina"), 'Offline engine introduces itself with dynamic companion name');
+
+console.log('  ✅ Pass: Dynamic companion names & Reset to Beginning verified across UI and engine\n');
+
+console.log('🎉 ALL AUTOMATED TESTS PASSED SUCCESSFULLY! (9/9 test gates green)\n');
 

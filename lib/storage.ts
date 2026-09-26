@@ -159,4 +159,18 @@ export const Storage = {
       console.error(e);
     }
   },
+
+  resetToDefault: async (): Promise<void> => {
+    if (typeof window === 'undefined') return;
+    try {
+      Object.values(STORAGE_KEYS).forEach((k) => localStorage.removeItem(k));
+      const db = await openDb();
+      if (db) {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).clear();
+      }
+    } catch (e) {
+      console.error('Error resetting storage to default:', e);
+    }
+  },
 };

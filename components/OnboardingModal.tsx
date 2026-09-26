@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserProfile, VibeTheme, MemoryItem, MonsterStyle } from '@/types';
 import { MONSTER_STYLE_OPTIONS, calculateAge } from '@/lib/constants';
@@ -31,6 +31,20 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   const [favorite1, setFavorite1] = useState('Drawing cute dragons and reading mystery books');
   const [favorite2, setFavorite2] = useState('Hot cocoa with marshmallows on cozy rainy days');
   const [favorite3, setFavorite3] = useState('My plushies and designing secret kingdoms');
+
+  useEffect(() => {
+    if (isOpen) {
+      setStep(1);
+      setName('Hazel');
+      setCompanionName('Sparky');
+      setBirthday('');
+      setMonsterStyle('spooky');
+      setVibeTheme('cyber-pink');
+      setFavorite1('Drawing cute dragons and reading mystery books');
+      setFavorite2('Hot cocoa with marshmallows on cozy rainy days');
+      setFavorite3('My plushies and designing secret kingdoms');
+    }
+  }, [isOpen]);
 
   // Stealth 5-click easter egg to open Guardian portal from onboarding
   const handleLogoClick = () => {
@@ -251,7 +265,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 When is your Birthday?
               </h2>
               <p className="text-xs text-pink-200/90 mt-1 max-w-sm mx-auto leading-relaxed">
-                Sparky wants to celebrate your milestones, draw special birthday art, and grow right alongside you!
+                {companionName.trim() || 'Your companion'} wants to celebrate your milestones, draw special birthday art, and grow right alongside you!
               </p>
             </div>
 
@@ -295,7 +309,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   </div>
                 ) : (
                   <p className="text-[11px] text-gray-400 mt-1">
-                    Tip: You can include the year (e.g. 2015) so Sparky always tracks your exact age!
+                    Tip: You can include the year (e.g. 2015) so {companionName.trim() || 'your companion'} always tracks your exact age!
                   </p>
                 )}
               </div>
@@ -489,7 +503,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 Tell Me 3 Things You Love
               </h2>
               <p className="text-xs text-gray-300 mt-1">
-                This populates your Memory Bank so Sparky will always remember what makes you shine!
+                This populates your Memory Bank so {companionName.trim() || 'your companion'} will always remember what makes you shine!
               </p>
             </div>
 

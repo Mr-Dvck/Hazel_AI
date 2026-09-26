@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sparkles, Shield, Trash2, Heart, Palette } from 'lucide-react';
+import { Sparkles, Shield, Trash2, Heart, Palette, RotateCcw } from 'lucide-react';
 import { VibeTheme, UserProfile } from '@/types';
 import { calculateAge } from '@/lib/constants';
 
@@ -13,6 +13,7 @@ interface HeaderProps {
   totalMonstersCount: number;
   onClearChat: () => void;
   onOpenProfile: () => void;
+  onResetToBeginning?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -22,6 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
   totalMonstersCount,
   onClearChat,
   onOpenProfile,
+  onResetToBeginning,
 }) => {
   const router = useRouter();
   const [clickCount, setClickCount] = useState(0);
@@ -106,7 +108,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-2 text-xs text-gray-300">
           <Heart className="w-3.5 h-3.5 text-pink-400 fill-pink-400 animate-pulse" />
           <span>
-            Companion: <strong className="text-white group-hover:text-pink-300 transition-colors">{profile.companionName}</strong> {profile.companionAvatar || '✨'}
+            Companion: <strong className="text-white group-hover:text-pink-300 transition-colors">{profile.companionName || 'Companion'}</strong> {profile.companionAvatar || '✨'}
           </span>
         </div>
         <div className="h-3 w-[1px] bg-white/15" />
@@ -179,14 +181,27 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </div>
 
+        {/* Reset to Beginning Button (Return to Default / Step 1 Onboarding) */}
+        {onResetToBeginning && (
+          <button
+            onClick={onResetToBeginning}
+            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs text-red-400 hover:text-red-200 bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 hover:border-red-500/60 transition-all flex items-center gap-1 active:scale-95"
+            title="Return to the beginning (Reset all settings to default)"
+            aria-label="Return to beginning"
+          >
+            <Trash2 className="w-3.5 h-3.5 text-red-400" />
+            <span className="hidden sm:inline font-medium">Reset All</span>
+          </button>
+        )}
+
         {/* Clear chat button */}
         <button
           onClick={onClearChat}
           className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-colors flex items-center gap-1"
           title="Clear Conversation"
         >
-          <Trash2 className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Reset</span>
+          <RotateCcw className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Clear Chat</span>
         </button>
 
         {/* Discreet Guardian Portal Button */}

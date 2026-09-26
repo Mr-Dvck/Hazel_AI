@@ -9,7 +9,7 @@ import {
   VibeTheme,
 } from '@/types';
 import { Storage } from '@/lib/storage';
-import { calculateAge, detectBirthdayFromText } from '@/lib/constants';
+import { calculateAge, detectBirthdayFromText, INITIAL_PROFILE, INITIAL_MONSTERS, INITIAL_MEMORIES } from '@/lib/constants';
 import { DynamicNeonBackground } from '@/components/DynamicNeonBackground';
 import { Header } from '@/components/Header';
 import { MonsterTower } from '@/components/MonsterTower';
@@ -430,6 +430,26 @@ export default function HomePage() {
     }
   };
 
+  // Reset all settings and return to beginning of Onboarding
+  const handleResetToBeginning = async () => {
+    if (
+      window.confirm(
+        'Are you sure you want to return to the beginning? All settings, companion name, and messages will be reset to default.'
+      )
+    ) {
+      await Storage.resetToDefault();
+      const freshProfile: UserProfile = { ...INITIAL_PROFILE, isOnboarded: false };
+      setProfile(freshProfile);
+      setMessages([]);
+      setMonsters(INITIAL_MONSTERS);
+      setMemories(INITIAL_MEMORIES);
+      setShowProfileModal(false);
+      setSelectedMonster(null);
+      setShowOnboarding(true);
+      Storage.syncToServer();
+    }
+  };
+
   // Add Memory Handler
   const handleAddMemory = (memory: Omit<MemoryItem, 'id' | 'timestamp'>) => {
     const updated = Storage.addMemory(memory);
@@ -457,6 +477,7 @@ export default function HomePage() {
         totalMonstersCount={monsters.length}
         onClearChat={handleClearChat}
         onOpenProfile={() => setShowProfileModal(true)}
+        onResetToBeginning={handleResetToBeginning}
       />
 
       {/* Mobile Tab Switcher (Large touch targets & glowing thumb-accessible tabs) */}
@@ -539,6 +560,7 @@ export default function HomePage() {
             memories={memories}
             onAddMemory={handleAddMemory}
             onDeleteMemory={handleDeleteMemory}
+            profile={profile}
           />
         </div>
       </main>
@@ -557,6 +579,7 @@ export default function HomePage() {
         totalMonstersCount={monsters.length}
         onClose={() => setShowProfileModal(false)}
         onSave={handleSaveProfile}
+        onResetToBeginning={handleResetToBeginning}
       />
 
       {/* Monster Details & Celebration Modal */}

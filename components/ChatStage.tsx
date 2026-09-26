@@ -205,7 +205,7 @@ export const ChatStage: React.FC<ChatStageProps> = ({
               Welcome to your Sanctuary, {profile.name}!
             </h3>
             <p className="text-xs sm:text-sm text-gray-300 max-w-md mt-2 leading-relaxed">
-              I am <strong className="text-pink-300">{profile.companionName}</strong>, your 100% judgment-free confidante.
+              I am <strong className="text-pink-300">{profile.companionName || 'your companion'}</strong>, your 100% judgment-free confidante.
               Whatever happened today, you are safe, understood, and deeply celebrated here.
             </p>
 
@@ -333,7 +333,7 @@ export const ChatStage: React.FC<ChatStageProps> = ({
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={`Talk to ${profile.companionName}...`}
+            placeholder={`Talk to ${profile.companionName || 'your companion'}...`}
             rows={1}
             className="flex-1 bg-transparent border-0 text-xs sm:text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-0 resize-none py-2 max-h-28 custom-scrollbar"
           />

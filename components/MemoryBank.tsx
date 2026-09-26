@@ -1,19 +1,21 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MemoryItem, MemoryCategory } from '@/types';
+import { MemoryItem, MemoryCategory, UserProfile } from '@/types';
 import { Bookmark, Plus, Heart, Zap, Sparkles, Anchor, Trash2, X } from 'lucide-react';
 
 interface MemoryBankProps {
   memories: MemoryItem[];
   onAddMemory: (memory: Omit<MemoryItem, 'id' | 'timestamp'>) => void;
   onDeleteMemory: (id: string) => void;
+  profile?: UserProfile;
 }
 
 export const MemoryBank: React.FC<MemoryBankProps> = ({
   memories,
   onAddMemory,
   onDeleteMemory,
+  profile,
 }) => {
   const [activeTab, setActiveTab] = useState<MemoryCategory | 'all'>('all');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -92,7 +94,7 @@ export const MemoryBank: React.FC<MemoryBankProps> = ({
             </h2>
           </div>
           <p className="text-[11px] text-gray-400 mt-0.5">
-            What I Remember About Hazel
+            What {profile?.companionName || 'I'} Remember About {profile?.name || 'Hazel'}
           </p>
         </div>
         <button
