@@ -9,6 +9,7 @@ import {
   Lock,
   AlertTriangle,
   HeartHandshake,
+  Heart,
   CloudSun,
   Lightbulb,
   ArrowLeft,
@@ -190,6 +191,13 @@ export default function GuardianPortalPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.push('/guardian/desk')}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-pink-600 hover:bg-pink-500 text-xs font-bold text-white transition-all shadow-md"
+            >
+              <Heart className="w-3.5 h-3.5 fill-white/20" />
+              <span>Guardian Desk Queue</span>
+            </button>
             <button
               onClick={handleRunAnalysis}
               disabled={isAnalyzing}

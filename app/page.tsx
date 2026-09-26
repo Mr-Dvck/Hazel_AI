@@ -86,6 +86,82 @@ export default function HomePage() {
     }
   };
 
+  // Periodic poll for warm glowing notes from Tim & Mom's Guardian Desk
+  useEffect(() => {
+    const pollBridgeReplies = async () => {
+      try {
+        const res = await fetch('/api/bridge/reply?poll=1&markDelivered=true');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.replies && data.replies.length > 0) {
+            setMessages((prev) => {
+              const existingIds = new Set(prev.map((m) => m.id));
+              const newItems: ChatMessage[] = data.replies
+                .filter((r: any) => !existingIds.has(r.id))
+                .map((r: any) => ({
+                  id: r.id,
+                  role: 'assistant' as const,
+                  content: r.message,
+                  timestamp: r.timestamp,
+                  bridgeReply: r,
+                }));
+              if (newItems.length === 0) return prev;
+              const next = [...prev, ...newItems];
+              Storage.setMessages(next);
+
+              // Celebration confetti for receiving loving reassurance from Dad & Mom!
+              confetti({
+                particleCount: 80,
+                spread: 75,
+                origin: { y: 0.6 },
+                colors: ['#f59e0b', '#ec4899', '#8b5cf6', '#10b981'],
+              });
+              return next;
+            });
+          }
+        }
+      } catch (err) {
+        // Non-blocking
+      }
+    };
+
+    const interval = setInterval(pollBridgeReplies, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Dispatch note from Hazel to Tim's desk
+  const handleDispatchBridgeNote = async (text: string) => {
+    try {
+      const res = await fetch('/api/bridge/dispatch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text,
+          senderName: profile.name || 'Hazel',
+          mood: 'sharing',
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const noteMsg: ChatMessage = {
+          id: `msg-${Date.now()}-bridge-sent`,
+          role: 'user',
+          content: `💌 Note to Tim's Computer: "${text}"`,
+          timestamp: Date.now(),
+          bridgeNote: data.note,
+        };
+        const updated = [...messages, noteMsg];
+        setMessages(updated);
+        Storage.setMessages(updated);
+        return true;
+      }
+    } catch (err) {
+      console.error('Failed to dispatch bridge note:', err);
+    }
+    return false;
+  };
+
   // Complete Onboarding
   const handleCompleteOnboarding = (
     updatedFields: Partial<UserProfile>,
@@ -442,6 +518,7 @@ export default function HomePage() {
             streamingMessage={streamingMessage}
             profile={profile}
             onSendMessage={handleSendMessage}
+            onDispatchBridgeNote={handleDispatchBridgeNote}
             isLoading={isLoading}
           />
         </div>

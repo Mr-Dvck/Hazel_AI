@@ -105,4 +105,49 @@ assert.ok(promptWithBday.includes('Hazel is currently 11 years old'), 'Prompt in
 assert.ok(promptWithBday.includes("Hazel's birthday: May 14, 2015"), 'Prompt includes exact birthday');
 console.log('  ✅ Pass: Dynamic age calculation, text extraction, and prompt adaptation verified\n');
 
-console.log('🎉 ALL AUTOMATED TESTS PASSED SUCCESSFULLY! (6/6 test gates green)\n');
+// Test 7: Guardian Bridge Storage & System Prompt Directive
+console.log('▶ Test 7: Guardian Bridge Storage & System Prompt Directive');
+const { BridgeStorage } = require('../lib/bridge-storage.ts');
+const fs = require('fs');
+const path = require('path');
+
+// Verify bridge storage functions
+const testNote = BridgeStorage.addNote({
+  sender: 'hazel',
+  senderName: 'Hazel',
+  text: 'Testing bridge note storage',
+  mood: 'testing',
+});
+assert.ok(testNote.id, 'Bridge note created with ID');
+assert.strictEqual(testNote.sender, 'hazel', 'Sender is hazel');
+
+const testReply = BridgeStorage.addReply({
+  sender: 'Tim (Dad)',
+  message: 'Testing reassurance reply from Dad',
+  noteId: testNote.id,
+});
+assert.ok(testReply.id, 'Bridge reply created with ID');
+assert.strictEqual(testReply.recipient, 'Hazel', 'Recipient is Hazel');
+
+// Verify system prompt directive
+assert.ok(
+  promptWithoutBday.includes("Would you like me to let either of them know how you're feeling? I can send a message right to Tim's computer if you like!"),
+  'System prompt includes exact bridge offer directive'
+);
+console.log('  ✅ Pass: Bridge storage persistence and system prompt bridge directive verified\n');
+
+// Test 8: Dedicated Desktop App & Windows Shortcut .lnk
+console.log('▶ Test 8: Dedicated Desktop App (Hazel_Guardian_Desk) & Windows Shortcut (.lnk)');
+const desktopAppDir = path.join(process.env.USERPROFILE || 'C:\\Users\\ovjup', 'Desktop', 'Hazel_Guardian_Desk');
+const shortcutPath = path.join(process.env.USERPROFILE || 'C:\\Users\\ovjup', 'Desktop', 'Hazel Guardian Desk.lnk');
+
+assert.ok(fs.existsSync(path.join(desktopAppDir, 'guardian_desk.py')), 'guardian_desk.py exists on Desktop');
+assert.ok(fs.existsSync(path.join(desktopAppDir, 'launch_guardian_desk.bat')), 'launch_guardian_desk.bat exists on Desktop');
+assert.ok(fs.existsSync(path.join(desktopAppDir, 'assets', 'guardian_desk_logo.ico')), 'guardian_desk_logo.ico exists');
+assert.ok(fs.existsSync(path.join(desktopAppDir, 'assets', 'guardian_desk_logo.png')), 'guardian_desk_logo.png exists');
+assert.ok(fs.existsSync(shortcutPath), 'Hazel Guardian Desk.lnk desktop shortcut exists');
+
+console.log('  ✅ Pass: Standalone Windows desktop app, assets, and .lnk shortcut verified\n');
+
+console.log('🎉 ALL AUTOMATED TESTS PASSED SUCCESSFULLY! (8/8 test gates green)\n');
+

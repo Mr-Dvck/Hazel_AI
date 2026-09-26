@@ -11,6 +11,40 @@ export interface ChatMessage {
   isStreaming?: boolean;
   guardianTag?: 'safe' | 'mild_alert' | 'moderate_alert' | 'critical_alert';
   guardianReason?: string;
+  isBridgeOffer?: boolean;
+  bridgeNote?: BridgeNote;
+  bridgeReply?: BridgeReply;
+}
+
+export interface BridgeNote {
+  id: string;
+  sender: 'hazel' | 'tim' | 'mom';
+  senderName?: string;
+  recipient: 'tim_computer' | 'hazel_chat' | 'all_guardians';
+  text: string;
+  category?: 'feeling' | 'comfort' | 'alert' | 'general' | 'artwork';
+  mood?: string;
+  timestamp: number;
+  read: boolean;
+  replied?: boolean;
+}
+
+export interface BridgeReply {
+  id: string;
+  noteId?: string;
+  sender: 'Tim (Dad)' | 'Mom' | 'Tim & Mom' | string;
+  recipient: 'Hazel';
+  message: string;
+  timestamp: number;
+  deliveredToHazel: boolean;
+  readByHazel: boolean;
+  reassuranceType?: 'love' | 'courage' | 'safe_harbor' | 'custom' | string;
+}
+
+export interface BridgeState {
+  notes: BridgeNote[];
+  replies: BridgeReply[];
+  lastUpdated: number;
 }
 
 export interface Monster {

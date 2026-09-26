@@ -231,7 +231,84 @@ async function testApi() {
   assert.strictEqual(retrieveBdayData.data.profile.birthday, 'May 14, 2015', 'Birthday stored and retrieved successfully');
   console.log('  ✅ Pass: Birthday detection in chat and state sync verified\n');
 
-  console.log('🎉 ALL API END-TO-END TESTS PASSED! (8/8 gates green)\n');
+  // Test 9: Bridge Dispatch API (Hazel dispatches note to Tim's desk)
+  console.log('▶ Test 9: Bridge Dispatch API (Hazel -> Tim\'s Desk Queue)');
+  const { POST: bridgeDispatchPost, GET: bridgeDispatchGet } = await import('../app/api/bridge/dispatch/route');
+  const dispatchReq = new Request('http://localhost/api/bridge/dispatch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      text: "Hey Dad, having a tough day and could use a hug later.",
+      senderName: "Hazel",
+      mood: "vulnerable",
+      category: "feeling",
+    }),
+  });
+  const dispatchRes = await bridgeDispatchPost(dispatchReq as any);
+  assert.strictEqual(dispatchRes.status, 200, 'Bridge dispatch returns 200 OK');
+  const dispatchData = await dispatchRes.json();
+  assert.ok(dispatchData.success, 'Dispatch succeeded');
+  assert.ok(dispatchData.note?.id, 'Note has unique ID');
+  assert.strictEqual(dispatchData.note.sender, 'hazel', 'Sender is hazel');
+  assert.strictEqual(dispatchData.note.recipient, 'tim_computer', 'Recipient is tim_computer');
+  assert.strictEqual(dispatchData.note.text, "Hey Dad, having a tough day and could use a hug later.", 'Note text matches');
+
+  // Verify retrieval
+  const getNotesReq = new Request('http://localhost/api/bridge/dispatch?limit=10', { method: 'GET' });
+  const getNotesRes = await bridgeDispatchGet(getNotesReq as any);
+  assert.strictEqual(getNotesRes.status, 200, 'Fetch notes returns 200 OK');
+  const getNotesData = await getNotesRes.json();
+  assert.ok(Array.isArray(getNotesData.notes), 'Notes returned as array');
+  assert.ok(getNotesData.notes.some((n: any) => n.id === dispatchData.note.id), 'Dispatched note present in list');
+  console.log('  ✅ Pass: Note dispatch to Tim\'s desk queue verified\n');
+
+  // Test 10: Bridge Reply API (Tim / Mom sends reassuring note back to Hazel's screen)
+  console.log('▶ Test 10: Bridge Reply API (Tim & Mom -> Hazel\'s Screen)');
+  const { POST: bridgeReplyPost, GET: bridgeReplyGet } = await import('../app/api/bridge/reply/route');
+  const replyReq = new Request('http://localhost/api/bridge/reply', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sender: 'Tim (Dad)',
+      message: 'You are so safe, loved, and wonderful just as you are. I am right downstairs sweetie.',
+      noteId: dispatchData.note.id,
+      reassuranceType: 'love',
+    }),
+  });
+  const replyRes = await bridgeReplyPost(replyReq as any);
+  assert.strictEqual(replyRes.status, 200, 'Bridge reply returns 200 OK');
+  const replyData = await replyRes.json();
+  assert.ok(replyData.success, 'Reply succeeded');
+  assert.strictEqual(replyData.reply.sender, 'Tim (Dad)', 'Sender matches Tim (Dad)');
+  assert.strictEqual(replyData.reply.recipient, 'Hazel', 'Recipient matches Hazel');
+
+  // Poll for undelivered replies (delivers to Hazel's screen)
+  const pollReq = new Request('http://localhost/api/bridge/reply?poll=1&markDelivered=true', { method: 'GET' });
+  const pollRes = await bridgeReplyGet(pollReq as any);
+  assert.strictEqual(pollRes.status, 200, 'Poll replies returns 200 OK');
+  const pollData = await pollRes.json();
+  assert.ok(pollData.replies.some((r: any) => r.id === replyData.reply.id), 'Pending reply returned in poll');
+
+  // Subsequent poll should have 0 undelivered
+  const secondPollReq = new Request('http://localhost/api/bridge/reply?poll=1&markDelivered=true', { method: 'GET' });
+  const secondPollRes = await bridgeReplyGet(secondPollReq as any);
+  const secondPollData = await secondPollRes.json();
+  assert.strictEqual(secondPollData.replies.length, 0, 'No remaining undelivered replies after delivery');
+  console.log('  ✅ Pass: Two-way reply delivery to Hazel\'s screen verified\n');
+
+  // Test 11: Bridge Status Overview API
+  console.log('▶ Test 11: Bridge Status Overview API');
+  const { GET: bridgeStatusGet } = await import('../app/api/bridge/route');
+  const statusReq = new Request('http://localhost/api/bridge', { method: 'GET' });
+  const statusRes = await bridgeStatusGet(statusReq as any);
+  assert.strictEqual(statusRes.status, 200, 'Bridge status returns 200 OK');
+  const statusData = await statusRes.json();
+  assert.strictEqual(statusData.status, 'active', 'Status is active');
+  assert.ok(statusData.summary.totalNotes >= 1, 'Total notes recorded');
+  assert.ok(statusData.summary.totalReplies >= 1, 'Total replies recorded');
+  console.log('  ✅ Pass: Bridge status overview endpoint verified\n');
+
+  console.log('🎉 ALL API END-TO-END TESTS PASSED! (11/11 gates green)\n');
 }
 
 testApi().catch((err) => {
