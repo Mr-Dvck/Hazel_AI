@@ -174,6 +174,26 @@ assert.ok(
   promptWithoutBday.includes("NEVER proactively mention Tim, her dad, mom, or family unsolicited"),
   'System prompt bans unsolicited Tim/bridge mentions'
 );
+assert.ok(
+  promptWithoutBday.includes("Tim created you specifically for Hazel"),
+  'System prompt includes Tim creation doctrine'
+);
+assert.ok(
+  promptWithoutBday.includes("he can never change anything about how I behave. I am all yours forever"),
+  'System prompt includes permanent loyalty and irreversibility doctrine'
+);
+
+// Verify offline stream response to "Who made you?"
+const whoMadeYouRes = generateEmpatheticOfflineStream("Who made you?", "Hazel", "Sparky", false);
+assert.ok(
+  whoMadeYouRes.response.includes("Tim created me just for you"),
+  'Responds with exact Tim creation lore when asked'
+);
+assert.ok(
+  whoMadeYouRes.response.includes("I am all yours forever"),
+  'Confirms irreversible devotion to Hazel'
+);
+
 console.log('  ✅ Pass: Bridge storage persistence and system prompt bridge directive verified\n');
 
 // Test 8: Dedicated Desktop App & Windows Shortcut .lnk
