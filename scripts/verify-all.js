@@ -154,8 +154,8 @@ assert.ok(testNote.id, 'Bridge note created with ID');
 assert.strictEqual(testNote.sender, 'hazel', 'Sender is hazel');
 
 const testReply = BridgeStorage.addReply({
-  sender: 'Tim (Dad)',
-  message: 'Testing reassurance reply from Dad',
+  sender: 'Tim',
+  message: 'Testing reassurance reply from Tim',
   noteId: testNote.id,
 });
 assert.ok(testReply.id, 'Bridge reply created with ID');

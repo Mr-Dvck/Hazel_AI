@@ -48,10 +48,10 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const vibeOptions: { id: VibeTheme; label: string; color: string }[] = [
-    { id: 'cyber-pink', label: 'Cyber Pink', color: '#ff2e93' },
-    { id: 'cyber-blue', label: 'Electric Blue', color: '#00f0ff' },
-    { id: 'cosmic-emerald', label: 'Cosmic Emerald', color: '#10b981' },
-    { id: 'sunset-violet', label: 'Sunset Violet', color: '#a855f7' },
+    { id: 'neon-pink', label: 'Neon Pink', color: '#ff2e93' },
+    { id: 'neon-yellow', label: 'Neon Yellow', color: '#ffe600' },
+    { id: 'electric-blue', label: 'Electric Blue', color: '#00f0ff' },
+    { id: 'neon-red', label: 'Neon Red', color: '#ff1744' },
   ];
 
   return (

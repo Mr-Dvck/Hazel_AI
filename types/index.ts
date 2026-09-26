@@ -32,7 +32,7 @@ export interface BridgeNote {
 export interface BridgeReply {
   id: string;
   noteId?: string;
-  sender: 'Tim (Dad)' | 'Mom' | 'Tim & Mom' | string;
+  sender: 'Tim' | 'Mom' | 'Tim & Mom' | string;
   recipient: 'Hazel';
   message: string;
   timestamp: number;
@@ -76,7 +76,16 @@ export interface MemoryItem {
   color?: string;
 }
 
-export type VibeTheme = 'cyber-pink' | 'cyber-blue' | 'cosmic-emerald' | 'sunset-violet';
+export type VibeTheme =
+  | 'neon-pink'
+  | 'neon-yellow'
+  | 'electric-blue'
+  | 'neon-red'
+  // Legacy aliases supported safely:
+  | 'cyber-pink'
+  | 'cyber-blue'
+  | 'cosmic-emerald'
+  | 'sunset-violet';
 
 export interface UserProfile {
   name: string;
@@ -128,7 +137,7 @@ export interface GuardianInsight {
     whatHazelAppreciates: string[];
   };
   emotionalWeather: {
-    currentMood: 'Resilient' | 'Joyful' | 'Thoughtful' | 'Anxious' | 'Withdrawn';
+    currentMood: 'Resilient' | 'Joyful' | 'Thoughtful' | 'Anxious' | 'Withdrawn' | 'Sad / Overwhelmed';
     score: number; // 0 - 100 resilience index
     trend: 'improving' | 'steady' | 'needs_boost';
     description: string;

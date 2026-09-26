@@ -57,13 +57,14 @@ loadDiskCache();
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { userId = 'hazel_default', profile, monsters, memories, guardianInsight } = body;
+    const { userId = 'hazel_default', profile, monsters, memories, guardianInsight, messages } = body;
 
     const payload = {
       profile,
       monsters,
       memories,
       guardianInsight,
+      messages,
       syncedAt: Date.now(),
     };
 

@@ -117,7 +117,7 @@ export default function HomePage() {
               const next = [...prev, ...newItems];
               Storage.setMessages(next);
 
-              // Celebration confetti for receiving loving reassurance from Dad & Mom!
+              // Celebration confetti for receiving loving reassurance from Tim & Mom!
               confetti({
                 particleCount: 80,
                 spread: 75,
@@ -282,6 +282,8 @@ export default function HomePage() {
     // Check unlocks
     checkMonsterUnlocks(nextMsgCount, monsters);
 
+    // Trigger immediate server sync so backend & desktop app update without delay
+    Storage.syncToServer();
     // Run non-intrusive background guardian evaluation pass
     runBackgroundGuardianEvaluation(nextMessages);
 

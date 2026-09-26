@@ -86,42 +86,40 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
   const vibeOptions: { id: VibeTheme; label: string; desc: string; color: string; border: string }[] = [
     {
-      id: 'cyber-pink',
-      label: 'Neon Cyber-Pink',
-      desc: 'Warm electric magenta & glowing neon violet',
+      id: 'neon-pink',
+      label: 'Neon Pink',
+      desc: 'Hot glowing magenta & neon aura',
       color: '#ff2e93',
       border: 'border-pink-500',
     },
     {
-      id: 'cyber-blue',
-      label: 'Electric Cyber-Blue',
-      desc: 'Deep oceanic cyan & starlit cobalt',
+      id: 'neon-yellow',
+      label: 'Neon Yellow',
+      desc: 'High-voltage cyber electric yellow',
+      color: '#ffe600',
+      border: 'border-yellow-400',
+    },
+    {
+      id: 'electric-blue',
+      label: 'Electric Blue',
+      desc: 'Vivid starlight cyan & electric blue pulse',
       color: '#00f0ff',
       border: 'border-cyan-400',
     },
     {
-      id: 'cosmic-emerald',
-      label: 'Cosmic Emerald',
-      desc: 'Lush magical forest greens & sparkling mint',
-      color: '#10b981',
-      border: 'border-emerald-400',
-    },
-    {
-      id: 'sunset-violet',
-      label: 'Sunset Violet',
-      desc: 'Golden ember sunsets & twilight amethyst',
-      color: '#a855f7',
-      border: 'border-purple-400',
+      id: 'neon-red',
+      label: 'Neon Red',
+      desc: 'Intense glowing neon crimson & power',
+      color: '#ff1744',
+      border: 'border-red-500',
     },
   ];
 
   const colorPresets = [
     'Neon Pink',
-    'Electric Cyan',
-    'Cosmic Violet',
-    'Emerald Mint',
-    'Sunshine Gold',
-    'Warm Coral',
+    'Neon Yellow',
+    'Electric Blue',
+    'Neon Red',
   ];
 
   const handleSave = (e: React.FormEvent) => {

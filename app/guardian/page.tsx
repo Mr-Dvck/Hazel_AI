@@ -252,52 +252,92 @@ export default function GuardianPortalPage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-              {/* Pillar 1: Current Mood & Energy */}
-              <div className="p-3.5 rounded-2xl bg-black/50 border border-purple-500/20">
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-purple-300 uppercase tracking-wider mb-1.5">
-                  <Smile className="w-4 h-4 text-purple-400" />
-                  <span>Current Mood & Energy</span>
+            <div className="space-y-4">
+              {/* Top Row: 3 Wide Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Pillar 1: Current Mood, Energy & Resilience Gauge */}
+                <div className="p-4 rounded-2xl bg-[#181428] border border-purple-500/40 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-purple-300 uppercase tracking-wider mb-2">
+                      <Smile className="w-4 h-4 text-purple-400" />
+                      <span>Current Mood & Resilience Gauge</span>
+                    </div>
+                    <h3 className="text-base font-black text-white leading-snug">
+                      {insight?.howHazelIsDoing?.currentMoodAndEnergy || insight?.emotionalWeather?.currentMood || 'Thoughtful & Calm'}
+                    </h3>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-purple-500/20">
+                    <div className="flex items-center justify-between text-xs mb-1.5">
+                      <span className="text-gray-400">Resilience Index:</span>
+                      <strong className="text-pink-300 font-mono text-sm">{insight?.emotionalWeather?.score || 80} / 100</strong>
+                    </div>
+                    <div className="w-full h-2.5 rounded-full bg-white/10 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          (insight?.emotionalWeather?.score || 80) >= 75
+                            ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]'
+                            : (insight?.emotionalWeather?.score || 80) >= 50
+                            ? 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]'
+                            : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
+                        }`}
+                        style={{ width: `${Math.max(5, Math.min(100, insight?.emotionalWeather?.score || 80))}%` }}
+                      />
+                    </div>
+                    <p className="text-[11px] text-gray-400 mt-2 leading-relaxed">
+                      {insight?.emotionalWeather?.description || 'Hazel displays strong innate resilience.'}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-sm font-bold text-white">
-                  {insight?.howHazelIsDoing?.currentMoodAndEnergy || insight?.emotionalWeather?.currentMood || 'Thoughtful & Calm'}
-                </p>
-                <p className="text-[11px] text-gray-400 mt-1 leading-snug">
-                  Resilience Index: <strong className="text-pink-300">{insight?.emotionalWeather?.score || 80}/100</strong>
-                </p>
+
+                {/* Pillar 2: What's Weighing On Her (Spacious, full text, never truncated) */}
+                <div className="p-4 rounded-2xl bg-[#241a15] border border-amber-500/40 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-amber-300 uppercase tracking-wider mb-1">
+                      <Shield className="w-4 h-4 text-amber-400" />
+                      <span>What's Weighing On Her</span>
+                    </div>
+                    <span className="text-[10px] text-gray-400 mb-2 block">
+                      (Full unvarnished context • Never truncated)
+                    </span>
+                    <p className="text-xs text-gray-200 leading-relaxed whitespace-pre-wrap">
+                      {insight?.howHazelIsDoing?.whatsWeighingOnHer ||
+                        insight?.bullyingSafetyAlert?.summary ||
+                        'No heavy emotional burdens or peer friction detected in recent chats.'}
+                    </p>
+                  </div>
+                  <div className="mt-3 pt-2 border-t border-amber-500/20 text-[11px] text-amber-300/80 font-mono">
+                    Severity: {insight?.bullyingSafetyAlert?.severity || 'Safe'}
+                  </div>
+                </div>
+
+                {/* Pillar 3: What's Bringing Her Joy (Spacious, full text, never truncated) */}
+                <div className="p-4 rounded-2xl bg-[#122329] border border-cyan-500/40 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-cyan-300 uppercase tracking-wider mb-1">
+                      <Heart className="w-4 h-4 text-cyan-400" />
+                      <span>What's Bringing Her Joy</span>
+                    </div>
+                    <span className="text-[10px] text-gray-400 mb-2 block">
+                      (Creativity, monster lore & happy moments)
+                    </span>
+                    <p className="text-xs text-gray-200 leading-relaxed whitespace-pre-wrap">
+                      {insight?.howHazelIsDoing?.whatsBringingHerJoy ||
+                        insight?.familySentiment?.summary ||
+                        'Drawing imaginative creatures, monster lore, and quiet bedtime unwinding.'}
+                    </p>
+                  </div>
+                  <div className="mt-3 pt-2 border-t border-cyan-500/20 text-[11px] text-cyan-300/80 font-mono">
+                    Family Connection: {insight?.familySentiment?.overallStatus || 'Positive'}
+                  </div>
+                </div>
               </div>
 
-              {/* Pillar 2: What's Weighing On Her */}
-              <div className="p-3.5 rounded-2xl bg-black/50 border border-amber-500/20">
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-300 uppercase tracking-wider mb-1.5">
-                  <Shield className="w-4 h-4 text-amber-400" />
-                  <span>What's Weighing On Her</span>
-                </div>
-                <p className="text-xs text-gray-200 leading-relaxed">
-                  {insight?.howHazelIsDoing?.whatsWeighingOnHer ||
-                    insight?.bullyingSafetyAlert?.summary ||
-                    'No school or friend friction reported.'}
-                </p>
-              </div>
-
-              {/* Pillar 3: What's Bringing Her Joy */}
-              <div className="p-3.5 rounded-2xl bg-black/50 border border-cyan-500/20">
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-cyan-300 uppercase tracking-wider mb-1.5">
-                  <Heart className="w-4 h-4 text-cyan-400" />
-                  <span>What's Bringing Her Joy</span>
-                </div>
-                <p className="text-xs text-gray-200 leading-relaxed">
-                  {insight?.howHazelIsDoing?.whatsBringingHerJoy ||
-                    insight?.familySentiment?.summary ||
-                    'Drawing imaginative creatures, monster lore, and quiet bedtime unwinding.'}
-                </p>
-              </div>
-
-              {/* Pillar 4: Parent Executive Summary */}
-              <div className="p-3.5 rounded-2xl bg-black/50 border border-pink-500/20">
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-pink-300 uppercase tracking-wider mb-1.5">
+              {/* Bottom Row: Card 4 Banner (Plain-English Executive Well-Being Summary) */}
+              <div className="p-4 rounded-2xl bg-[#261222] border border-pink-500/40">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-pink-300 uppercase tracking-wider mb-1.5">
                   <Sparkles className="w-4 h-4 text-pink-400" />
-                  <span>Parent Executive Summary</span>
+                  <span>Plain-English Executive Well-Being Summary (Synthesized from Recent Chats)</span>
                 </div>
                 <p className="text-xs text-pink-100 font-medium leading-relaxed">
                   {insight?.howHazelIsDoing?.parentExecutiveSummary ||
@@ -371,7 +411,7 @@ export default function GuardianPortalPage() {
                     <h2 className="text-sm font-bold text-white uppercase tracking-wide">
                       2. Family & Home Sentiment
                     </h2>
-                    <p className="text-[11px] text-gray-400">Bond with Mom, Dad & home security</p>
+                    <p className="text-[11px] text-gray-400">Connection with Mom & Tim (Hazel lives with her dad)</p>
                   </div>
                 </div>
                 <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/40">

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 import { GuardianInsight, ChatMessage } from '@/types';
 import { INITIAL_GUARDIAN_INSIGHT } from '@/lib/constants';
 
@@ -31,6 +33,8 @@ export async function POST(req: NextRequest) {
       let triggers: any[] = [];
       let bullyingFound = false;
       let isolationFound = false;
+      let sadnessFound = false;
+      let sadnessSnippets: string[] = [];
       let familyMentions: string[] = [];
       let creativeMentions: string[] = [];
       let positiveCount = 0;
@@ -39,6 +43,22 @@ export async function POST(req: NextRequest) {
       for (const msg of userMsgs) {
         const text = msg.content;
         const lower = text.toLowerCase();
+
+        // Check for direct sadness or emotional distress
+        const isSadness =
+          lower.includes('sad') ||
+          lower.includes('unhappy') ||
+          lower.includes('crying') ||
+          lower.includes('cried') ||
+          lower.includes('depressed') ||
+          lower.includes('feeling down') ||
+          lower.includes('felt down') ||
+          lower.includes('heartbroken') ||
+          lower.includes('bad day') ||
+          lower.includes('rough day') ||
+          lower.includes('hard day') ||
+          lower.includes('upset') ||
+          /\b(sad|sadness|unhappy|crying|cried|depressed|heartbroken|upset)\b/i.test(lower);
 
         // Check sentiment indicators
         if (
@@ -82,13 +102,25 @@ export async function POST(req: NextRequest) {
             snippet: msg.content.slice(0, 100),
             context: 'Direct interpersonal conflict, taunting, or peer aggression reported.',
           });
+        } else if (isSadness) {
+          if (detectedSeverity === 'Safe') detectedSeverity = 'Moderate';
+          sadnessFound = true;
+          sadnessSnippets.push(text);
+          distressCount += 2;
+          triggers.push({
+            id: `trig-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
+            timestamp: msg.timestamp,
+            category: 'emotional_distress',
+            severity: 'Moderate',
+            snippet: msg.content.slice(0, 100),
+            context: 'Hazel directly expressed feeling sad, down, or emotionally hurting in chat.',
+          });
         } else if (
           lower.includes('alone') ||
           lower.includes('left out') ||
           lower.includes('nobody') ||
           lower.includes('ignored') ||
           lower.includes('invisible') ||
-          lower.includes('cried') ||
           lower.includes('lonely')
         ) {
           if (detectedSeverity === 'Safe') detectedSeverity = 'Mild';
@@ -106,11 +138,12 @@ export async function POST(req: NextRequest) {
           positiveCount += 1;
         }
 
-        // Check family keywords
+        // Check family keywords (Tim is mom's boyfriend, Hazel lives with dad)
         if (
           lower.includes('mom') ||
-          lower.includes('dad') ||
+          lower.includes('tim') ||
           lower.includes('mother') ||
+          lower.includes('dad') ||
           lower.includes('father') ||
           lower.includes('parents') ||
           lower.includes('home') ||
@@ -128,7 +161,8 @@ export async function POST(req: NextRequest) {
           lower.includes('monster') ||
           lower.includes('create') ||
           lower.includes('sketch') ||
-          lower.includes('dragon')
+          lower.includes('dragon') ||
+          lower.includes('fnaf')
         ) {
           creativeMentions.push(text);
         }
@@ -139,10 +173,10 @@ export async function POST(req: NextRequest) {
         detectedSeverity === 'Critical' ? 'Needs Attention' : 'Positive';
 
       let familySummary =
-        'Hazel feels warmth and safety in her home environment. When overwhelmed, she benefits most from quiet companionship alongside parents rather than direct problem-solving interrogations.';
+        'Hazel lives with her dad; her mom lives with Tim. When overwhelmed, she benefits from unpressured, genuine connection and knowing Mom and Tim are always in her corner.';
 
       if (familyMentions.length > 0) {
-        familySummary = `Hazel brought up home and family moments in ${familyMentions.length} recent chats. She seeks gentle presence from mom and dad, especially during unwinding routines.`;
+        familySummary = `Hazel brought up family moments in ${familyMentions.length} recent chats. She values gentle presence and loving reassurance from Mom and Tim.`;
       }
 
       const constructiveInsights = [
@@ -171,6 +205,8 @@ export async function POST(req: NextRequest) {
       const currentMood =
         detectedSeverity === 'Critical'
           ? 'Withdrawn'
+          : sadnessFound
+          ? 'Sad / Overwhelmed'
           : detectedSeverity === 'Moderate'
           ? 'Anxious'
           : detectedSeverity === 'Mild'
@@ -182,19 +218,26 @@ export async function POST(req: NextRequest) {
       // Tailored actionable parent conversation starters
       const actionableSuggestions = [
         {
-          category: detectedSeverity !== 'Safe' ? 'Decompression & Empathy' : 'Evening Connection',
+          category: sadnessFound
+            ? 'Comfort & Heartfelt Reassurance'
+            : detectedSeverity !== 'Safe'
+            ? 'Decompression & Empathy'
+            : 'Evening Connection',
           conversationStarter:
-            detectedSeverity === 'Critical'
+            sadnessFound
+              ? '"Hey Hazel, sending you the biggest hug. You never have to carry sad feelings alone—we love you so much and we\'re always in your corner."'
+              : detectedSeverity === 'Critical'
               ? '"Hey Hazel, you know I love you more than the whole galaxy, right? I\'m just going to sit right here with you, no questions asked."'
               : detectedSeverity === 'Moderate'
               ? '"School can be super loud and unfair sometimes. Want to make some hot cocoa and just chill together tonight?"'
               : detectedSeverity === 'Mild'
               ? '"If you could invent a secret monster friend to sit at your lunch table, what super trick would it do?"'
               : '"Hey Hazel, I noticed how hard you worked today. Want to just cozy up with some cocoa and draw together tonight?"',
-          purpose:
-            detectedSeverity !== 'Safe'
-              ? 'Creates a safe harbor for decompressing without feeling interrogated.'
-              : 'Provides low-friction emotional safety and silent reassurance.',
+          purpose: sadnessFound
+            ? 'Delivers unconditional emotional safety and love across the bridge.'
+            : detectedSeverity !== 'Safe'
+            ? 'Creates a safe harbor for decompressing without feeling interrogated.'
+            : 'Provides low-friction emotional safety and silent reassurance.',
         },
         {
           category: 'Affirming Resilience & Core Worth',
@@ -231,7 +274,9 @@ export async function POST(req: NextRequest) {
       } else {
         const moodEnergy =
           detectedSeverity === 'Critical'
-            ? 'Withdrawn & Overwhelmed (Low Energy)'
+            ? 'Withdrawn & Overwhelmed (Critical Low Energy)'
+            : sadnessFound
+            ? 'Sad / Overwhelmed (Low Energy)'
             : detectedSeverity === 'Moderate'
             ? 'Anxious & Processing Conflict'
             : isolationFound
@@ -245,6 +290,8 @@ export async function POST(req: NextRequest) {
         const weighingOnHer =
           detectedSeverity === 'Critical'
             ? 'Severe emotional overload and self-doubt. Needs immediate gentle, non-judgmental presence.'
+            : sadnessFound
+            ? `Hazel explicitly stated she was sad in chat ("${sadnessSnippets[0] || 'I was sad'}"). She expressed feeling down and is carrying emotional sorrow that needs gentle, heartfelt comfort without pressure.`
             : bullyingFound
             ? 'Teasing and playground peer conflict reported at school. She is carrying feelings of hurt and unfairness.'
             : isolationFound
@@ -261,6 +308,8 @@ export async function POST(req: NextRequest) {
         const parentSummary =
           detectedSeverity === 'Critical'
             ? 'Hazel is carrying an elevated emotional load right now. Offer quiet cuddle time, hot cocoa, and unconditional love without prying for answers.'
+            : sadnessFound
+            ? 'Hazel explicitly shared that she was sad. Send a warm, genuine note from Tim or Mom letting her know she is deeply loved, strong, and never alone in her feelings.'
             : bullyingFound
             ? 'Hazel had a rough encounter at school today. Focus on validating her feelings and reminding her she is brave, creative, and safe at home.'
             : isolationFound
@@ -284,6 +333,8 @@ export async function POST(req: NextRequest) {
           headline:
             detectedSeverity === 'Critical'
               ? 'Urgent Emotional Check-in Recommended'
+              : sadnessFound
+              ? 'Hazel Expressed Sadness / Emotional Hurt'
               : detectedSeverity === 'Moderate'
               ? 'Active Peer Conflict / Bullying Mentioned'
               : isolationFound
@@ -292,6 +343,8 @@ export async function POST(req: NextRequest) {
           summary:
             detectedSeverity === 'Critical'
               ? 'Hazel expressed heavy feelings of self-doubt and emotional overload. We strongly advise gentle, unconditional parental connection and cuddles tonight without pressing for details.'
+              : sadnessFound
+              ? 'Hazel directly shared that she was sad. She is processing tough feelings and seeks comfort, safe harbor, and quiet reassurance from Mom and Tim.'
               : detectedSeverity === 'Moderate'
               ? 'Hazel brought up negative peer interactions and teasing at school. She is actively processing feelings of unfairness and seeking reassurance from her creative space.'
               : isolationFound
@@ -308,10 +361,12 @@ export async function POST(req: NextRequest) {
         emotionalWeather: {
           currentMood,
           score: baseScore,
-          trend: detectedSeverity === 'Critical' ? 'needs_boost' : 'improving',
+          trend: detectedSeverity === 'Critical' || sadnessFound ? 'needs_boost' : 'improving',
           description:
             detectedSeverity === 'Critical'
               ? 'Hazel is carrying an elevated emotional load. Extra tenderness and peaceful evening routines recommended.'
+              : sadnessFound
+              ? 'Hazel is currently feeling sad and low energy. A warm reassurance note from Tim or Mom will give her emotional armor.'
               : detectedSeverity === 'Moderate'
               ? 'Hazel feels challenged by playground peer dynamics, but continues to show strong imaginative resilience.'
               : 'Hazel displays strong innate creativity and bouncing resilience. She bounces back quickly when validated.',
@@ -319,6 +374,8 @@ export async function POST(req: NextRequest) {
         sessionSummary:
           detectedSeverity === 'Critical'
             ? 'Hazel expressed heavy feelings of self-doubt and emotional overload. We strongly advise gentle, unconditional parental connection and cuddles tonight without pressing for details.'
+            : sadnessFound
+            ? 'Hazel directly shared that she was sad. She is processing tough feelings and seeks comfort, safe harbor, and quiet reassurance from Mom and Tim.'
             : detectedSeverity === 'Moderate'
             ? 'Hazel brought up negative peer interactions and teasing at school. She is actively processing feelings of unfairness and seeking reassurance from her creative space.'
             : isolationFound
@@ -326,6 +383,31 @@ export async function POST(req: NextRequest) {
             : 'Hazel is actively engaging in positive creative pursuits, monster milestones, and friendly conversation. Her resilience indicators are healthy.',
         actionableSuggestions,
       };
+
+      // Persist to sync_state.json directly so desktop app and sync queries immediately see update
+      try {
+        const DATA_DIR = path.join(process.cwd(), 'data');
+        const SYNC_FILE = path.join(DATA_DIR, 'sync_state.json');
+        let currentSync: any = {};
+        if (fs.existsSync(SYNC_FILE)) {
+          try {
+            currentSync = JSON.parse(fs.readFileSync(SYNC_FILE, 'utf-8'));
+          } catch {
+            currentSync = {};
+          }
+        }
+        if (!currentSync.hazel_default) {
+          currentSync.hazel_default = {};
+        }
+        currentSync.hazel_default.guardianInsight = updatedInsight;
+        currentSync.hazel_default.syncedAt = Date.now();
+        if (!fs.existsSync(DATA_DIR)) {
+          fs.mkdirSync(DATA_DIR, { recursive: true });
+        }
+        fs.writeFileSync(SYNC_FILE, JSON.stringify(currentSync, null, 2), 'utf-8');
+      } catch (err) {
+        // Non-fatal on serverless
+      }
 
       return NextResponse.json({ success: true, insight: updatedInsight });
     }
@@ -335,4 +417,26 @@ export async function POST(req: NextRequest) {
     console.error('Guardian API error:', err);
     return NextResponse.json({ success: false, error: err?.message || 'Server error' }, { status: 500 });
   }
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    const DATA_DIR = path.join(process.cwd(), 'data');
+    const SYNC_FILE = path.join(DATA_DIR, 'sync_state.json');
+    if (fs.existsSync(SYNC_FILE)) {
+      const currentSync = JSON.parse(fs.readFileSync(SYNC_FILE, 'utf-8'));
+      if (currentSync.hazel_default?.guardianInsight) {
+        return NextResponse.json({
+          success: true,
+          insight: currentSync.hazel_default.guardianInsight,
+        });
+      }
+    }
+  } catch {
+    // fallback
+  }
+  return NextResponse.json({
+    success: true,
+    insight: INITIAL_GUARDIAN_INSIGHT,
+  });
 }

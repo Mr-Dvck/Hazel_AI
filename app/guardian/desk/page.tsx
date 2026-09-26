@@ -14,21 +14,10 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock,
-  Plus,
-  Trash2,
   MessageSquare,
-  Bookmark,
 } from 'lucide-react';
 import { BridgeNote, BridgeReply, GuardianInsight } from '@/types';
 import { Storage } from '@/lib/storage';
-
-const DEFAULT_REASSURANCE_STATEMENTS = [
-  { id: '1', text: "You are safe, deeply loved, and wonderful just as you are.", type: 'love' },
-  { id: '2', text: "I'm right downstairs if you want a warm cuddle or hot cocoa.", type: 'safe_harbor' },
-  { id: '3', text: "Whatever happened at school today, you are not alone. We will handle it together.", type: 'courage' },
-  { id: '4', text: "I'm so proud of your creative courage and kind heart today.", type: 'courage' },
-  { id: '5', text: "Take all the quiet sanctuary time you need. I love you to the moon and back.", type: 'love' },
-];
 
 export default function GuardianDeskPage() {
   const router = useRouter();
@@ -36,13 +25,10 @@ export default function GuardianDeskPage() {
   const [replies, setReplies] = useState<BridgeReply[]>([]);
   const [insight, setInsight] = useState<GuardianInsight | null>(null);
   const [selectedNote, setSelectedNote] = useState<BridgeNote | null>(null);
-  const [replySender, setReplySender] = useState<'Tim (Dad)' | 'Mom' | 'Tim & Mom'>('Tim (Dad)');
+  const [replySender, setReplySender] = useState<'Tim' | 'Mom' | 'Tim & Mom'>('Tim');
   const [replyText, setReplyText] = useState('');
   const [isSendingReply, setIsSendingReply] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
-  const [reassuranceStatements, setReassuranceStatements] = useState(DEFAULT_REASSURANCE_STATEMENTS);
-  const [newStatementInput, setNewStatementInput] = useState('');
-  const [showAddStatement, setShowAddStatement] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchBridgeData = async () => {
@@ -114,137 +100,117 @@ export default function GuardianDeskPage() {
       });
 
       if (res.ok) {
-        setStatusMessage('✨ Reassuring note sent straight to Hazel\'s screen!');
+        setStatusMessage("✨ Note delivered directly to Hazel's screen!");
         setReplyText('');
         fetchBridgeData();
         setTimeout(() => setStatusMessage(''), 4000);
       } else {
-        const data = await res.json();
-        setStatusMessage(`Error: ${data.error || 'Failed to send'}`);
+        setStatusMessage('Failed to deliver note. Check connection.');
       }
     } catch (err) {
-      setStatusMessage('Connection error sending reply.');
+      setStatusMessage('Error delivering note.');
     } finally {
       setIsSendingReply(false);
     }
   };
 
-  const handleAddStatement = () => {
-    if (!newStatementInput.trim()) return;
-    const newItem = {
-      id: `stmt-${Date.now()}`,
-      text: newStatementInput.trim(),
-      type: 'custom',
-    };
-    setReassuranceStatements([...reassuranceStatements, newItem]);
-    setNewStatementInput('');
-    setShowAddStatement(false);
-  };
-
-  const handleDeleteStatement = (id: string) => {
-    setReassuranceStatements(reassuranceStatements.filter((s) => s.id !== id));
-  };
-
-  const unreadNotesCount = notes.filter((n) => !n.read).length;
-  const mood = insight?.emotionalWeather.currentMood || 'Resilient';
-  const bullyingSev = insight?.bullyingSafetyAlert.severity || 'Safe';
+  const resilienceScore = insight?.emotionalWeather?.score || 80;
 
   return (
-    <main className="min-h-screen w-full bg-[#07080f] text-gray-100 p-4 sm:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
-          <div className="flex items-center gap-3">
+    <main className="min-h-screen bg-[#07080f] text-white p-4 sm:p-6 lg:p-8 font-sans selection:bg-pink-500 selection:text-white">
+      {/* Background radial glow */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[140px]" />
+        <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-pink-600/10 rounded-full blur-[140px]" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto space-y-6">
+        {/* Header Bar */}
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-3xl bg-black/60 border border-white/10 backdrop-blur-xl shadow-2xl">
+          <div className="flex items-center gap-3.5">
             <button
-              onClick={() => router.push('/guardian')}
-              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
-              title="Return to Guardian Portal"
+              onClick={() => router.push('/')}
+              className="p-2.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white transition-all flex items-center gap-1.5 text-xs font-semibold"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Sanctuary</span>
             </button>
-            <div className="w-10 h-10 rounded-2xl overflow-hidden border border-pink-500/40 shadow-neon-pink flex-shrink-0 bg-black/90">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/guardian_desk_logo.png" alt="Guardian Desk Logo" className="w-full h-full object-cover" />
-            </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg sm:text-xl font-black text-white tracking-tight">
+                <Laptop className="w-5 h-5 text-pink-400" />
+                <h1 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-300 to-cyan-400">
                   Hazel Guardian Desk
                 </h1>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1 font-semibold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                  Live Desk Queue
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  Live Bridge Active
                 </span>
-                {unreadNotesCount > 0 && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-pink-500 text-white font-bold">
-                    {unreadNotesCount} New Note{unreadNotesCount > 1 ? 's' : ''}
-                  </span>
-                )}
               </div>
-              <p className="text-xs text-gray-400">
-                Two-way reassurance bridge between Hazel's Sanctuary and Tim & Mom's computer
+              <p className="text-xs text-gray-400 mt-0.5">
+                Two-Way Reassurance Bridge • Tim & Mom's Dedicated Console
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <button
-              onClick={() => router.push('/')}
-              className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-gray-300 hover:text-white transition-colors"
+              onClick={() => router.push('/guardian')}
+              className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-gray-200 hover:text-white transition-all flex items-center gap-1.5"
             >
-              Hazel Sanctuary
+              <Shield className="w-3.5 h-3.5 text-purple-400" />
+              <span>Guardian Intel</span>
             </button>
             <button
               onClick={fetchBridgeData}
               disabled={isRefreshing}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white transition-all shadow-md disabled:opacity-50"
+              className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white transition-all flex items-center gap-1.5 shadow-md disabled:opacity-50"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span>Refresh</span>
+              <span>{isRefreshing ? 'Syncing...' : 'Refresh Bridge'}</span>
             </button>
           </div>
-        </div>
+        </header>
 
-        {/* Status Radar Strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* Card 1: Emotional Weather */}
-          <div className="p-4 rounded-2xl bg-black/60 border border-white/10 flex items-center justify-between">
+        {/* Compact Quick Status Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 rounded-2xl bg-black/50 border border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-purple-500/20 text-purple-300">
                 <Smile className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Current Mood</p>
-                <h4 className="text-sm font-bold text-white">{mood}</h4>
+                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Emotional Weather</p>
+                <h4 className="text-sm font-bold text-white">
+                  {insight?.emotionalWeather?.currentMood || 'Resilient'} (Score: {resilienceScore}/100)
+                </h4>
               </div>
             </div>
-            <span className="text-xs font-mono text-pink-300 px-2.5 py-1 rounded-full bg-pink-500/10 border border-pink-500/20">
-              Score: {insight?.emotionalWeather.score || 80}/100
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
+              resilienceScore >= 75
+                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                : resilienceScore >= 50
+                ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                : 'bg-red-500/20 text-red-300 border-red-500/30'
+            }`}>
+              {insight?.emotionalWeather?.trend === 'needs_boost' ? 'Needs Tender Care' : 'Stable'}
             </span>
           </div>
 
-          {/* Card 2: Bullying Safety Alert */}
-          <div className="p-4 rounded-2xl bg-black/60 border border-white/10 flex items-center justify-between">
+          <div className="p-4 rounded-2xl bg-black/50 border border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-300">
+              <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-300">
                 <Shield className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Safety Status</p>
-                <h4 className="text-sm font-bold text-white">{bullyingSev} Severity</h4>
+                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Safety Scanner</p>
+                <h4 className="text-sm font-bold text-white">
+                  {insight?.bullyingSafetyAlert?.severity || 'Safe'} • {insight?.bullyingSafetyAlert?.headline || 'Sanctuary Active'}
+                </h4>
               </div>
             </div>
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-              bullyingSev === 'Critical' ? 'bg-red-500/20 text-red-300' :
-              bullyingSev === 'Moderate' ? 'bg-amber-500/20 text-amber-300' :
-              'bg-emerald-500/20 text-emerald-300'
-            }`}>
-              {insight?.bullyingSafetyAlert.headline || 'Sanctuary Active'}
-            </span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           </div>
 
-          {/* Card 3: Notes & Replies Stats */}
-          <div className="p-4 rounded-2xl bg-black/60 border border-white/10 flex items-center justify-between">
+          <div className="p-4 rounded-2xl bg-black/50 border border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-pink-500/20 text-pink-300">
                 <Heart className="w-5 h-5 fill-pink-500/30" />
@@ -262,83 +228,123 @@ export default function GuardianDeskPage() {
           </div>
         </div>
 
-        {/* Prominent High-Visibility Section: How Hazel Is Actually Doing */}
-        <div className="p-5 rounded-3xl bg-gradient-to-r from-purple-950/60 via-pink-950/30 to-black/80 border border-pink-500/30 shadow-neon-pink/20">
-          <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+        {/* EXPANDED PROMINENT SECTION: How Hazel Is Actually Doing */}
+        <div className="p-6 rounded-3xl bg-gradient-to-r from-purple-950/60 via-pink-950/40 to-black/90 border border-pink-500/40 shadow-neon-pink/20 space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-white/10">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-pink-500/20 text-pink-300">
+              <div className="p-2.5 rounded-2xl bg-pink-500/20 text-pink-300 shadow-neon-pink/30">
                 <Sparkles className="w-5 h-5 text-pink-400" />
               </div>
               <div>
-                <h2 className="text-base font-black text-white tracking-wide flex items-center gap-2">
-                  <span>How Hazel Is Actually Doing</span>
+                <h2 className="text-lg font-black text-white tracking-wide flex items-center gap-2">
+                  <span>✨ HOW HAZEL IS ACTUALLY DOING</span>
                   <span className="text-[10px] font-semibold text-pink-300 px-2 py-0.5 rounded-full bg-pink-500/15 border border-pink-500/30">
                     Real-Time AI Synthesis
                   </span>
                 </h2>
-                <p className="text-[11px] text-gray-400">
+                <p className="text-xs text-gray-400">
                   Unvarnished emotional well-being assessment synthesized from real chat conversations
                 </p>
               </div>
             </div>
-            <span className="text-[10px] text-gray-400 font-mono">
+            <span className="text-[11px] text-gray-400 font-mono">
               Last updated: {insight?.lastUpdated ? new Date(insight.lastUpdated).toLocaleTimeString() : 'Just now'}
             </span>
           </div>
 
           {insight?.howHazelIsDoing?.hasConversations === false ? (
-            <div className="p-4 rounded-2xl bg-black/40 border border-white/5 text-center">
-              <p className="text-xs text-gray-300 italic">
+            <div className="p-8 rounded-2xl bg-black/40 border border-white/5 text-center">
+              <p className="text-sm text-gray-300 italic">
                 "Waiting for Hazel's first conversation to synthesize her well-being assessment."
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-              {/* Pillar 1: Current Mood & Energy */}
-              <div className="p-3.5 rounded-2xl bg-black/50 border border-purple-500/20">
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-purple-300 uppercase tracking-wider mb-1.5">
-                  <Smile className="w-4 h-4 text-purple-400" />
-                  <span>Current Mood & Energy</span>
+            <div className="space-y-4">
+              {/* Top Row: 3 Wide Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Card 1: Current Mood, Energy & Resilience Gauge */}
+                <div className="p-4 rounded-2xl bg-[#181428] border border-purple-500/40 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-purple-300 uppercase tracking-wider mb-2">
+                      <Smile className="w-4 h-4 text-purple-400" />
+                      <span>Current Mood & Resilience Gauge</span>
+                    </div>
+                    <h3 className="text-base font-black text-white leading-snug">
+                      {insight?.howHazelIsDoing?.currentMoodAndEnergy || insight?.emotionalWeather?.currentMood || 'Thoughtful & Calm'}
+                    </h3>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-purple-500/20">
+                    <div className="flex items-center justify-between text-xs mb-1.5">
+                      <span className="text-gray-400">Resilience Index:</span>
+                      <strong className="text-pink-300 font-mono text-sm">{resilienceScore} / 100</strong>
+                    </div>
+                    <div className="w-full h-2.5 rounded-full bg-white/10 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          resilienceScore >= 75
+                            ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]'
+                            : resilienceScore >= 50
+                            ? 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]'
+                            : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]'
+                        }`}
+                        style={{ width: `${Math.max(5, Math.min(100, resilienceScore))}%` }}
+                      />
+                    </div>
+                    <p className="text-[11px] text-gray-400 mt-2 leading-relaxed">
+                      {insight?.emotionalWeather?.description || 'Hazel displays strong innate resilience.'}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-sm font-bold text-white">
-                  {insight?.howHazelIsDoing?.currentMoodAndEnergy || insight?.emotionalWeather?.currentMood || 'Thoughtful & Calm'}
-                </p>
-                <p className="text-[11px] text-gray-400 mt-1 leading-snug">
-                  Resilience Index: <strong className="text-pink-300">{insight?.emotionalWeather?.score || 80}/100</strong>
-                </p>
+
+                {/* Card 2: What's Weighing On Her (Spacious, full text, never truncated) */}
+                <div className="p-4 rounded-2xl bg-[#241a15] border border-amber-500/40 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-amber-300 uppercase tracking-wider mb-1">
+                      <Shield className="w-4 h-4 text-amber-400" />
+                      <span>What's Weighing On Her</span>
+                    </div>
+                    <span className="text-[10px] text-gray-400 mb-2 block">
+                      (Full unvarnished context • Never truncated)
+                    </span>
+                    <p className="text-xs text-gray-200 leading-relaxed whitespace-pre-wrap">
+                      {insight?.howHazelIsDoing?.whatsWeighingOnHer ||
+                        insight?.bullyingSafetyAlert?.summary ||
+                        'No heavy emotional burdens or peer friction detected in recent chats.'}
+                    </p>
+                  </div>
+                  <div className="mt-3 pt-2 border-t border-amber-500/20 text-[11px] text-amber-300/80 font-mono">
+                    Severity: {insight?.bullyingSafetyAlert?.severity || 'Safe'}
+                  </div>
+                </div>
+
+                {/* Card 3: What's Bringing Her Joy (Spacious, full text, never truncated) */}
+                <div className="p-4 rounded-2xl bg-[#122329] border border-cyan-500/40 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-cyan-300 uppercase tracking-wider mb-1">
+                      <Heart className="w-4 h-4 text-cyan-400" />
+                      <span>What's Bringing Her Joy</span>
+                    </div>
+                    <span className="text-[10px] text-gray-400 mb-2 block">
+                      (Creativity, monster lore & happy moments)
+                    </span>
+                    <p className="text-xs text-gray-200 leading-relaxed whitespace-pre-wrap">
+                      {insight?.howHazelIsDoing?.whatsBringingHerJoy ||
+                        insight?.familySentiment?.summary ||
+                        'Drawing imaginative creatures, monster lore, and quiet bedtime unwinding.'}
+                    </p>
+                  </div>
+                  <div className="mt-3 pt-2 border-t border-cyan-500/20 text-[11px] text-cyan-300/80 font-mono">
+                    Family Connection: {insight?.familySentiment?.overallStatus || 'Positive'}
+                  </div>
+                </div>
               </div>
 
-              {/* Pillar 2: What's Weighing On Her */}
-              <div className="p-3.5 rounded-2xl bg-black/50 border border-amber-500/20">
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-300 uppercase tracking-wider mb-1.5">
-                  <Shield className="w-4 h-4 text-amber-400" />
-                  <span>What's Weighing On Her</span>
-                </div>
-                <p className="text-xs text-gray-200 leading-relaxed">
-                  {insight?.howHazelIsDoing?.whatsWeighingOnHer ||
-                    insight?.bullyingSafetyAlert?.summary ||
-                    'No school or friend friction reported.'}
-                </p>
-              </div>
-
-              {/* Pillar 3: What's Bringing Her Joy */}
-              <div className="p-3.5 rounded-2xl bg-black/50 border border-cyan-500/20">
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-cyan-300 uppercase tracking-wider mb-1.5">
-                  <Heart className="w-4 h-4 text-cyan-400" />
-                  <span>What's Bringing Her Joy</span>
-                </div>
-                <p className="text-xs text-gray-200 leading-relaxed">
-                  {insight?.howHazelIsDoing?.whatsBringingHerJoy ||
-                    insight?.familySentiment?.summary ||
-                    'Drawing imaginative creatures, monster lore, and quiet bedtime unwinding.'}
-                </p>
-              </div>
-
-              {/* Pillar 4: Parent Executive Summary */}
-              <div className="p-3.5 rounded-2xl bg-black/50 border border-pink-500/20">
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-pink-300 uppercase tracking-wider mb-1.5">
+              {/* Bottom Row: Card 4 Banner (Plain-English Executive Well-Being Summary) */}
+              <div className="p-4 rounded-2xl bg-[#261222] border border-pink-500/40">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-pink-300 uppercase tracking-wider mb-1.5">
                   <Sparkles className="w-4 h-4 text-pink-400" />
-                  <span>Parent Executive Summary</span>
+                  <span>Plain-English Executive Well-Being Summary (Synthesized from Recent Chats)</span>
                 </div>
                 <p className="text-xs text-pink-100 font-medium leading-relaxed">
                   {insight?.howHazelIsDoing?.parentExecutiveSummary ||
@@ -350,7 +356,7 @@ export default function GuardianDeskPage() {
           )}
         </div>
 
-        {/* Main Content: Left Column (Inbox & Details) + Right Column (Reply Composer & Statement Manager) */}
+        {/* Main Content: Left Column (Inbox) + Right Column (Custom Note Composer) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column: Inbox of Dispatched Notes (5 cols) */}
           <div className="lg:col-span-5 rounded-3xl bg-black/60 border border-white/10 p-5 flex flex-col h-[650px] shadow-xl">
@@ -408,26 +414,40 @@ export default function GuardianDeskPage() {
                 })
               )}
             </div>
+
+            {/* Selected Note Inspector at bottom of left column */}
+            {selectedNote && (
+              <div className="mt-3 pt-3 border-t border-white/10">
+                <div className="text-[10px] text-pink-300 font-bold uppercase tracking-wider mb-1">
+                  Selected Note from Hazel:
+                </div>
+                <div className="p-3 rounded-2xl bg-black/80 border border-white/10 text-xs text-gray-200">
+                  <div className="text-[10px] text-gray-400 mb-1">
+                    Sent at {new Date(selectedNote.timestamp).toLocaleTimeString()}
+                  </div>
+                  "{selectedNote.text}"
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Right Column: Active Note Inspector + Two-Way Reply Composer + Statement Manager (7 cols) */}
+          {/* Right Column: Clean Spacious Custom Note Composer (7 cols) */}
           <div className="lg:col-span-7 space-y-6">
-            {/* Box 1: Selected Note & Two-Way Reassurance Reply Composer */}
             <div className="rounded-3xl bg-black/60 border border-white/10 p-6 shadow-xl space-y-4">
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
                   <Heart className="w-5 h-5 text-pink-400 fill-pink-400" />
                   <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-                    Quick Reassurance Composer
+                    Custom Note Composer for Hazel
                   </h3>
                 </div>
-                {/* Sender Selector */}
+                {/* Sender Selector (Tim / Mom / Tim & Mom - ZERO references to Tim as Dad) */}
                 <div className="flex items-center gap-1.5 bg-black/80 p-1 rounded-xl border border-white/15">
-                  {(['Tim (Dad)', 'Mom', 'Tim & Mom'] as const).map((s) => (
+                  {(['Tim', 'Mom', 'Tim & Mom'] as const).map((s) => (
                     <button
                       key={s}
                       onClick={() => setReplySender(s)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                         replySender === s
                           ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-sm'
                           : 'text-gray-400 hover:text-white'
@@ -451,73 +471,20 @@ export default function GuardianDeskPage() {
                 </div>
               )}
 
-              {/* Reassurance Statement Quick Buttons */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
-                    One-Tap Reassurance Statements:
-                  </span>
-                  <button
-                    onClick={() => setShowAddStatement(!showAddStatement)}
-                    className="text-[10px] text-pink-300 hover:text-pink-200 flex items-center gap-1 font-bold"
-                  >
-                    <Plus className="w-3 h-3" />
-                    <span>Add New</span>
-                  </button>
-                </div>
-
-                {showAddStatement && (
-                  <div className="mb-3 p-3 rounded-2xl bg-black/80 border border-white/15 flex gap-2">
-                    <input
-                      type="text"
-                      value={newStatementInput}
-                      onChange={(e) => setNewStatementInput(e.target.value)}
-                      placeholder="e.g. You are courageous and never alone..."
-                      className="flex-1 bg-transparent border-0 text-xs text-white placeholder-gray-500 focus:outline-none"
-                    />
-                    <button
-                      onClick={handleAddStatement}
-                      className="px-3 py-1 rounded-xl bg-pink-600 hover:bg-pink-500 text-xs font-bold text-white"
-                    >
-                      Save
-                    </button>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1 custom-scrollbar">
-                  {reassuranceStatements.map((stmt) => (
-                    <div
-                      key={stmt.id}
-                      className="group flex items-center justify-between p-2.5 rounded-xl bg-white/5 hover:bg-pink-500/15 border border-white/10 hover:border-pink-500/40 text-left transition-all"
-                    >
-                      <button
-                        onClick={() => setReplyText(stmt.text)}
-                        className="flex-1 text-xs text-gray-200 group-hover:text-pink-100 text-left line-clamp-2"
-                      >
-                        "{stmt.text}"
-                      </button>
-                      {stmt.type === 'custom' && (
-                        <button
-                          onClick={() => handleDeleteStatement(stmt.id)}
-                          className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-400 transition-opacity"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {/* Custom Reply Textarea & Dispatch */}
-              <form onSubmit={handleSendReply} className="space-y-3 pt-2">
-                <textarea
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  placeholder={`Write a warm, reassuring note as ${replySender} to Hazel's screen...`}
-                  rows={3}
-                  className="w-full p-3.5 rounded-2xl bg-black/80 border border-white/15 text-xs sm:text-sm text-white placeholder-gray-500 focus:outline-none focus:border-pink-500/80 resize-none shadow-inner"
-                />
+              <form onSubmit={handleSendReply} className="space-y-4 pt-1">
+                <div>
+                  <label className="text-xs font-bold text-gray-300 block mb-2">
+                    Write a genuine, heartfelt note directly to Hazel's screen:
+                  </label>
+                  <textarea
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    placeholder={`Write a genuine, heartfelt note as ${replySender} to Hazel's screen...`}
+                    rows={6}
+                    className="w-full p-4 rounded-2xl bg-black/80 border border-white/15 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-pink-500/80 resize-none shadow-inner leading-relaxed"
+                  />
+                </div>
 
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-emerald-400 font-medium">
@@ -527,10 +494,10 @@ export default function GuardianDeskPage() {
                   <button
                     type="submit"
                     disabled={!replyText.trim() || isSendingReply}
-                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-95 text-white font-bold text-xs uppercase tracking-wider shadow-neon-pink disabled:opacity-40 transition-all flex items-center gap-2"
+                    className="px-6 py-3 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-95 text-white font-bold text-xs uppercase tracking-wider shadow-neon-pink disabled:opacity-40 transition-all flex items-center gap-2"
                   >
-                    <Send className="w-3.5 h-3.5" />
-                    <span>{isSendingReply ? 'Sending to Screen...' : 'Send Note to Hazel\'s Screen'}</span>
+                    <Send className="w-4 h-4" />
+                    <span>{isSendingReply ? 'Sending to Screen...' : "Send Note to Hazel's Screen"}</span>
                   </button>
                 </div>
               </form>
@@ -540,7 +507,7 @@ export default function GuardianDeskPage() {
             <div className="rounded-3xl bg-black/60 border border-white/10 p-5 shadow-xl">
               <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
                 <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-                  Recent Warm Notes Sent to Hazel ({replies.length})
+                  Recent Delivered Notes to Hazel ({replies.length})
                 </h4>
                 <span className="text-[11px] text-gray-400">Delivered directly to her screen</span>
               </div>

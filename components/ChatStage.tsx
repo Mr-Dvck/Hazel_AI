@@ -18,6 +18,9 @@ import {
   Mail,
   Check,
   Laptop,
+  Palette,
+  Download,
+  Maximize2,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -289,12 +292,12 @@ export const ChatStage: React.FC<ChatStageProps> = ({
         )}
 
         <div className={`flex items-center gap-1.5 sm:gap-2 bg-obsidian-900/90 border rounded-full px-2 sm:px-3 py-1 sm:py-1.5 shadow-inner transition-all ${
-          profile.vibeTheme === 'cyber-blue'
+          profile.vibeTheme === 'electric-blue' || profile.vibeTheme === 'cyber-blue'
             ? 'border-cyan-400/60 shadow-[0_0_20px_rgba(0,240,255,0.35)] focus-within:border-cyan-300 focus-within:shadow-[0_0_30px_rgba(0,240,255,0.6)]'
-            : profile.vibeTheme === 'cosmic-emerald'
-            ? 'border-emerald-400/60 shadow-[0_0_20px_rgba(16,185,129,0.35)] focus-within:border-emerald-300 focus-within:shadow-[0_0_30px_rgba(16,185,129,0.6)]'
-            : profile.vibeTheme === 'sunset-violet'
-            ? 'border-purple-400/60 shadow-[0_0_20px_rgba(168,85,247,0.35)] focus-within:border-purple-300 focus-within:shadow-[0_0_30px_rgba(168,85,247,0.6)]'
+            : profile.vibeTheme === 'neon-yellow' || profile.vibeTheme === 'cosmic-emerald'
+            ? 'border-yellow-400/60 shadow-[0_0_20px_rgba(255,230,0,0.35)] focus-within:border-yellow-300 focus-within:shadow-[0_0_30px_rgba(255,230,0,0.6)]'
+            : profile.vibeTheme === 'neon-red' || profile.vibeTheme === 'sunset-violet'
+            ? 'border-red-500/60 shadow-[0_0_20px_rgba(255,23,68,0.35)] focus-within:border-red-400 focus-within:shadow-[0_0_30px_rgba(255,23,68,0.6)]'
             : 'border-pink-500/60 shadow-[0_0_20px_rgba(255,46,147,0.35)] focus-within:border-pink-400 focus-within:shadow-[0_0_30px_rgba(255,46,147,0.6)]'
         }`}>
           {/* Prominent Camera / Picture & Artwork Upload Button (Touch-Friendly 44px) */}
@@ -315,6 +318,27 @@ export const ChatStage: React.FC<ChatStageProps> = ({
           >
             <Camera className="w-5 h-5 text-pink-400 flex-shrink-0" />
             <span className="hidden sm:inline font-medium">Add Picture</span>
+          </button>
+
+          {/* Dedicated Imagine / Draw Button (Touch-Friendly 44px) */}
+          <button
+            type="button"
+            onClick={() => {
+              setInputText((prev) => {
+                const trimmed = prev.trim();
+                if (!trimmed) return 'Draw a ';
+                if (/^draw/i.test(trimmed)) return prev;
+                return `Draw a ${trimmed}`;
+              });
+              const el = document.querySelector('textarea');
+              if (el) el.focus();
+            }}
+            title="Ask companion to draw or imagine an artwork"
+            aria-label="Imagine or Draw artwork"
+            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold bg-gradient-to-r from-pink-500/20 to-purple-500/20 hover:from-pink-500/35 hover:to-purple-500/35 active:scale-95 text-pink-200 border border-pink-400/40 hover:border-pink-400 transition-all hover:scale-105 shadow-sm min-h-[44px] min-w-[44px]"
+          >
+            <Palette className="w-5 h-5 text-pink-400 flex-shrink-0" />
+            <span className="hidden sm:inline font-medium">🎨 Imagine / Draw</span>
           </button>
 
           {/* Quick Emoji Picker Button (Touch-Friendly 44px) */}
@@ -536,9 +560,24 @@ const MessageBubble: React.FC<{
           </div>
         )}
 
-        {/* Main Content Body with Fluid Word-by-Word Streaming */}
+        {/* Main Content Body with Fluid Word-by-Word Streaming and Rich Artwork */}
         <div className="text-xs sm:text-sm leading-relaxed">
-          <StreamingText text={message.content} isStreaming={isStreaming} />
+          {message.content.includes('![') ? (
+            parseContentWithImages(message.content).map((part, pIdx) =>
+              part.type === 'image' ? (
+                <ArtworkCard
+                  key={pIdx}
+                  alt={part.alt || 'Sanctuary Masterpiece'}
+                  url={part.url || ''}
+                  theme={profile.vibeTheme}
+                />
+              ) : (
+                <StreamingText key={pIdx} text={part.text || ''} isStreaming={isStreaming} />
+              )
+            )
+          ) : (
+            <StreamingText text={message.content} isStreaming={isStreaming} />
+          )}
         </div>
 
         {/* One-Tap Bridge Offer Card */}
@@ -640,3 +679,189 @@ const StreamingText: React.FC<{ text: string; isStreaming: boolean }> = ({ text,
     </span>
   );
 };
+
+interface ContentPart {
+  type: 'text' | 'image';
+  text?: string;
+  alt?: string;
+  url?: string;
+}
+
+function parseContentWithImages(content: string): ContentPart[] {
+  const parts: ContentPart[] = [];
+  const regex = /!\[([^\]]*)\]\((https?:\/\/[^\s\)]+)\)/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(content)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push({ type: 'text', text: content.substring(lastIndex, match.index) });
+    }
+    parts.push({ type: 'image', alt: match[1], url: match[2] });
+    lastIndex = regex.lastIndex;
+  }
+
+  if (lastIndex < content.length) {
+    parts.push({ type: 'text', text: content.substring(lastIndex) });
+  }
+
+  return parts;
+}
+
+interface ArtworkCardProps {
+  alt: string;
+  url: string;
+  theme?: string;
+}
+
+const ArtworkCard: React.FC<ArtworkCardProps> = ({ alt, url, theme }) => {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const getBorderColor = () => {
+    if (theme === 'electric-blue' || theme === 'cyber-blue')
+      return 'border-cyan-400/80 shadow-[0_0_25px_rgba(0,240,255,0.4)]';
+    if (theme === 'neon-yellow' || theme === 'cosmic-emerald')
+      return 'border-yellow-400/80 shadow-[0_0_25px_rgba(255,230,0,0.4)]';
+    if (theme === 'neon-red' || theme === 'sunset-violet')
+      return 'border-red-500/80 shadow-[0_0_25px_rgba(255,23,68,0.4)]';
+    return 'border-pink-500/80 shadow-[0_0_25px_rgba(255,46,147,0.4)]';
+  };
+
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsDownloading(true);
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `hazel-art-${Date.now()}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(url, '_blank');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  return (
+    <>
+      <div className={`relative group my-3 rounded-2xl sm:rounded-3xl overflow-hidden border-2 bg-black/90 transition-all ${getBorderColor()}`}>
+        {/* Loading Skeleton */}
+        {!loaded && !error && (
+          <div className="w-full h-64 sm:h-80 bg-gradient-to-r from-purple-950/40 via-pink-950/40 to-purple-950/40 animate-pulse flex flex-col items-center justify-center gap-3 p-4">
+            <Palette className="w-8 h-8 text-pink-400 animate-bounce" />
+            <div className="flex items-center gap-2 text-xs font-semibold text-pink-300">
+              <Sparkles className="w-4 h-4 text-amber-300 animate-spin" />
+              <span>Conjuring original art with Flux...</span>
+            </div>
+            <p className="text-[11px] text-gray-400 max-w-xs text-center truncate italic">
+              "{alt || 'Sanctuary Masterpiece'}"
+            </p>
+          </div>
+        )}
+
+        {/* Error Fallback */}
+        {error && (
+          <div className="w-full p-6 text-center text-xs text-red-400 bg-red-950/20">
+            Failed to render artwork preview.{' '}
+            <a href={url} target="_blank" rel="noreferrer" className="underline text-pink-300">
+              Open direct image link
+            </a>
+          </div>
+        )}
+
+        {/* Main Artwork Image */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={url}
+          alt={alt || 'Sanctuary Masterpiece'}
+          onLoad={() => setLoaded(true)}
+          onError={() => setError(true)}
+          onClick={() => setIsLightboxOpen(true)}
+          className={`w-full max-h-[500px] object-contain cursor-zoom-in transition-all duration-500 hover:scale-[1.01] ${
+            loaded ? 'opacity-100 block' : 'opacity-0 hidden'
+          }`}
+        />
+
+        {/* Hover / Persistent Action Bar */}
+        {loaded && (
+          <div className="bg-gradient-to-t from-black/95 via-black/60 to-transparent p-3 flex items-center justify-between">
+            <span className="text-[11px] text-pink-200 font-medium truncate max-w-[60%] flex items-center gap-1.5">
+              <Palette className="w-3.5 h-3.5 text-pink-400 flex-shrink-0" />
+              <span className="truncate">{alt || 'Artwork'}</span>
+            </span>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleDownload}
+                disabled={isDownloading}
+                className="px-2.5 py-1 rounded-xl bg-pink-500/80 hover:bg-pink-500 text-white text-[11px] font-semibold flex items-center gap-1 shadow-md hover:scale-105 active:scale-95 transition-all"
+                title="Download artwork"
+              >
+                <Download className="w-3 h-3" />
+                <span>{isDownloading ? 'Saving...' : 'Download Art'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsLightboxOpen(true)}
+                className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[11px] hover:scale-105 transition-all"
+                title="Fullscreen lightbox"
+              >
+                <Maximize2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Lightbox Modal */}
+      {isLightboxOpen && (
+        <div
+          onClick={() => setIsLightboxOpen(false)}
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 cursor-zoom-out"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative max-w-4xl max-h-[90vh] flex flex-col items-center cursor-default"
+          >
+            <button
+              onClick={() => setIsLightboxOpen(false)}
+              className="absolute -top-10 right-0 p-1.5 rounded-full bg-white/20 text-white hover:bg-red-500 transition-colors"
+              title="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={url}
+              alt={alt}
+              className="max-h-[80vh] w-auto rounded-2xl border-2 border-pink-400/60 shadow-[0_0_50px_rgba(255,46,147,0.5)] object-contain"
+            />
+            <div className="mt-3 flex items-center justify-between w-full px-2">
+              <p className="text-xs text-pink-200 font-medium truncate max-w-md">{alt || 'Sanctuary Masterpiece'}</p>
+              <button
+                type="button"
+                onClick={handleDownload}
+                className="px-4 py-1.5 rounded-xl bg-pink-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-neon-pink hover:scale-105 transition-all"
+              >
+                <Download className="w-4 h-4" />
+                <span>Download High-Res</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+

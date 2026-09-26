@@ -92,6 +92,7 @@ export const Storage = {
           monsters: Storage.getMonsters(),
           memories: Storage.getMemories(),
           guardianInsight: Storage.getGuardianInsight(),
+          messages: Storage.getMessages(),
         }),
       });
       return res.ok;

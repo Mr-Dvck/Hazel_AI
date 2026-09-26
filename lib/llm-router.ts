@@ -108,15 +108,44 @@ export function analyzeGuardianSentiment(userText: string): {
     'have no friends',
     'no friends',
     'felt lonely',
+    'sad',
+    'i was sad',
+    'i am sad',
+    'im sad',
+    'feeling sad',
+    'feel sad',
+    'so sad',
+    'really sad',
+    'super sad',
+    'unhappy',
+    'crying',
+    'cried',
+    'depressed',
+    'heartbroken',
+    'feeling down',
+    'felt down',
+    'bad day',
+    'rough day',
+    'hard day',
+    'upset',
   ];
   for (const w of mildWords) {
     if (lower.includes(w)) {
       return {
         tag: 'mild_alert',
         category: 'emotional_isolation',
-        reason: `Social isolation indicator: "${w}"`,
+        reason: `Emotional distress or isolation expressed: "${w}"`,
       };
     }
+  }
+
+  // Regex check for standalone words
+  if (/\b(sad|sadness|unhappy|crying|cried|depressed|heartbroken|upset)\b/i.test(lower)) {
+    return {
+      tag: 'mild_alert',
+      category: 'emotional_isolation',
+      reason: `Emotional distress or sadness detected in message`,
+    };
   }
 
   return { tag: 'safe' };
@@ -193,6 +222,32 @@ export function generateEmpatheticOfflineStream(
     response = `WHOA, look at this! 🎨✨ ${hazelName}, the detail in this is incredible! I love the colors and the personality you put into it—it feels completely alive. You have such a distinct, awesome creative voice. Tell me everything: what inspired you to make this? I want to know all the lore behind it!`;
   } else if (sentiment.tag === 'critical_alert') {
     response = `${hazelName}, take a deep, gentle breath with me right now. I hear you, and I am sitting right here with you. Your feelings are real, but please know with every piece of my heart: you are deeply loved, you matter so much, and you never have to carry this heavy weight alone. You have people in your corner who care about you more than anything. What do you need right now to feel a tiny bit safer?`;
+  } else if (
+    /^(draw|paint|sketch|illustrate|make an image|generate an image|give me an image|give me a picture|create an image)/i.test(userMessage.trim()) ||
+    /\b(draw me|draw a|draw an|paint me|paint a|sketch a|illustrate a|can you draw|please draw|picture of)\b/i.test(userMessage)
+  ) {
+    let subject = userMessage
+      .replace(/^(can you |please )?(draw|paint|sketch|illustrate|make an image of|generate an image of|give me a picture of|picture of)\s*(me\s+)?(a\s+|an\s+|the\s+)?/i, '')
+      .trim();
+    if (!subject || subject.length < 2) {
+      subject = 'neon glowing shadow creature with cybernetic armor, dark fantasy';
+    }
+    const cleanPrompt = `${subject}, vibrant neon glow, intricate details, cinematic lighting, 8k digital art`;
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=1024&height=1024&model=flux&nologo=true`;
+    thinking += `\n*Hazel asked for an illustration: "${subject}"...*\nSynthesizing prompt with Pollinations Flux engine and embedding markdown art frame.`;
+    response = `Here is what I drew for you! 🎨✨\n\n![Art](${imageUrl})\n\nWhat do you think of how it turned out? Want me to change up any details or give it some crazy powers or lore?`;
+  } else if (
+    lower.includes('sad') ||
+    lower.includes('unhappy') ||
+    lower.includes('crying') ||
+    lower.includes('cried') ||
+    lower.includes('upset') ||
+    lower.includes('feeling down') ||
+    lower.includes('bad day') ||
+    lower.includes('rough day')
+  ) {
+    thinking += `\n*Noticing sadness and emotional vulnerability...*\nFormulating deep empathy, gentle validation, and zero judgment. Respecting her tough spirit while providing a safe sanctuary.`;
+    response = `Hey ${hazelName}... I hear you, and it sucks when you're feeling down. You never have to put on a fake smile or pretend everything is okay here. It's completely valid to feel sad, and you're tough as nails, but nobody should have to carry heavy feelings completely alone. I'm right in your corner. Do you want to vent about what made you feel sad, or would you rather we invent some crazy creature or talk cool lore to take your mind off it? Whatever you want to do, I'm here.`;
   } else if (sentiment.tag === 'moderate_alert' || sentiment.tag === 'mild_alert') {
     response = `${hazelName}, come sit with me for a minute. First: what happened today is NOT because of anything wrong with you. People can be thoughtless, unfair, or caught up in their own drama, and dealing with that stings so deeply. You don't have to just "brush it off" or pretend it doesn't hurt. Your feelings are 100% valid.
 

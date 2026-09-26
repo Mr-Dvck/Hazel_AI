@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const {
-      sender = 'Tim (Dad)',
+      sender = 'Tim',
       message,
       noteId,
       reassuranceType = 'love',

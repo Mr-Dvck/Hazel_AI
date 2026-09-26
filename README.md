@@ -16,7 +16,7 @@ Hazel is a creative, sensitive 10-year-old girl navigating bullying and social i
 
 **Hazel_AI** was built with a dual-layer architectural philosophy:
 1. **Hazel's Frontstage**: An uninhibited, magical cyber-sanctuary where Hazel can chat without fear of judgment, upload drawings and photos, invent creatures, and awaken 10 collectible growth monsters as her courage expands.
-2. **Guardian Backstage**: A discreet parental intelligence portal that synthesizes emotional weather patterns, detects school conflict/bullying distress silently, and arms mom and dad with natural, organic conversation starters—without ever violating Hazel's trust with invasive raw chat logs.
+2. **Guardian Backstage**: A discreet parental intelligence portal that synthesizes emotional weather patterns, detects school conflict/bullying distress silently, and arms Mom & Tim with natural, organic conversation starters—without ever violating Hazel's trust with invasive raw chat logs.
 
 ---
 
@@ -24,7 +24,7 @@ Hazel is a creative, sensitive 10-year-old girl navigating bullying and social i
 
 ### A. Dynamic Ambient Neon Background
 - Low-overhead GPU-accelerated canvas particle field with drifting starlight and multi-colored aurora meshes.
-- 4 Customizable sanctuary vibes: **Neon Cyber-Pink**, **Electric Cyber-Blue**, **Cosmic Emerald**, and **Sunset Violet**.
+- 4 Customizable sanctuary vibes: **Neon Pink**, **Neon Yellow**, **Electric Blue**, and **Neon Red**.
 
 ### B. Left Column: Monster Milestone Tower
 A vertical "Growth & Resilience Tower" featuring **10 Unique Custom SVG Collectible Guardians**:
@@ -99,9 +99,9 @@ Hazel must feel 100% trusted. Rather than an intrusive raw chat log, the **Guard
 
 ### 4 Core Parental Well-Being Pillars:
 1. **Bullying & School Safety Alert**: Severity rating (**Safe / Mild / Moderate / Critical**) identifying cafeteria exclusion, peer teasing, or cyberbullying.
-2. **Family & Home Sentiment**: Summarizes her bond with parents and provides constructive advice on when she needs low-pressure quiet companionship.
+2. **Family & Home Sentiment**: Summarizes her connection with Mom & Tim (Hazel lives with her dad) and provides constructive advice on when she needs low-pressure quiet companionship.
 3. **Emotional Weather**: Daily mood barometer (Resilient, Anxious, Joyful, Withdrawn) with a 0-100 Resilience Score.
-4. **Actionable Suggestions for Parents**: AI-generated conversation starters for mom and dad to connect with Hazel naturally without ever tipping off that they saw the logs.
+4. **Actionable Suggestions for Parents**: AI-generated conversation starters for Mom & Tim to connect with Hazel naturally without ever tipping off that they saw the logs.
 
 ---
 

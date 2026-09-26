@@ -79,30 +79,34 @@ export const DynamicNeonBackground: React.FC<DynamicNeonBackgroundProps> = ({
   // Dynamic theme gradients
   const getThemeGradients = () => {
     switch (theme) {
-      case 'cyber-blue':
-        return {
-          glow1: 'from-cyan-500/20 via-blue-600/15 to-transparent',
-          glow2: 'from-indigo-600/20 via-sky-500/10 to-transparent',
-          glow3: 'from-teal-400/15 via-blue-500/10 to-transparent',
-        };
+      case 'neon-yellow':
       case 'cosmic-emerald':
         return {
-          glow1: 'from-emerald-500/20 via-teal-600/15 to-transparent',
-          glow2: 'from-cyan-600/15 via-green-500/10 to-transparent',
-          glow3: 'from-lime-400/10 via-emerald-700/15 to-transparent',
+          glow1: 'from-[#ffe600]/25 via-amber-500/15 to-transparent',
+          glow2: 'from-amber-400/20 via-yellow-600/10 to-transparent',
+          glow3: 'from-[#ffe600]/15 via-orange-500/10 to-transparent',
         };
+      case 'electric-blue':
+      case 'cyber-blue':
+        return {
+          glow1: 'from-[#00f0ff]/25 via-blue-600/15 to-transparent',
+          glow2: 'from-sky-500/20 via-indigo-600/15 to-transparent',
+          glow3: 'from-[#00f0ff]/15 via-cyan-600/10 to-transparent',
+        };
+      case 'neon-red':
       case 'sunset-violet':
         return {
-          glow1: 'from-purple-600/25 via-pink-600/15 to-transparent',
-          glow2: 'from-amber-500/15 via-purple-800/15 to-transparent',
-          glow3: 'from-fuchsia-600/20 via-indigo-600/15 to-transparent',
+          glow1: 'from-[#ff1744]/25 via-rose-600/20 to-transparent',
+          glow2: 'from-red-600/20 via-amber-600/15 to-transparent',
+          glow3: 'from-[#ff1744]/20 via-pink-700/15 to-transparent',
         };
+      case 'neon-pink':
       case 'cyber-pink':
       default:
         return {
-          glow1: 'from-pink-600/25 via-purple-700/20 to-transparent',
-          glow2: 'from-cyan-500/20 via-blue-700/15 to-transparent',
-          glow3: 'from-fuchsia-500/20 via-purple-900/20 to-transparent',
+          glow1: 'from-[#ff2e93]/30 via-purple-700/20 to-transparent',
+          glow2: 'from-pink-500/20 via-fuchsia-700/15 to-transparent',
+          glow3: 'from-[#ff2e93]/20 via-purple-900/20 to-transparent',
         };
     }
   };

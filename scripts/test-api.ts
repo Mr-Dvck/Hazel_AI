@@ -238,7 +238,7 @@ async function testApi() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      text: "Hey Dad, having a tough day and could use a hug later.",
+      text: "Hey Mom & Tim, having a tough day and could use a hug later.",
       senderName: "Hazel",
       mood: "vulnerable",
       category: "feeling",
@@ -251,7 +251,7 @@ async function testApi() {
   assert.ok(dispatchData.note?.id, 'Note has unique ID');
   assert.strictEqual(dispatchData.note.sender, 'hazel', 'Sender is hazel');
   assert.strictEqual(dispatchData.note.recipient, 'tim_computer', 'Recipient is tim_computer');
-  assert.strictEqual(dispatchData.note.text, "Hey Dad, having a tough day and could use a hug later.", 'Note text matches');
+  assert.strictEqual(dispatchData.note.text, "Hey Mom & Tim, having a tough day and could use a hug later.", 'Note text matches');
 
   // Verify retrieval
   const getNotesReq = new Request('http://localhost/api/bridge/dispatch?limit=10', { method: 'GET' });
@@ -269,8 +269,8 @@ async function testApi() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      sender: 'Tim (Dad)',
-      message: 'You are so safe, loved, and wonderful just as you are. I am right downstairs.',
+      sender: 'Tim',
+      message: 'You are so safe, loved, and wonderful just as you are. We are always in your corner.',
       noteId: dispatchData.note.id,
       reassuranceType: 'love',
     }),
@@ -279,7 +279,7 @@ async function testApi() {
   assert.strictEqual(replyRes.status, 200, 'Bridge reply returns 200 OK');
   const replyData = await replyRes.json();
   assert.ok(replyData.success, 'Reply succeeded');
-  assert.strictEqual(replyData.reply.sender, 'Tim (Dad)', 'Sender matches Tim (Dad)');
+  assert.strictEqual(replyData.reply.sender, 'Tim', 'Sender matches Tim');
   assert.strictEqual(replyData.reply.recipient, 'Hazel', 'Recipient matches Hazel');
 
   // Poll for undelivered replies (delivers to Hazel's screen)
