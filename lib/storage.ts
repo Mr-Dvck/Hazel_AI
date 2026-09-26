@@ -1,0 +1,88 @@
+import { ChatMessage, Monster, MemoryItem, UserProfile, GuardianInsight } from '@/types';
+import { INITIAL_MONSTERS, INITIAL_PROFILE, INITIAL_MEMORIES, INITIAL_GUARDIAN_INSIGHT } from './constants';
+
+const STORAGE_KEYS = {
+  PROFILE: 'hazel_profile_v1',
+  MESSAGES: 'hazel_messages_v1',
+  MONSTERS: 'hazel_monsters_v1',
+  MEMORIES: 'hazel_memories_v1',
+  GUARDIAN: 'hazel_guardian_insights_v1',
+};
+
+// Safe localStorage wrapper
+function getItem<T>(key: string, fallback: T): T {
+  if (typeof window === 'undefined') return fallback;
+  try {
+    const item = localStorage.getItem(key);
+    return item ? (JSON.parse(item) as T) : fallback;
+  } catch (e) {
+    console.warn(`Error reading key ${key} from localStorage:`, e);
+    return fallback;
+  }
+}
+
+function setItem<T>(key: string, value: T): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {
+    console.warn(`Error saving key ${key} to localStorage:`, e);
+  }
+}
+
+export const Storage = {
+  getProfile: (): UserProfile => getItem<UserProfile>(STORAGE_KEYS.PROFILE, INITIAL_PROFILE),
+  setProfile: (profile: UserProfile): void => setItem(STORAGE_KEYS.PROFILE, profile),
+
+  getMessages: (): ChatMessage[] => getItem<ChatMessage[]>(STORAGE_KEYS.MESSAGES, []),
+  setMessages: (messages: ChatMessage[]): void => setItem(STORAGE_KEYS.MESSAGES, messages),
+  addMessage: (message: ChatMessage): ChatMessage[] => {
+    const current = Storage.getMessages();
+    const updated = [...current, message];
+    Storage.setMessages(updated);
+    return updated;
+  },
+
+  getMonsters: (): Monster[] => getItem<Monster[]>(STORAGE_KEYS.MONSTERS, INITIAL_MONSTERS),
+  setMonsters: (monsters: Monster[]): void => setItem(STORAGE_KEYS.MONSTERS, monsters),
+  unlockMonster: (id: number): Monster[] => {
+    const monsters = Storage.getMonsters();
+    const updated = monsters.map((m) =>
+      m.id === id ? { ...m, unlocked: true, unlockedAt: Date.now() } : m
+    );
+    Storage.setMonsters(updated);
+    return updated;
+  },
+
+  getMemories: (): MemoryItem[] => getItem<MemoryItem[]>(STORAGE_KEYS.MEMORIES, INITIAL_MEMORIES),
+  setMemories: (memories: MemoryItem[]): void => setItem(STORAGE_KEYS.MEMORIES, memories),
+  addMemory: (memory: Omit<MemoryItem, 'id' | 'timestamp'>): MemoryItem[] => {
+    const memories = Storage.getMemories();
+    const newItem: MemoryItem = {
+      ...memory,
+      id: `mem-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      timestamp: Date.now(),
+    };
+    const updated = [newItem, ...memories];
+    Storage.setMemories(updated);
+    return updated;
+  },
+  deleteMemory: (id: string): MemoryItem[] => {
+    const memories = Storage.getMemories();
+    const updated = memories.filter((m) => m.id !== id);
+    Storage.setMemories(updated);
+    return updated;
+  },
+
+  getGuardianInsight: (): GuardianInsight => getItem<GuardianInsight>(STORAGE_KEYS.GUARDIAN, INITIAL_GUARDIAN_INSIGHT),
+  setGuardianInsight: (insight: GuardianInsight): void => setItem(STORAGE_KEYS.GUARDIAN, insight),
+
+  clearAllData: (): void => {
+    if (typeof window === 'undefined') return;
+    try {
+      Object.values(STORAGE_KEYS).forEach((k) => localStorage.removeItem(k));
+    } catch (e) {
+      console.error(e);
+    }
+  },
+};

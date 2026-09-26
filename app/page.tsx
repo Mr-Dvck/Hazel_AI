@@ -1,0 +1,382 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import {
+  UserProfile,
+  ChatMessage,
+  Monster,
+  MemoryItem,
+  VibeTheme,
+} from '@/types';
+import { Storage } from '@/lib/storage';
+import { DynamicNeonBackground } from '@/components/DynamicNeonBackground';
+import { Header } from '@/components/Header';
+import { MonsterTower } from '@/components/MonsterTower';
+import { ChatStage } from '@/components/ChatStage';
+import { MemoryBank } from '@/components/MemoryBank';
+import { OnboardingModal } from '@/components/OnboardingModal';
+import { MonsterDetailModal } from '@/components/MonsterDetailModal';
+import confetti from 'canvas-confetti';
+import { Trophy, MessageSquare, Bookmark } from 'lucide-react';
+
+export default function HomePage() {
+  const [profile, setProfile] = useState<UserProfile>(Storage.getProfile());
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [monsters, setMonsters] = useState<Monster[]>(Storage.getMonsters());
+  const [memories, setMemories] = useState<MemoryItem[]>(Storage.getMemories());
+
+  const [streamingMessage, setStreamingMessage] = useState<ChatMessage | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedMonster, setSelectedMonster] = useState<Monster | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Mobile active tab ('tower' | 'chat' | 'memory')
+  const [mobileTab, setMobileTab] = useState<'tower' | 'chat' | 'memory'>('chat');
+
+  // Load state on mount
+  useEffect(() => {
+    const loadedProfile = Storage.getProfile();
+    const loadedMessages = Storage.getMessages();
+    const loadedMonsters = Storage.getMonsters();
+    const loadedMemories = Storage.getMemories();
+
+    setProfile(loadedProfile);
+    setMessages(loadedMessages);
+    setMonsters(loadedMonsters);
+    setMemories(loadedMemories);
+
+    if (!loadedProfile.isOnboarded) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  // Update Vibe Theme
+  const handleUpdateVibe = (newVibe: VibeTheme) => {
+    const updated = { ...profile, vibeTheme: newVibe };
+    setProfile(updated);
+    Storage.setProfile(updated);
+  };
+
+  // Complete Onboarding
+  const handleCompleteOnboarding = (
+    updatedFields: Partial<UserProfile>,
+    initialMemories: Omit<MemoryItem, 'id' | 'timestamp'>[]
+  ) => {
+    const updatedProfile: UserProfile = {
+      ...profile,
+      ...updatedFields,
+      isOnboarded: true,
+      lastActive: Date.now(),
+    };
+    setProfile(updatedProfile);
+    Storage.setProfile(updatedProfile);
+
+    // Ensure Tier 1 Pufflet is unlocked
+    const updatedMonsters = Storage.unlockMonster(1);
+    setMonsters(updatedMonsters);
+
+    // Add initial memories
+    let currentMems = Storage.getMemories();
+    initialMemories.forEach((mem) => {
+      currentMems = Storage.addMemory(mem);
+    });
+    setMemories(currentMems);
+
+    setShowOnboarding(false);
+  };
+
+  // Check for newly unlocked monsters based on message count
+  const checkMonsterUnlocks = (currentMessageCount: number, currentMonsters: Monster[]) => {
+    let newlyUnlocked: Monster | null = null;
+    const updatedList = currentMonsters.map((m) => {
+      if (!m.unlocked && currentMessageCount >= m.requiredMessages) {
+        newlyUnlocked = { ...m, unlocked: true, unlockedAt: Date.now() };
+        return newlyUnlocked;
+      }
+      return m;
+    });
+
+    if (newlyUnlocked) {
+      setMonsters(updatedList);
+      Storage.setMonsters(updatedList);
+
+      // Trigger celebration
+      confetti({
+        particleCount: 100,
+        spread: 90,
+        origin: { y: 0.5 },
+        colors: [(newlyUnlocked as Monster).color, '#ff2e93', '#00f0ff', '#fde047'],
+      });
+
+      setSelectedMonster(newlyUnlocked);
+    }
+  };
+
+  // Send message and stream response
+  const handleSendMessage = async (text: string, images: string[] = []) => {
+    if ((!text.trim() && images.length === 0) || isLoading) return;
+
+    const userMessage: ChatMessage = {
+      id: `msg-${Date.now()}-user`,
+      role: 'user',
+      content: text,
+      timestamp: Date.now(),
+      images: images.length > 0 ? images : undefined,
+    };
+
+    const nextMessages = [...messages, userMessage];
+    setMessages(nextMessages);
+    Storage.setMessages(nextMessages);
+
+    // Update profile stats
+    const nextMsgCount = profile.totalMessages + 1;
+    const updatedProf = { ...profile, totalMessages: nextMsgCount, lastActive: Date.now() };
+    setProfile(updatedProf);
+    Storage.setProfile(updatedProf);
+
+    // Check unlocks
+    checkMonsterUnlocks(nextMsgCount, monsters);
+
+    setIsLoading(true);
+
+    const assistantMsgId = `msg-${Date.now()}-assistant`;
+    setStreamingMessage({
+      id: assistantMsgId,
+      role: 'assistant',
+      content: '',
+      timestamp: Date.now(),
+      isStreaming: true,
+    });
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: nextMessages,
+          images: images,
+          profile: updatedProf,
+        }),
+      });
+
+      if (!response.ok || !response.body) {
+        throw new Error('Failed to start chat stream');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let accumulatedContent = '';
+      let accumulatedThinking = '';
+      let modelUsed = '';
+      let guardianTag: any = undefined;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith('data: ')) continue;
+          const payload = trimmed.slice(6);
+          if (payload === '[DONE]') continue;
+
+          try {
+            const data = JSON.parse(payload);
+            if (data.type === 'meta') {
+              modelUsed = data.model;
+              if (data.guardianAlert?.tag !== 'safe') {
+                guardianTag = data.guardianAlert.tag;
+              }
+            } else if (data.type === 'thinking') {
+              accumulatedThinking += data.chunk;
+            } else if (data.type === 'content') {
+              accumulatedContent += data.chunk;
+            }
+
+            setStreamingMessage({
+              id: assistantMsgId,
+              role: 'assistant',
+              content: accumulatedContent,
+              thinking: accumulatedThinking || undefined,
+              modelUsed: modelUsed || undefined,
+              timestamp: Date.now(),
+              isStreaming: true,
+            });
+          } catch (e) {
+            // Ignore parse errors on partial frames
+          }
+        }
+      }
+
+      // Finalize assistant message
+      const finalAssistantMessage: ChatMessage = {
+        id: assistantMsgId,
+        role: 'assistant',
+        content: accumulatedContent || "I'm always here for you, Hazel!",
+        thinking: accumulatedThinking || undefined,
+        modelUsed: modelUsed || undefined,
+        guardianTag: guardianTag,
+        timestamp: Date.now(),
+        isStreaming: false,
+      };
+
+      const finalMessages = [...nextMessages, finalAssistantMessage];
+      setMessages(finalMessages);
+      Storage.setMessages(finalMessages);
+      setStreamingMessage(null);
+    } catch (error) {
+      console.error('Chat stream error:', error);
+      const errorMessage: ChatMessage = {
+        id: assistantMsgId,
+        role: 'assistant',
+        content: `I'm right here with you, Hazel! Whatever happened today, you are completely safe and worthy. Take a gentle breath. Let's make something creative or talk about your favorite things! 💖`,
+        timestamp: Date.now(),
+        isStreaming: false,
+      };
+      const finalMessages = [...nextMessages, errorMessage];
+      setMessages(finalMessages);
+      Storage.setMessages(finalMessages);
+      setStreamingMessage(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Clear Chat Handler
+  const handleClearChat = () => {
+    if (window.confirm('Would you like to clear the current chat history? Your memories and unlocked monsters will be safely preserved.')) {
+      setMessages([]);
+      Storage.setMessages([]);
+    }
+  };
+
+  // Add Memory Handler
+  const handleAddMemory = (memory: Omit<MemoryItem, 'id' | 'timestamp'>) => {
+    const updated = Storage.addMemory(memory);
+    setMemories(updated);
+  };
+
+  // Delete Memory Handler
+  const handleDeleteMemory = (id: string) => {
+    const updated = Storage.deleteMemory(id);
+    setMemories(updated);
+  };
+
+  const unlockedCount = monsters.filter((m) => m.unlocked).length;
+
+  return (
+    <div className="relative min-h-screen flex flex-col overflow-hidden text-gray-100">
+      {/* Dynamic Background */}
+      <DynamicNeonBackground theme={profile.vibeTheme} />
+
+      {/* Main Header */}
+      <Header
+        profile={profile}
+        onUpdateVibe={handleUpdateVibe}
+        unlockedMonstersCount={unlockedCount}
+        totalMonstersCount={monsters.length}
+        onClearChat={handleClearChat}
+      />
+
+      {/* Mobile Tab Switcher */}
+      <div className="md:hidden relative z-20 flex items-center justify-around border-b border-white/10 bg-black/70 backdrop-blur-md px-2 py-2">
+        <button
+          onClick={() => setMobileTab('tower')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+            mobileTab === 'tower'
+              ? 'bg-amber-400/20 text-amber-300 border border-amber-400/30'
+              : 'text-gray-400'
+          }`}
+        >
+          <Trophy className="w-3.5 h-3.5" />
+          <span>Tower ({unlockedCount})</span>
+        </button>
+
+        <button
+          onClick={() => setMobileTab('chat')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+            mobileTab === 'chat'
+              ? 'bg-pink-500/20 text-pink-300 border border-pink-500/30'
+              : 'text-gray-400'
+          }`}
+        >
+          <MessageSquare className="w-3.5 h-3.5" />
+          <span>Chat Stage</span>
+        </button>
+
+        <button
+          onClick={() => setMobileTab('memory')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+            mobileTab === 'memory'
+              ? 'bg-cyan-400/20 text-cyan-300 border border-cyan-400/30'
+              : 'text-gray-400'
+          }`}
+        >
+          <Bookmark className="w-3.5 h-3.5" />
+          <span>Memories ({memories.length})</span>
+        </button>
+      </div>
+
+      {/* 3-Column Sleek Neon Layout Stage */}
+      <main className="relative z-10 flex-1 w-full max-w-[1700px] mx-auto p-2 sm:p-4 md:p-6 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 md:gap-5 min-h-0 overflow-hidden">
+        {/* Left Column: Monster Milestone Tower (2.5 cols on desktop) */}
+        <div
+          className={`md:col-span-3 lg:col-span-3 h-[calc(100vh-140px)] md:h-[calc(100vh-100px)] ${
+            mobileTab === 'tower' ? 'block' : 'hidden md:block'
+          }`}
+        >
+          <MonsterTower
+            monsters={monsters}
+            totalMessages={profile.totalMessages}
+            onSelectMonster={(m) => setSelectedMonster(m)}
+          />
+        </div>
+
+        {/* Center Column: Main Chat Stage (6.5 cols on desktop) */}
+        <div
+          className={`md:col-span-6 lg:col-span-6 h-[calc(100vh-140px)] md:h-[calc(100vh-100px)] ${
+            mobileTab === 'chat' ? 'block' : 'hidden md:block'
+          }`}
+        >
+          <ChatStage
+            messages={messages}
+            streamingMessage={streamingMessage}
+            profile={profile}
+            onSendMessage={handleSendMessage}
+            isLoading={isLoading}
+          />
+        </div>
+
+        {/* Right Column: Persistent Memory Bank (3 cols on desktop) */}
+        <div
+          className={`md:col-span-3 lg:col-span-3 h-[calc(100vh-140px)] md:h-[calc(100vh-100px)] ${
+            mobileTab === 'memory' ? 'block' : 'hidden md:block'
+          }`}
+        >
+          <MemoryBank
+            memories={memories}
+            onAddMemory={handleAddMemory}
+            onDeleteMemory={handleDeleteMemory}
+          />
+        </div>
+      </main>
+
+      {/* Onboarding Setup Modal */}
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onComplete={handleCompleteOnboarding}
+      />
+
+      {/* Monster Details & Celebration Modal */}
+      <MonsterDetailModal
+        monster={selectedMonster}
+        onClose={() => setSelectedMonster(null)}
+      />
+    </div>
+  );
+}

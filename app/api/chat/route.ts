@@ -1,0 +1,340 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { SYSTEM_PROMPT } from '@/lib/constants';
+import {
+  ALL_MODELS,
+  analyzeGuardianSentiment,
+  generateEmpatheticOfflineStream,
+} from '@/lib/llm-router';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { messages = [], images = [], profile = {} } = body;
+
+    const lastMessage = messages[messages.length - 1];
+    const userText = typeof lastMessage?.content === 'string' ? lastMessage.content : '';
+
+    // Silently evaluate safety / guardian markers
+    const guardianSentiment = analyzeGuardianSentiment(userText);
+
+    const apiKey = process.env.OPENROUTER_API_KEY;
+
+    // Helper for encoder
+    const encoder = new TextEncoder();
+
+    // If no API key is provided, stream using our empathetic offline engine
+    if (!apiKey || apiKey.trim() === '') {
+      const { thinking, response } = generateEmpatheticOfflineStream(
+        userText,
+        profile.name || 'Hazel',
+        profile.companionName || 'Sparky',
+        images.length > 0
+      );
+
+      const stream = new ReadableStream({
+        async start(controller) {
+          // Send metadata & guardian flag
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({
+                type: 'meta',
+                model: 'Hazel-Compassion-Engine (Built-in)',
+                guardianAlert: guardianSentiment,
+              })}\n\n`
+            )
+          );
+
+          // Stream thinking pulse
+          const thinkingWords = thinking.split(' ');
+          for (const word of thinkingWords) {
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({
+                  type: 'thinking',
+                  chunk: word + ' ',
+                })}\n\n`
+              )
+            );
+            await new Promise((r) => setTimeout(r, 20));
+          }
+
+          // Small pause between thinking and response
+          await new Promise((r) => setTimeout(r, 100));
+
+          // Stream response word by word
+          const words = response.split(' ');
+          for (let i = 0; i < words.length; i++) {
+            const word = words[i];
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({
+                  type: 'content',
+                  chunk: word + (i < words.length - 1 ? ' ' : ''),
+                })}\n\n`
+              )
+            );
+            await new Promise((r) => setTimeout(r, 25));
+          }
+
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+          controller.close();
+        },
+      });
+
+      return new NextResponse(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream; charset=utf-8',
+          'Cache-Control': 'no-cache, no-transform',
+          Connection: 'keep-alive',
+        },
+      });
+    }
+
+    // When API Key exists, execute resilient cascading multi-tier fallback through OpenRouter
+    let activeModel = ALL_MODELS[0];
+    let openRouterResponse: Response | null = null;
+
+    // Build OpenRouter messages format
+    const formattedMessages = [
+      { role: 'system', content: SYSTEM_PROMPT },
+      ...messages.slice(-10).map((m: any, index: number) => {
+        // If this is the last message and contains images, format for vision model
+        if (index === messages.length - 1 && images.length > 0) {
+          const contentParts: any[] = [{ type: 'text', text: m.content }];
+          for (const img of images) {
+            contentParts.push({
+              type: 'image_url',
+              image_url: { url: img },
+            });
+          }
+          return { role: m.role, content: contentParts };
+        }
+        return { role: m.role, content: m.content };
+      }),
+    ];
+
+    for (const model of ALL_MODELS) {
+      try {
+        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'HTTP-Referer': 'https://hazel-ai.vercel.app',
+            'X-Title': 'Hazel_AI Companion',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: model,
+            messages: formattedMessages,
+            stream: true,
+            temperature: 0.7,
+            max_tokens: 1200,
+          }),
+        });
+
+        if (res.ok && res.body) {
+          activeModel = model;
+          openRouterResponse = res;
+          break;
+        } else {
+          console.warn(`Model ${model} returned ${res.status}. Falling back to next tier...`);
+        }
+      } catch (err) {
+        console.warn(`Error attempting model ${model}:`, err);
+      }
+    }
+
+    // If all OpenRouter tiers failed or were rate limited, fallback to compassionate offline engine
+    if (!openRouterResponse || !openRouterResponse.body) {
+      const { thinking, response } = generateEmpatheticOfflineStream(
+        userText,
+        profile.name || 'Hazel',
+        profile.companionName || 'Sparky',
+        images.length > 0
+      );
+
+      const stream = new ReadableStream({
+        async start(controller) {
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({
+                type: 'meta',
+                model: 'Hazel-Compassion-Engine (Fallback Active)',
+                guardianAlert: guardianSentiment,
+              })}\n\n`
+            )
+          );
+
+          for (const word of thinking.split(' ')) {
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({
+                  type: 'thinking',
+                  chunk: word + ' ',
+                })}\n\n`
+              )
+            );
+            await new Promise((r) => setTimeout(r, 20));
+          }
+
+          for (const word of response.split(' ')) {
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({
+                  type: 'content',
+                  chunk: word + ' ',
+                })}\n\n`
+              )
+            );
+            await new Promise((r) => setTimeout(r, 25));
+          }
+
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+          controller.close();
+        },
+      });
+
+      return new NextResponse(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream; charset=utf-8',
+          'Cache-Control': 'no-cache, no-transform',
+          Connection: 'keep-alive',
+        },
+      });
+    }
+
+    // Stream SSE from OpenRouter
+    const bodyReader = openRouterResponse.body.getReader();
+    const decoder = new TextDecoder();
+
+    const forwardStream = new ReadableStream({
+      async start(controller) {
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({
+              type: 'meta',
+              model: activeModel,
+              guardianAlert: guardianSentiment,
+            })}\n\n`
+          )
+        );
+
+        let buffer = '';
+        let isInsideThinkingBlock = false;
+
+        try {
+          while (true) {
+            const { done, value } = await bodyReader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (!trimmed.startsWith('data: ')) continue;
+              const jsonStr = trimmed.slice(6);
+              if (jsonStr === '[DONE]') {
+                controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+                continue;
+              }
+
+              try {
+                const parsed = JSON.parse(jsonStr);
+                const delta = parsed.choices?.[0]?.delta;
+                const token = delta?.content || delta?.reasoning || '';
+
+                if (token.includes('<think>')) {
+                  isInsideThinkingBlock = true;
+                  const parts = token.split('<think>');
+                  if (parts[1]) {
+                    controller.enqueue(
+                      encoder.encode(
+                        `data: ${JSON.stringify({
+                          type: 'thinking',
+                          chunk: parts[1],
+                        })}\n\n`
+                      )
+                    );
+                  }
+                  continue;
+                }
+
+                if (token.includes('</think>')) {
+                  isInsideThinkingBlock = false;
+                  const parts = token.split('</think>');
+                  if (parts[0]) {
+                    controller.enqueue(
+                      encoder.encode(
+                        `data: ${JSON.stringify({
+                          type: 'thinking',
+                          chunk: parts[0],
+                        })}\n\n`
+                      )
+                    );
+                  }
+                  if (parts[1]) {
+                    controller.enqueue(
+                      encoder.encode(
+                        `data: ${JSON.stringify({
+                          type: 'content',
+                          chunk: parts[1],
+                        })}\n\n`
+                      )
+                    );
+                  }
+                  continue;
+                }
+
+                if (isInsideThinkingBlock || delta?.reasoning) {
+                  controller.enqueue(
+                    encoder.encode(
+                      `data: ${JSON.stringify({
+                        type: 'thinking',
+                        chunk: token,
+                      })}\n\n`
+                    )
+                  );
+                } else if (token) {
+                  controller.enqueue(
+                    encoder.encode(
+                      `data: ${JSON.stringify({
+                        type: 'content',
+                        chunk: token,
+                      })}\n\n`
+                    )
+                  );
+                }
+              } catch (e) {
+                // Ignore parse errors from ping or malformed chunks
+              }
+            }
+          }
+        } catch (streamError) {
+          console.error('SSE Stream error:', streamError);
+        } finally {
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+          controller.close();
+        }
+      },
+    });
+
+    return new NextResponse(forwardStream, {
+      headers: {
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-cache, no-transform',
+        Connection: 'keep-alive',
+      },
+    });
+  } catch (error: any) {
+    console.error('Chat API Fatal Error:', error);
+    return NextResponse.json(
+      { error: error?.message || 'Internal chat handler error' },
+      { status: 500 }
+    );
+  }
+}
