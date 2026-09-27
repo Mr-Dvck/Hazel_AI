@@ -107,7 +107,7 @@ export interface UserProfile {
 export interface GuardianIncident {
   id: string;
   timestamp: number;
-  category: 'bullying' | 'emotional_isolation' | 'school_distress' | 'self_worth';
+  category: 'bullying' | 'emotional_isolation' | 'school_distress' | 'self_worth' | 'emotional_distress';
   severity: 'Mild' | 'Moderate' | 'Critical';
   snippet: string;
   context: string;

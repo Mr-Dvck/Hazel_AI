@@ -452,6 +452,29 @@ async function testApi() {
       'Explains message passes directly to Tim\'s personal AI on his computer'
     );
     console.log('  ✅ Pass: Companion explains real bridge architecture to personal AI honestly & excitedly\n');
+
+    // Test 15: Chat API Sadness Detection & Guardian Desk Live Synthesis
+    console.log('▶ Test 15: Live Sadness Detection & Guardian Desk Well-Being Synthesis');
+    const sadMessages = [
+      { id: 'sad-1', role: 'user', content: 'i told the AI I was sad today', timestamp: Date.now() },
+    ];
+    const sadChatReq = new Request('http://localhost/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: sadMessages, profile: { name: 'Hazel', companionName: 'Sparky' } }),
+    });
+    const sadChatRes = await chatHandler(sadChatReq as any);
+    assert.strictEqual(sadChatRes.status, 200, 'Chat stream responds with 200');
+
+    // Verify guardian endpoint immediately reflects the sadness update
+    const gCheckReq = new Request('http://localhost/api/guardian', { method: 'GET' });
+    const gCheckRes = await (await import('../app/api/guardian/route')).GET(gCheckReq as any);
+    const gCheckData = await gCheckRes.json();
+    assert.strictEqual(gCheckData.success, true);
+    assert.strictEqual(gCheckData.insight.emotionalWeather.currentMood, 'Sad / Overwhelmed', 'Mood updated to Sad / Overwhelmed');
+    assert.ok(gCheckData.insight.emotionalWeather.score <= 65, 'Resilience score lowered appropriately');
+    assert.ok(gCheckData.insight.howHazelIsDoing.whatsWeighingOnHer.includes('sad'), 'whatsWeighingOnHer quotes sadness');
+    console.log('  ✅ Pass: Live sadness immediately reflected in guardian well-being assessment\n');
   } finally {
     process.env.OPENROUTER_API_KEY = savedApiKey;
     try {
@@ -462,7 +485,7 @@ async function testApi() {
     }
   }
 
-  console.log('🎉 ALL API END-TO-END TESTS PASSED! (14/14 gates green)\n');
+  console.log('🎉 ALL API END-TO-END TESTS PASSED! (15/15 gates green)\n');
 }
 
 testApi().catch((err) => {

@@ -310,7 +310,7 @@ class GuardianDeskApp:
         self.lbl_h_gauge_bar = tk.Label(c1, text="[████████░░]", font=("Consolas", 11, "bold"), fg=self.colors["green"], bg="#181428")
         self.lbl_h_gauge_bar.pack(anchor="w", pady=(2, 4))
 
-        self.txt_h_mood = tk.Text(c1, height=3, bg="#181428", fg="#e0e7ff", font=("Segoe UI", 8), relief="flat", wrap="word", highlightthickness=0, borderwidth=0)
+        self.txt_h_mood = tk.Text(c1, height=5, bg="#181428", fg="#e0e7ff", font=("Segoe UI", 9), relief="flat", wrap="word", highlightthickness=0, borderwidth=0)
         self.txt_h_mood.pack(fill="both", expand=True)
         self.txt_h_mood.config(state="disabled")
 
@@ -321,7 +321,7 @@ class GuardianDeskApp:
         tk.Label(c2, text="🛡️ What's Weighing On Her", font=("Segoe UI", 9, "bold"), fg="#fcd34d", bg="#241a15").pack(anchor="w")
         tk.Label(c2, text="(Full unvarnished context • Never truncated)", font=("Segoe UI", 7), fg=self.colors["text_muted"], bg="#241a15").pack(anchor="w", pady=(0, 4))
 
-        self.txt_h_weighing = tk.Text(c2, height=6, bg="#241a15", fg="#f3f4f6", font=("Segoe UI", 9), relief="flat", wrap="word", highlightthickness=0, borderwidth=0)
+        self.txt_h_weighing = tk.Text(c2, height=8, bg="#241a15", fg="#f3f4f6", font=("Segoe UI", 9), relief="flat", wrap="word", highlightthickness=0, borderwidth=0)
         self.txt_h_weighing.pack(fill="both", expand=True)
         self.txt_h_weighing.config(state="disabled")
 
@@ -332,7 +332,7 @@ class GuardianDeskApp:
         tk.Label(c3, text="💖 What's Bringing Her Joy", font=("Segoe UI", 9, "bold"), fg="#67e8f9", bg="#122329").pack(anchor="w")
         tk.Label(c3, text="(Creativity, monster lore & happy moments)", font=("Segoe UI", 7), fg=self.colors["text_muted"], bg="#122329").pack(anchor="w", pady=(0, 4))
 
-        self.txt_h_joy = tk.Text(c3, height=6, bg="#122329", fg="#f3f4f6", font=("Segoe UI", 9), relief="flat", wrap="word", highlightthickness=0, borderwidth=0)
+        self.txt_h_joy = tk.Text(c3, height=8, bg="#122329", fg="#f3f4f6", font=("Segoe UI", 9), relief="flat", wrap="word", highlightthickness=0, borderwidth=0)
         self.txt_h_joy.pack(fill="both", expand=True)
         self.txt_h_joy.config(state="disabled")
 
@@ -348,7 +348,7 @@ class GuardianDeskApp:
             bg="#261222"
         ).pack(anchor="w", pady=(0, 2))
 
-        self.txt_h_summary = tk.Text(c4, height=3, bg="#261222", fg="#fce7f3", font=("Segoe UI", 9), relief="flat", wrap="word", highlightthickness=0, borderwidth=0)
+        self.txt_h_summary = tk.Text(c4, height=4, bg="#261222", fg="#fce7f3", font=("Segoe UI", 9), relief="flat", wrap="word", highlightthickness=0, borderwidth=0)
         self.txt_h_summary.pack(fill="x")
         self.txt_h_summary.config(state="disabled")
 
@@ -722,13 +722,19 @@ class GuardianDeskApp:
         elif not self.insight:
             has_convs = False
 
-        if not has_convs:
-            self.cards_container.pack_forget()
-            self.lbl_h_waiting.pack(fill="x", pady=16)
-        else:
-            self.lbl_h_waiting.pack_forget()
-            self.cards_container.pack(fill="x")
+        self.lbl_h_waiting.pack_forget()
+        self.cards_container.pack(fill="x")
 
+        if not has_convs:
+            mood_text = "Awaiting First Conversation"
+            self.lbl_h_mood_title.config(text=mood_text)
+            self.lbl_h_resilience_score.config(text="Resilience Index: 80 / 100")
+            self.lbl_h_gauge_bar.config(text="[████████░░]", fg=self.colors["green"])
+            self._set_text_widget(self.txt_h_mood, "Status: Ready & Listening\nSanctuary active. Awaiting Hazel's first conversation to map real-time emotional weather.")
+            self._set_text_widget(self.txt_h_weighing, "No heavy emotional burdens or peer friction reported yet. Ready to listen whenever Hazel shares.")
+            self._set_text_widget(self.txt_h_joy, "Sanctuary created. Ready for drawings, monster stories, and creative shares.")
+            self._set_text_widget(self.txt_h_summary, "Waiting for Hazel's first conversation to synthesize her well-being assessment. Once she chats, real-time unvarnished insights will appear here immediately.")
+        else:
             mood_text = (how_data.get("currentMoodAndEnergy") if how_data else None) or (self.insight.get("emotionalWeather", {}).get("currentMood") if self.insight else "Thoughtful & Calm")
             self.lbl_h_mood_title.config(text=mood_text)
             self.lbl_h_resilience_score.config(text=f"Resilience Index: {score} / 100")

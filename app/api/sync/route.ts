@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { synthesizeGuardianInsight } from '@/lib/guardian-service';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -59,11 +60,16 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { userId = 'hazel_default', profile, monsters, memories, guardianInsight, messages } = body;
 
+    let finalInsight = guardianInsight;
+    if (messages && Array.isArray(messages) && messages.length > 0) {
+      finalInsight = synthesizeGuardianInsight(messages, guardianInsight);
+    }
+
     const payload = {
       profile,
       monsters,
       memories,
-      guardianInsight,
+      guardianInsight: finalInsight,
       messages,
       syncedAt: Date.now(),
     };
@@ -74,6 +80,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       syncedAt: payload.syncedAt,
+      guardianInsight: finalInsight,
       message: 'State synchronized successfully across devices',
     });
   } catch (error: any) {
@@ -88,9 +95,8 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get('userId') || 'hazel_default';
 
-  if (!serverStateCache.has(userId)) {
-    loadDiskCache();
-  }
+  // Always refresh cache from disk to ensure cross-process synchronization
+  loadDiskCache();
 
   const cached = serverStateCache.get(userId);
   if (!cached) {

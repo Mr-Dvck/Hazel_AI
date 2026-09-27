@@ -245,16 +245,9 @@ export default function GuardianPortalPage() {
             </span>
           </div>
 
-          {insight?.howHazelIsDoing?.hasConversations === false ? (
-            <div className="p-4 rounded-2xl bg-black/40 border border-white/5 text-center">
-              <p className="text-xs text-gray-300 italic">
-                "Waiting for Hazel's first conversation to synthesize her well-being assessment."
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {/* Top Row: 3 Wide Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-4">
+            {/* Top Row: 3 Wide Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Pillar 1: Current Mood, Energy & Resilience Gauge */}
                 <div className="p-4 rounded-2xl bg-[#181428] border border-purple-500/40 flex flex-col justify-between">
                   <div>
@@ -346,8 +339,7 @@ export default function GuardianPortalPage() {
                 </p>
               </div>
             </div>
-          )}
-        </div>
+          </div>
 
         {/* 4 Core Insight Pillars Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

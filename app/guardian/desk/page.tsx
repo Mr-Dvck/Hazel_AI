@@ -51,22 +51,20 @@ export default function GuardianDeskPage() {
         setReplies(repliesData.replies || []);
       }
 
-      // 3. Load Guardian Insight (Local or Sync endpoint)
-      let curInsight = Storage.getGuardianInsight();
-      if (!curInsight) {
-        try {
-          const syncRes = await fetch('/api/sync?userId=hazel_default');
-          if (syncRes.ok) {
-            const syncData = await syncRes.json();
-            if (syncData.found && syncData.data?.guardianInsight) {
-              curInsight = syncData.data.guardianInsight;
-            }
+      // 3. Load Guardian Insight directly from server sync endpoint
+      try {
+        const syncRes = await fetch('/api/sync?userId=hazel_default');
+        if (syncRes.ok) {
+          const syncData = await syncRes.json();
+          if (syncData.found && syncData.data?.guardianInsight) {
+            setInsight(syncData.data.guardianInsight);
+            Storage.setGuardianInsight(syncData.data.guardianInsight);
           }
-        } catch {
-          // ignore
         }
+      } catch {
+        const local = Storage.getGuardianInsight();
+        if (local) setInsight(local);
       }
-      setInsight(curInsight);
     } catch (err) {
       console.error('Failed to fetch bridge data:', err);
     } finally {
@@ -252,16 +250,9 @@ export default function GuardianDeskPage() {
             </span>
           </div>
 
-          {insight?.howHazelIsDoing?.hasConversations === false ? (
-            <div className="p-8 rounded-2xl bg-black/40 border border-white/5 text-center">
-              <p className="text-sm text-gray-300 italic">
-                "Waiting for Hazel's first conversation to synthesize her well-being assessment."
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {/* Top Row: 3 Wide Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-4">
+            {/* Top Row: 3 Wide Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Card 1: Current Mood, Energy & Resilience Gauge */}
                 <div className="p-4 rounded-2xl bg-[#181428] border border-purple-500/40 flex flex-col justify-between">
                   <div>
@@ -353,8 +344,7 @@ export default function GuardianDeskPage() {
                 </p>
               </div>
             </div>
-          )}
-        </div>
+          </div>
 
         {/* Main Content: Left Column (Inbox) + Right Column (Custom Note Composer) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

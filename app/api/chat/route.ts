@@ -5,6 +5,7 @@ import {
   analyzeGuardianSentiment,
   generateEmpatheticOfflineStream,
 } from '@/lib/llm-router';
+import { synthesizeGuardianInsight, saveGuardianInsightToDisk } from '@/lib/guardian-service';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -21,6 +22,16 @@ export async function POST(req: NextRequest) {
     const guardianSentiment = analyzeGuardianSentiment(userText);
     const detectedBirthday = detectBirthdayFromText(userText);
     const computedAge = calculateAge(profile.birthday);
+
+    // Immediately synthesize live well-being & emotional weather to sync_state.json directly
+    try {
+      if (messages.length > 0) {
+        const synthesized = synthesizeGuardianInsight(messages);
+        saveGuardianInsightToDisk(synthesized, 'hazel_default');
+      }
+    } catch {
+      // Non-fatal
+    }
 
     const apiKey = process.env.OPENROUTER_API_KEY;
 

@@ -282,6 +282,40 @@ export default function HomePage() {
     // Check unlocks
     checkMonsterUnlocks(nextMsgCount, monsters);
 
+    // Optimistically update guardian insight locally if sadness or distress is mentioned
+    const lowerText = text.toLowerCase();
+    if (
+      lowerText.includes('sad') ||
+      lowerText.includes('unhappy') ||
+      lowerText.includes('crying') ||
+      lowerText.includes('cried') ||
+      lowerText.includes('depressed') ||
+      lowerText.includes('upset') ||
+      lowerText.includes('bad day') ||
+      lowerText.includes('rough day') ||
+      lowerText.includes('feeling down')
+    ) {
+      const curInsight = Storage.getGuardianInsight();
+      const updatedInsight = {
+        ...curInsight,
+        lastUpdated: Date.now(),
+        emotionalWeather: {
+          ...curInsight.emotionalWeather,
+          currentMood: 'Sad / Overwhelmed' as const,
+          score: Math.min(curInsight.emotionalWeather?.score || 80, 60),
+          description: 'Hazel shared that she was feeling sad. Gentle, heartfelt presence recommended.',
+        },
+        howHazelIsDoing: {
+          currentMoodAndEnergy: 'Sad / Overwhelmed (Low Energy)',
+          whatsWeighingOnHer: `Hazel explicitly stated she was sad in chat ("${text}"). She expressed feeling down and is carrying emotional sorrow that needs gentle, heartfelt comfort without pressure.`,
+          whatsBringingHerJoy: curInsight.howHazelIsDoing?.whatsBringingHerJoy || 'Exploring her companion sanctuary and creative ideas.',
+          parentExecutiveSummary: 'Hazel explicitly shared that she was sad. Send a warm, genuine note from Tim or Mom letting her know she is deeply loved, strong, and never alone in her feelings.',
+          hasConversations: true,
+        },
+      };
+      Storage.setGuardianInsight(updatedInsight);
+    }
+
     // Trigger immediate server sync so backend & desktop app update without delay
     Storage.syncToServer();
     // Run non-intrusive background guardian evaluation pass

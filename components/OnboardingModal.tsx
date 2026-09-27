@@ -23,8 +23,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   const [step, setStep] = useState(1);
   const [clickCount, setClickCount] = useState(0);
   const [lastClickTime, setLastClickTime] = useState(0);
-  const [name, setName] = useState('Hazel');
-  const [companionName, setCompanionName] = useState('Sparky');
+  const [name, setName] = useState('');
+  const [companionName, setCompanionName] = useState('');
   const [birthday, setBirthday] = useState('');
   const [monsterStyle, setMonsterStyle] = useState<MonsterStyle>('spooky'); // Great default for Hazel who is a dark kid!
   const [vibeTheme, setVibeTheme] = useState<VibeTheme>('neon-pink');
@@ -35,8 +35,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       setStep(1);
-      setName('Hazel');
-      setCompanionName('Sparky');
+      setName('');
+      setCompanionName('');
       setBirthday('');
       setMonsterStyle('spooky');
       setVibeTheme('neon-pink');
@@ -230,9 +230,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Hazel"
+                  placeholder="Enter your name..."
                   className="w-full px-4 py-3 rounded-2xl bg-black/60 border border-white/20 text-sm text-white focus:outline-none focus:border-pink-500 shadow-inner"
-                  required
                 />
               </div>
 
@@ -244,9 +243,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   type="text"
                   value={companionName}
                   onChange={(e) => setCompanionName(e.target.value)}
-                  placeholder="Sparky (or Lumina, Pip, Astra...)"
+                  placeholder="Enter companion name..."
                   className="w-full px-4 py-3 rounded-2xl bg-black/60 border border-white/20 text-sm text-white focus:outline-none focus:border-cyan-400 shadow-inner"
-                  required
                 />
               </div>
             </div>

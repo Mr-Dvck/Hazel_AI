@@ -369,6 +369,27 @@ assert.ok(pageSrc.includes('onUpdateMemory={handleUpdateMemory}'), 'page.tsx con
 
 console.log('  ✅ Pass: Clean slate memories, optional onboarding inputs, and interactive memory elaboration verified\n');
 
-console.log('🎉 ALL AUTOMATED TESTS PASSED SUCCESSFULLY! (10/10 test gates green)\n');
+// Test 11: Zero Name Suggestions in Onboarding & Live Sadness Guardian Synthesis
+console.log('▶ Test 11: Zero Name Suggestions in Onboarding & Live Sadness Well-Being Synthesis');
+assert.ok(onboardingSrc.includes("const [name, setName] = useState('');"), 'name starts completely blank in OnboardingModal');
+assert.ok(onboardingSrc.includes("const [companionName, setCompanionName] = useState('');"), 'companionName starts completely blank in OnboardingModal');
+assert.ok(onboardingSrc.includes('placeholder="Enter your name..."'), 'Neutral name placeholder without suggestion');
+assert.ok(onboardingSrc.includes('placeholder="Enter companion name..."'), 'Neutral companion placeholder without suggestion');
+assert.ok(!onboardingSrc.includes('placeholder="Hazel"'), 'Purged hardcoded Hazel name suggestion placeholder');
+assert.ok(!onboardingSrc.includes('placeholder="Sparky (or Lumina, Pip, Astra...)"'), 'Purged companion name suggestion list');
+
+// Test live guardian sadness synthesis
+const { synthesizeGuardianInsight } = require('../lib/guardian-service.ts');
+const sadnessChat = [
+  { id: '1', role: 'user', content: 'i told the AI I was sad', timestamp: Date.now() }
+];
+const sadInsight = synthesizeGuardianInsight(sadnessChat);
+assert.strictEqual(sadInsight.emotionalWeather.currentMood, 'Sad / Overwhelmed', 'Sadness sets currentMood to Sad / Overwhelmed');
+assert.ok(sadInsight.emotionalWeather.score <= 65, 'Resilience score drops when sad');
+assert.ok(sadInsight.howHazelIsDoing.whatsWeighingOnHer.includes('sad'), 'whatsWeighingOnHer highlights sadness quote');
+assert.strictEqual(sadInsight.howHazelIsDoing.hasConversations, true, 'hasConversations is true after chat');
+console.log('  ✅ Pass: Blank onboarding names and live sadness well-being synthesis verified\n');
+
+console.log('🎉 ALL AUTOMATED TESTS PASSED SUCCESSFULLY! (11/11 test gates green)\n');
 
 

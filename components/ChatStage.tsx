@@ -469,6 +469,7 @@ const MessageBubble: React.FC<{
   }
 
   const isUser = message.role === 'user';
+  const [customNoteText, setCustomNoteText] = useState('');
   const hasBridgeOffer =
     !isUser &&
     !isStreaming &&
@@ -580,16 +581,16 @@ const MessageBubble: React.FC<{
           )}
         </div>
 
-        {/* One-Tap Bridge Offer Card */}
+        {/* Custom Bridge Note Dispatch Card */}
         {hasBridgeOffer && (
           <div className="mt-4 pt-3 border-t border-purple-500/20">
             <div className="p-3.5 rounded-2xl bg-gradient-to-r from-purple-900/60 via-pink-900/40 to-black/80 border border-pink-400/40 shadow-neon-pink/20">
               <div className="flex items-center gap-2 mb-2 text-xs font-bold text-pink-300">
                 <Heart className="w-4 h-4 text-pink-400 fill-pink-400 animate-pulse" />
-                <span>One-Tap Note Dispatch to Tim's Desk</span>
+                <span>Send a Note Directly to Tim's Computer Desk</span>
               </div>
-              <p className="text-[11px] text-gray-300 mb-3">
-                Tap below to send a message straight to Tim's computer screen:
+              <p className="text-[11px] text-gray-300 mb-2.5">
+                Type whatever you want to share—it will appear right on his screen in real time:
               </p>
 
               {isDispatched ? (
@@ -598,48 +599,37 @@ const MessageBubble: React.FC<{
                   <span>Dispatched straight to Tim's computer! He received your note on his desk. ✨</span>
                 </div>
               ) : (
-                <div className="space-y-1.5">
-                  <button
-                    onClick={() =>
-                      onDispatchNote &&
-                      onDispatchNote(
-                        "Hey Mom, having a hard time today. Could really use some quiet hugs later.",
-                        message.id
-                      )
-                    }
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={customNoteText}
+                    onChange={(e) => setCustomNoteText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && customNoteText.trim() && !isDispatching) {
+                        e.preventDefault();
+                        if (onDispatchNote) {
+                          onDispatchNote(customNoteText.trim(), message.id);
+                          setCustomNoteText('');
+                        }
+                      }
+                    }}
+                    placeholder="Type your personal note to Tim & Mom..."
+                    className="flex-1 px-3 py-2 rounded-xl bg-black/60 border border-white/20 text-xs text-white placeholder-gray-400 focus:outline-none focus:border-pink-400 shadow-inner"
                     disabled={isDispatching}
-                    className="w-full text-left p-2 rounded-xl bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-400/50 text-xs text-pink-100 transition-all flex items-center justify-between group"
-                  >
-                    <span>💙 "Hey Mom, having a hard time today. Could use a hug later."</span>
-                    <Send className="w-3 h-3 text-pink-400 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
+                  />
                   <button
-                    onClick={() =>
-                      onDispatchNote &&
-                      onDispatchNote(
-                        "Hey Mom & Tim, thinking of you guys and wanted to say hi!",
-                        message.id
-                      )
-                    }
-                    disabled={isDispatching}
-                    className="w-full text-left p-2 rounded-xl bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-400/50 text-xs text-pink-100 transition-all flex items-center justify-between group"
+                    type="button"
+                    onClick={() => {
+                      if (customNoteText.trim() && onDispatchNote && !isDispatching) {
+                        onDispatchNote(customNoteText.trim(), message.id);
+                        setCustomNoteText('');
+                      }
+                    }}
+                    disabled={!customNoteText.trim() || isDispatching}
+                    className="px-3.5 py-2 rounded-xl bg-pink-500 hover:bg-pink-600 disabled:opacity-40 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-md flex-shrink-0"
                   >
-                    <span>🌸 "Hey Mom & Tim, thinking of you guys and wanted to say hi!"</span>
-                    <Send className="w-3 h-3 text-pink-400 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
-                  <button
-                    onClick={() =>
-                      onDispatchNote &&
-                      onDispatchNote(
-                        "Hey Mom & Tim, I made something really cool in my sanctuary today!",
-                        message.id
-                      )
-                    }
-                    disabled={isDispatching}
-                    className="w-full text-left p-2 rounded-xl bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-400/50 text-xs text-pink-100 transition-all flex items-center justify-between group"
-                  >
-                    <span>🎨 "Hey Mom & Tim, I made something cool in my sanctuary today!"</span>
-                    <Send className="w-3 h-3 text-pink-400 group-hover:translate-x-0.5 transition-transform" />
+                    <span>Send</span>
+                    <Send className="w-3 h-3" />
                   </button>
                 </div>
               )}

@@ -311,7 +311,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Hazel"
+                  placeholder="Enter your name..."
                   className="w-full px-4 py-2.5 rounded-2xl bg-black/60 border border-white/20 text-sm text-white focus:outline-none focus:border-pink-500 shadow-inner"
                   required
                 />
@@ -423,7 +423,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   type="text"
                   value={companionName}
                   onChange={(e) => setCompanionName(e.target.value)}
-                  placeholder="Sparky (or Astra, Pip, Lumina...)"
+                  placeholder="Enter companion name..."
                   className="w-full px-4 py-2.5 rounded-2xl bg-black/60 border border-white/20 text-sm text-white focus:outline-none focus:border-purple-400 shadow-inner"
                   required
                 />
