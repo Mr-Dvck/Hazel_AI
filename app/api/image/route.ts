@@ -22,7 +22,8 @@ export async function POST(req: NextRequest) {
     }
 
     const apiKey = process.env.OPENROUTER_API_KEY;
-    const result = await generateImageWithFallback(rawPrompt.trim(), apiKey);
+    const requestedModel = body.model || body.preferredModel || undefined;
+    const result = await generateImageWithFallback(rawPrompt.trim(), apiKey, requestedModel);
 
     return NextResponse.json({
       success: true,
@@ -67,7 +68,8 @@ export async function GET(req: NextRequest) {
     }
 
     const apiKey = process.env.OPENROUTER_API_KEY;
-    const result = await generateImageWithFallback(rawPrompt.trim(), apiKey);
+    const requestedModel = searchParams.get('model') || undefined;
+    const result = await generateImageWithFallback(rawPrompt.trim(), apiKey, requestedModel);
 
     return NextResponse.json({
       success: true,

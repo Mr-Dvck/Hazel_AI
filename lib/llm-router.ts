@@ -65,14 +65,20 @@ export function buildOptimizedArtPrompt(rawSubject: string): string {
   }
 
   if (/minecraft|redstone|voxel/i.test(subject)) {
-    const cleanArtSubject = subject
+    let cleanArtSubject = subject
       .replace(/\s+in\s+a\s+minecraft\s+(forest|world|biome)/i, '')
       .replace(/\s+in\s+minecraft/i, '')
       .replace(/\s+minecraft\s+/i, ' ')
+      .replace(/^voxel\s+/i, '')
       .trim();
+    if (!cleanArtSubject) cleanArtSubject = 'world';
     return `cinematic voxel ${cleanArtSubject} glowing with electric cyan highlights, dense bioluminescent pine forest, volumetric fog, dramatic rim lighting, highly detailed 3D Minecraft aesthetic, 8k resolution, Unreal Engine 5 render`;
   } else if (/fnaf|freddy|animatronic|spooky/i.test(subject)) {
-    const cleanFnafSubject = subject.replace(/\s+(from|in)\s+(fnaf|five nights at freddy'?s)/i, '').trim();
+    let cleanFnafSubject = subject
+      .replace(/\s+(from|in)\s+(fnaf|five nights at freddy'?s)/i, '')
+      .replace(/^animatronic\s+/i, '')
+      .trim();
+    if (!cleanFnafSubject) cleanFnafSubject = 'creature';
     return `cinematic eerie animatronic ${cleanFnafSubject}, Five Nights at Freddy's aesthetic, mechanical joints, glowing neon eyes, moody atmospheric shadows, dramatic rim lighting, hyper-detailed 3D render, 8k resolution, Unreal Engine 5`;
   } else {
     return `cinematic ${subject}, vibrant neon highlights, dense atmosphere, volumetric fog, dramatic rim lighting, rich texture, epic composition, 8k resolution, Unreal Engine 5 render, highly detailed digital art`;
@@ -83,11 +89,40 @@ export function getPollinationsImageUrl(prompt: string): string {
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&model=flux&nologo=true`;
 }
 
-export function detectArtRequest(userMessage: string): {
+export function detectArtRequest(
+  userMessage: string,
+  previousAssistantMessage?: string
+): {
   isArt: boolean;
   isVague: boolean;
   subject: string;
 } {
+  // Check if this message is a response to an interactive creative direction query (Step 2)
+  const isFollowingCreativeDirection =
+    typeof previousAssistantMessage === 'string' &&
+    (previousAssistantMessage.includes('Before I start rendering') ||
+      previousAssistantMessage.includes("I'll bring it to life") ||
+      previousAssistantMessage.includes('what should the lighting and colors look like') ||
+      previousAssistantMessage.includes('voxel Minecraft style, neon cyber-dark, or painted fantasy'));
+
+  if (isFollowingCreativeDirection) {
+    const clean = userMessage.trim();
+    const isIndifferent =
+      !clean ||
+      /^(anything|something|whatever|you choose|you decide|surprise me|idk|i don't know|not sure|up to you)$/i.test(clean);
+
+    // If Hazel playfully replies "anything" or "surprise me", don't loop in questions—give her an awesome creative piece!
+    const effectiveSubject = isIndifferent
+      ? 'epic glowing cyber dragon soaring above a neon voxel castle'
+      : clean;
+
+    return {
+      isArt: true,
+      isVague: false,
+      subject: effectiveSubject,
+    };
+  }
+
   const isArt =
     /\b(draw|paint|sketch|illustrate|render|generate|create|make)\b.*\b(image|picture|drawing|painting|artwork|art|illustration)\b/i.test(userMessage) ||
     /\b(draw|paint|sketch|illustrate)\b\s+(me\s+|us\s+)?(a|an|the|some|something)?\b/i.test(userMessage) ||
@@ -117,36 +152,67 @@ export function detectArtRequest(userMessage: string): {
 
 function extractImageUrlFromResponse(data: any): string | null {
   if (!data) return null;
+
   // 1. data[0].url (OpenAI image generation format)
   if (data.data && Array.isArray(data.data) && data.data[0]?.url) {
     return data.data[0].url;
   }
   // 2. data[0].b64_json
   if (data.data && Array.isArray(data.data) && data.data[0]?.b64_json) {
-    return `data:image/png;base64,${data.data[0].b64_json}`;
+    const b64 = data.data[0].b64_json;
+    return b64.startsWith('data:') ? b64 : `data:image/png;base64,${b64}`;
   }
-  // 3. url at top level
+  // 3. data[0].image_url
+  if (data.data && Array.isArray(data.data) && data.data[0]?.image_url) {
+    const img = data.data[0].image_url;
+    return typeof img === 'string' ? img : img?.url || null;
+  }
+  // 4. images array at top level
+  if (Array.isArray(data.images) && data.images[0]) {
+    const img = data.images[0];
+    if (typeof img === 'string') {
+      return img.startsWith('data:') || img.startsWith('http') ? img : `data:image/png;base64,${img}`;
+    }
+    if (img?.url) return img.url;
+    if (img?.b64_json) {
+      return img.b64_json.startsWith('data:') ? img.b64_json : `data:image/png;base64,${img.b64_json}`;
+    }
+  }
+  // 5. url at top level
   if (typeof data.url === 'string' && data.url.startsWith('http')) {
     return data.url;
   }
-  // 4. choices[0].message multimodal images
+  // 6. choices[0].message multimodal images
   const msg = data.choices?.[0]?.message;
   if (msg) {
     if (Array.isArray(msg.images) && msg.images.length > 0) {
       const first = msg.images[0];
-      if (typeof first === 'string') return first;
+      if (typeof first === 'string') {
+        return first.startsWith('data:') || first.startsWith('http') ? first : `data:image/png;base64,${first}`;
+      }
       if (first?.image_url?.url) return first.image_url.url;
       if (first?.url) return first.url;
+      if (first?.b64_json) {
+        return first.b64_json.startsWith('data:') ? first.b64_json : `data:image/png;base64,${first.b64_json}`;
+      }
     }
     if (Array.isArray(msg.content)) {
       for (const part of msg.content) {
-        if (part.type === 'image_url' && part.image_url?.url) return part.image_url.url;
-        if (part.type === 'image' && part.image_url?.url) return part.image_url.url;
+        if (part.type === 'image_url') {
+          const u = typeof part.image_url === 'string' ? part.image_url : part.image_url?.url;
+          if (u) return u;
+        }
+        if (part.type === 'image') {
+          const u = typeof part.image_url === 'string' ? part.image_url : part.image_url?.url;
+          if (u) return u;
+        }
       }
     }
     if (typeof msg.content === 'string') {
       const mdMatch = msg.content.match(/!\[.*?\]\((https?:\/\/[^\s\)]+|data:image\/[^)\n\r]+)\)/);
       if (mdMatch) return mdMatch[1];
+      const urlMatch = msg.content.match(/(https?:\/\/[^\s<>"')]+(?:\.(?:png|jpg|jpeg|webp|gif)|openrouter\.ai\/[^\s<>"')]+|pollinations\.ai\/[^\s<>"')]+))/i);
+      if (urlMatch) return urlMatch[1];
       if (msg.content.trim().startsWith('http')) return msg.content.trim();
     }
     if (Array.isArray(msg.tool_calls)) {
@@ -154,7 +220,8 @@ function extractImageUrlFromResponse(data: any): string | null {
         try {
           const args = JSON.parse(tc.function?.arguments || '{}');
           if (args.url) return args.url;
-          if (args.image_url) return args.image_url;
+          if (args.image_url) return typeof args.image_url === 'string' ? args.image_url : args.image_url?.url;
+          if (args.b64_json) return args.b64_json.startsWith('data:') ? args.b64_json : `data:image/png;base64,${args.b64_json}`;
         } catch {
           // ignore
         }
@@ -166,7 +233,8 @@ function extractImageUrlFromResponse(data: any): string | null {
 
 export async function generateImageWithFallback(
   rawPrompt: string,
-  apiKey?: string
+  apiKey?: string,
+  preferredModel?: string
 ): Promise<ImageGenerationResult> {
   const optimizedPrompt = buildOptimizedArtPrompt(rawPrompt);
 
@@ -180,8 +248,12 @@ export async function generateImageWithFallback(
     };
   }
 
+  const modelsToTry = preferredModel && IMAGE_MODELS.tier1.includes(preferredModel)
+    ? [preferredModel, ...IMAGE_MODELS.tier1.filter((m) => m !== preferredModel)]
+    : [...IMAGE_MODELS.tier1];
+
   // Tier 1: OpenRouter Image API (Nano Banana 2 or Flux Schnell)
-  for (const model of IMAGE_MODELS.tier1) {
+  for (const model of modelsToTry) {
     try {
       // 1. Try standard OpenAI-compatible OpenRouter image endpoint
       const imgRes = await fetch('https://openrouter.ai/api/v1/images', {
@@ -195,8 +267,6 @@ export async function generateImageWithFallback(
         body: JSON.stringify({
           model: model,
           prompt: optimizedPrompt,
-          n: 1,
-          size: '1024x1024',
         }),
       });
 
@@ -213,12 +283,21 @@ export async function generateImageWithFallback(
         }
       }
 
-      // If status is 402, 404, or 429, log warning and try tool calling / chat completions fallback
-      if (imgRes.status === 402 || imgRes.status === 404 || imgRes.status === 429) {
-        console.warn(`OpenRouter image endpoint for model ${model} returned ${imgRes.status}.`);
+      // If status is 401 or 402, account is unauthorized or out of credits.
+      // Instant fail-safe fallback to Pollinations to avoid multi-second cascading latency!
+      if (imgRes.status === 401 || imgRes.status === 402) {
+        console.warn(`OpenRouter image endpoint returned ${imgRes.status} (auth/payment). Instant fail-safe to Pollinations.`);
+        break;
+      }
+
+      // If status is 429, log warning and skip tool call on same model
+      if (imgRes.status === 429) {
+        console.warn(`OpenRouter image endpoint for model ${model} returned 429 (rate limit).`);
+        continue;
       }
 
       // 2. Tool calling fallback via chat/completions with image modalities
+      console.warn(`OpenRouter image endpoint for model ${model} returned ${imgRes.status}. Attempting tool calling fallback...`);
       try {
         const chatRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
@@ -264,6 +343,11 @@ export async function generateImageWithFallback(
               prompt: optimizedPrompt,
             };
           }
+        }
+
+        if (chatRes.status === 401 || chatRes.status === 402) {
+          console.warn(`OpenRouter chat endpoint returned ${chatRes.status}. Instant fail-safe to Pollinations.`);
+          break;
         }
       } catch (chatErr) {
         console.warn(`Tool calling fallback failed for ${model}:`, chatErr);
@@ -423,7 +507,8 @@ export function generateEmpatheticOfflineStream(
   imagesPresent: boolean = false,
   computedAge: number = 10,
   birthday?: string,
-  monsterStyle: MonsterStyle = 'cute'
+  monsterStyle: MonsterStyle = 'cute',
+  previousAssistantMessage?: string
 ): { thinking: string; response: string; detectedBirthday?: string } {
   const lower = userMessage.toLowerCase();
   const sentiment = analyzeGuardianSentiment(userMessage);
@@ -476,6 +561,9 @@ export function generateEmpatheticOfflineStream(
     /(\bmom\b|\btim\b).*(make|built|created|programmed|know|told)/i.test(userMessage) ||
     /\b(my mom|mom and tim|tim and mom)\b/i.test(userMessage);
 
+  // Check art request using conversational context (handles both initial and step 2 direction)
+  const artCheck = detectArtRequest(userMessage, previousAssistantMessage);
+
   if (detectedBirthday) {
     thinking += `\n*Noticing birthday announcement: ${detectedBirthday}...*\nCelebrating milestone and pinning to persistent memories!`;
     response = `OH YAY!! 🎂🎉 I am writing that down into our Memory Bank right now: your special day is **${detectedBirthday}**! I will make sure we celebrate with confetti, drawings, and all the magical creature parties every year! What is your absolute favorite cake flavor or birthday wish?`;
@@ -486,14 +574,7 @@ export function generateEmpatheticOfflineStream(
     response = `WHOA, look at this! 🎨✨ ${hazelName}, the detail in this is incredible! I love the colors and the personality you put into it—it feels completely alive. You have such a distinct, awesome creative voice. Tell me everything: what inspired you to make this? I want to know all the lore behind it!`;
   } else if (sentiment.tag === 'critical_alert') {
     response = `${hazelName}, take a deep, gentle breath with me right now. I hear you, and I am sitting right here with you. Your feelings are real, but please know with every piece of my heart: you are deeply loved, you matter so much, and you never have to carry this heavy weight alone. You have people in your corner who care about you more than anything. What do you need right now to feel a tiny bit safer?`;
-  } else if (
-    /\b(draw|paint|sketch|illustrate|render|generate|create|make)\b.*\b(image|picture|drawing|painting|artwork|art|illustration)\b/i.test(userMessage) ||
-    /\b(draw|paint|sketch|illustrate)\b\s+(me\s+|us\s+)?(a|an|the|some|something)?\b/i.test(userMessage) ||
-    /^(draw|paint|sketch|illustrate|imagine|render)\b/i.test(userMessage.trim()) ||
-    /\b(can you|could you|please|let's|i want to|i'd like to|i would love to)\s+(draw|paint|sketch|generate|make|create)\b/i.test(userMessage)
-  ) {
-    const artCheck = detectArtRequest(userMessage);
-
+  } else if (artCheck.isArt) {
     if (artCheck.isVague) {
       thinking += `\n*Hazel expressed interest in drawing/generating an image...*\nPrompting with interactive creative direction to give her creative agency over style and lighting.`;
       response = `I would love to make some epic art with you! 🎨 Before I start rendering: do you want it in a voxel Minecraft style, neon cyber-dark, or painted fantasy? What should the lighting and colors look like? Tell me your vision and I'll bring it to life!`;

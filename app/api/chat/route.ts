@@ -20,6 +20,13 @@ export async function POST(req: NextRequest) {
     const lastMessage = messages[messages.length - 1];
     const userText = typeof lastMessage?.content === 'string' ? lastMessage.content : '';
 
+    // Extract previous assistant message to support multi-turn conversational creative direction
+    const previousAssistantMsg = messages.length >= 2 ? messages[messages.length - 2] : null;
+    const previousAssistantText =
+      previousAssistantMsg?.role === 'assistant' && typeof previousAssistantMsg?.content === 'string'
+        ? previousAssistantMsg.content
+        : undefined;
+
     // Silently evaluate safety / guardian markers & detect birthday
     const guardianSentiment = analyzeGuardianSentiment(userText);
     const detectedBirthday = detectBirthdayFromText(userText);
@@ -40,8 +47,8 @@ export async function POST(req: NextRequest) {
     // Helper for encoder
     const encoder = new TextEncoder();
 
-    // Check if this is an art / drawing request
-    const artIntent = detectArtRequest(userText);
+    // Check if this is an art / drawing request (including step 2 following creative direction)
+    const artIntent = detectArtRequest(userText, previousAssistantText);
     if (artIntent.isArt) {
       let thinking = '';
       let response = '';
@@ -122,7 +129,8 @@ export async function POST(req: NextRequest) {
         images.length > 0,
         computedAge,
         profile.birthday,
-        profile.monsterStyle || 'cute'
+        profile.monsterStyle || 'cute',
+        previousAssistantText
       );
 
       const stream = new ReadableStream({
@@ -252,7 +260,8 @@ export async function POST(req: NextRequest) {
         images.length > 0,
         computedAge,
         profile.birthday,
-        profile.monsterStyle || 'cute'
+        profile.monsterStyle || 'cute',
+        previousAssistantText
       );
 
       const stream = new ReadableStream({

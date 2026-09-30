@@ -707,8 +707,137 @@ async function testApi() {
     assert.strictEqual(openRouterSuccess.source, 'openrouter', 'Selects openrouter on successful generation');
     assert.strictEqual(openRouterSuccess.url, 'https://images.openrouter.ai/generated/mock-art-12345.png', 'Resolves OpenRouter generated image URL');
     assert.strictEqual(openRouterSuccess.model, 'google/gemini-3.1-flash-image', 'Uses primary Tier 1 model');
-    global.fetch = originalFetch;
     console.log('  ✅ Pass: OpenRouter Tier 1 image generation URL correctly resolved\n');
+
+    // Test 23: Complete Two-Step Interactive Creative Direction in Chat Stream
+    console.log('▶ Test 23: Complete Two-Step Interactive Creative Direction Flow in Chat Stream');
+    // Turn 1: User asks vague drawing request
+    const turn1Req = new Request('http://localhost/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: 'Can you draw a picture?' }],
+        profile: { name: 'Hazel', companionName: 'Sparky' },
+      }),
+    });
+    const turn1Res = await chatHandler(turn1Req as any);
+    assert.strictEqual(turn1Res.status, 200);
+    const turn1Reader = turn1Res.body?.getReader();
+    const tDec = new TextDecoder();
+    let turn1Data = '';
+    while (true) {
+      const { done, value } = await turn1Reader!.read();
+      if (done) break;
+      turn1Data += tDec.decode(value);
+    }
+    const turn1Content = turn1Data
+      .split('\n\n')
+      .filter((l) => l.startsWith('data: ') && !l.includes('[DONE]'))
+      .map((l) => {
+        try {
+          return JSON.parse(l.replace('data: ', ''));
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean)
+      .filter((c: any) => c.type === 'content')
+      .map((c: any) => c.chunk)
+      .join('');
+    assert.ok(turn1Content.includes('Before I start rendering') || turn1Content.includes('voxel Minecraft style'), 'Turn 1 asks for creative choices');
+
+    // Turn 2: User responds with vision (does not repeat "draw")
+    const turn2Req = new Request('http://localhost/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [
+          { role: 'user', content: 'Can you draw a picture?' },
+          { role: 'assistant', content: turn1Content },
+          { role: 'user', content: 'voxel Minecraft cyber-wolf with glowing cyan eyes in a dark pine forest' },
+        ],
+        profile: { name: 'Hazel', companionName: 'Sparky' },
+      }),
+    });
+    const turn2Res = await chatHandler(turn2Req as any);
+    assert.strictEqual(turn2Res.status, 200);
+    const turn2Reader = turn2Res.body?.getReader();
+    let turn2Data = '';
+    while (true) {
+      const { done, value } = await turn2Reader!.read();
+      if (done) break;
+      turn2Data += tDec.decode(value);
+    }
+    const turn2Content = turn2Data
+      .split('\n\n')
+      .filter((l) => l.startsWith('data: ') && !l.includes('[DONE]'))
+      .map((l) => {
+        try {
+          return JSON.parse(l.replace('data: ', ''));
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean)
+      .filter((c: any) => c.type === 'content')
+      .map((c: any) => c.chunk)
+      .join('');
+
+    assert.ok(turn2Content.includes('![Generated Art]('), 'Turn 2 completes creative direction and generates artwork');
+    assert.ok(turn2Content.includes('mock-art-12345.png') || turn2Content.includes('pollinations.ai/prompt/'), 'Embeds resolved artwork');
+    console.log('  ✅ Pass: Complete Two-Step Interactive Creative Direction successfully verified in chat stream\n');
+
+    // Test 24: OpenRouter b64_json Extraction and Tool Calling Fallback Resolution
+    console.log('▶ Test 24: OpenRouter b64_json Extraction and Tool Calling Fallback Resolution');
+    // Subtest A: b64_json support
+    global.fetch = async (url: any) => {
+      if (typeof url === 'string' && url.includes('openrouter.ai/api/v1/images')) {
+        return new Response(
+          JSON.stringify({
+            data: [{ b64_json: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' }],
+          }),
+          { status: 200 }
+        );
+      }
+      return originalFetch(url);
+    };
+    const b64Res = await generateImageWithFallback('cybernetic lion', 'sk-or-valid-key');
+    assert.strictEqual(b64Res.source, 'openrouter');
+    assert.ok(b64Res.url.startsWith('data:image/png;base64,'), 'Formats b64_json as standard data URI');
+
+    // Subtest B: Tool calling fallback when images endpoint returns 404
+    global.fetch = async (url: any, opts: any) => {
+      if (typeof url === 'string' && url.includes('openrouter.ai/api/v1/images')) {
+        return new Response('Not Found', { status: 404 });
+      }
+      if (typeof url === 'string' && url.includes('openrouter.ai/api/v1/chat/completions')) {
+        return new Response(
+          JSON.stringify({
+            choices: [
+              {
+                message: {
+                  tool_calls: [
+                    {
+                      function: {
+                        name: 'generate_image',
+                        arguments: JSON.stringify({ url: 'https://images.openrouter.ai/tool-call/lion.png' }),
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          }),
+          { status: 200 }
+        );
+      }
+      return originalFetch(url, opts);
+    };
+    const toolCallRes = await generateImageWithFallback('cybernetic lion', 'sk-or-valid-key');
+    assert.strictEqual(toolCallRes.source, 'openrouter');
+    assert.strictEqual(toolCallRes.url, 'https://images.openrouter.ai/tool-call/lion.png');
+    global.fetch = originalFetch;
+    console.log('  ✅ Pass: b64_json and tool calling fallback generation verified\n');
   } finally {
     process.env.OPENROUTER_API_KEY = savedApiKey;
     try {
@@ -719,7 +848,7 @@ async function testApi() {
     }
   }
 
-  console.log('🎉 ALL API END-TO-END TESTS PASSED! (22/22 gates green)\n');
+  console.log('🎉 ALL API END-TO-END TESTS PASSED! (24/24 gates green)\n');
 }
 
 testApi().catch((err) => {

@@ -521,7 +521,16 @@ assert.ok(customOptPrompt.includes('8k resolution') || customOptPrompt.includes(
 const alreadyOptimized = 'cinematic voxel castle glowing, 8k resolution, Unreal Engine 5 render';
 assert.strictEqual(buildOptimizedArtPrompt(alreadyOptimized), alreadyOptimized, 'Does not duplicate already optimized prompt');
 
-// Test detectArtRequest
+// Test duplicate prefix suppression (e.g. no "voxel voxel" or "animatronic animatronic")
+const voxelOpt = buildOptimizedArtPrompt('voxel castle');
+assert.ok(!voxelOpt.includes('voxel voxel'), 'Suppresses duplicate "voxel voxel" in Minecraft prompts');
+assert.ok(voxelOpt.includes('cinematic voxel castle'), 'Keeps single voxel description cleanly');
+
+const fnafOpt = buildOptimizedArtPrompt('animatronic bear');
+assert.ok(!fnafOpt.includes('animatronic animatronic'), 'Suppresses duplicate "animatronic animatronic" in FNAF prompts');
+assert.ok(fnafOpt.includes('cinematic eerie animatronic bear'), 'Keeps single animatronic description cleanly');
+
+// Test detectArtRequest - Turn 1 (Direct & Vague)
 const vagueDetect = detectArtRequest('Can you paint a picture?');
 assert.strictEqual(vagueDetect.isArt, true, 'Detects art intent');
 assert.strictEqual(vagueDetect.isVague, true, 'Detects vague art request');
@@ -530,6 +539,35 @@ const specificDetect = detectArtRequest('Draw a neon wolf in a Minecraft forest'
 assert.strictEqual(specificDetect.isArt, true, 'Detects art intent');
 assert.strictEqual(specificDetect.isVague, false, 'Detects specific art request');
 assert.ok(specificDetect.subject.includes('neon wolf'), 'Extracts subject accurately');
+
+// Test detectArtRequest - Turn 2 (Interactive Creative Direction Continuation)
+const creativeDirectionPrompt = "I would love to make some epic art with you! 🎨 Before I start rendering: do you want it in a voxel Minecraft style, neon cyber-dark, or painted fantasy? What should the lighting and colors look like? Tell me your vision and I'll bring it to life!";
+
+// Hazel specifies vision without repeating "draw"
+const step2Specific = detectArtRequest('voxel Minecraft style with glowing purple neon eyes', creativeDirectionPrompt);
+assert.strictEqual(step2Specific.isArt, true, 'Detects art intent in Step 2 of creative direction');
+assert.strictEqual(step2Specific.isVague, false, 'Considers specific vision not vague');
+assert.strictEqual(step2Specific.subject, 'voxel Minecraft style with glowing purple neon eyes', 'Captures vision accurately');
+
+// Hazel responds with "surprise me"
+const step2Surprise = detectArtRequest('surprise me', creativeDirectionPrompt);
+assert.strictEqual(step2Surprise.isArt, true, 'Detects art intent on surprise me');
+assert.strictEqual(step2Surprise.isVague, false, 'Automatically supplies creative subject to prevent question loop');
+assert.ok(step2Surprise.subject.includes('dragon'), 'Supplies an exciting surprise subject');
+
+// Test generateEmpatheticOfflineStream Turn 2 continuation
+const offlineStep2 = generateEmpatheticOfflineStream(
+  'voxel Minecraft castle with redstone torches',
+  'Hazel',
+  'Sparky',
+  false,
+  10,
+  undefined,
+  'cute',
+  creativeDirectionPrompt
+);
+assert.ok(offlineStep2.response.includes('![Generated Art]('), 'Offline stream delivers artwork in Step 2 of creative direction');
+assert.ok(offlineStep2.response.includes('pollinations.ai/prompt/'), 'Uses Pollinations Flux URL in Step 2');
 
 // Test Pollinations image URL builder
 const fluxUrl = getPollinationsImageUrl('test prompt');

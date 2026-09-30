@@ -325,12 +325,16 @@ export const ChatStage: React.FC<ChatStageProps> = ({
             type="button"
             onClick={() => {
               const trimmed = inputText.trim();
-              if (trimmed && !/^draw\b/i.test(trimmed)) {
-                onSendMessage(`Draw a ${trimmed}`, selectedImages);
-                setInputText('');
-                setSelectedImages([]);
-              } else if (trimmed && /^draw\b/i.test(trimmed)) {
-                onSendMessage(trimmed, selectedImages);
+              if (trimmed) {
+                let promptToSend = trimmed;
+                if (!/^(draw|paint|sketch|illustrate|render|imagine|generate|create|make)\b/i.test(trimmed)) {
+                  if (/^(a|an|the)\b/i.test(trimmed)) {
+                    promptToSend = `Draw ${trimmed}`;
+                  } else {
+                    promptToSend = `Draw a ${trimmed}`;
+                  }
+                }
+                onSendMessage(promptToSend, selectedImages);
                 setInputText('');
                 setSelectedImages([]);
               } else {
