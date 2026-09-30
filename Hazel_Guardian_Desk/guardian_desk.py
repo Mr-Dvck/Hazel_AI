@@ -63,6 +63,12 @@ class GuardianDeskApp:
             cleaned = f"http://{cleaned}"
         while cleaned.endswith("/"):
             cleaned = cleaned[:-1]
+        for subpath in ["/api/bridge/reply", "/api/bridge/dispatch", "/api/bridge", "/api/sync", "/api/guardian", "/api", "/guardian/desk", "/guardian"]:
+            if cleaned.endswith(subpath):
+                cleaned = cleaned[:-len(subpath)]
+                while cleaned.endswith("/"):
+                    cleaned = cleaned[:-1]
+                break
         return cleaned
 
     def __init__(self, root):
@@ -171,6 +177,7 @@ class GuardianDeskApp:
         self.server_entry.insert(0, self.server_url)
         self.server_entry.pack(side="left", padx=(0, 4))
         self.server_entry.bind("<Return>", lambda e: self.apply_server_url())
+        self.server_entry.bind("<FocusOut>", lambda e: self.apply_server_url())
 
         btn_apply_srv = tk.Button(
             srv_frame,
@@ -473,6 +480,7 @@ class GuardianDeskApp:
             insertbackground="#ffffff",
         )
         self.txt_reply.pack(fill="both", expand=True, pady=(0, 8))
+        self.txt_reply.bind("<Control-Return>", lambda e: (self.send_reply(), "break")[1])
 
         # Bottom Action Bar with big prominent send button
         act_bar = tk.Frame(right_col, bg=self.colors["bg_card"])
@@ -558,10 +566,20 @@ class GuardianDeskApp:
         self.send_reply()
 
     def send_reply(self):
+        # Prevent duplicate in-flight dispatches
+        if hasattr(self, "btn_send") and str(self.btn_send["state"]) == "disabled":
+            return
+
         msg = self.txt_reply.get("1.0", "end").strip()
         if not msg:
             messagebox.showwarning("Empty Message", "Please type a genuine, heartfelt note for Hazel.")
             return
+
+        # Ensure latest input from server entry is applied and cleaned
+        if hasattr(self, "server_entry"):
+            entry_val = self.server_entry.get().strip()
+            if entry_val:
+                self.server_url = self.clean_server_url(entry_val)
 
         sender = self.sender_var.get()
         note_id = self.selected_note.get("id") if self.selected_note else None
@@ -608,9 +626,14 @@ class GuardianDeskApp:
             except urllib.error.HTTPError as he:
                 try:
                     err_body = he.read().decode("utf-8", errors="replace")
+                    try:
+                        err_json = json.loads(err_body)
+                        err_msg = err_json.get("error") or err_json.get("message") or err_body
+                    except Exception:
+                        err_msg = err_body
                 except Exception:
-                    err_body = str(he)
-                err_text = f"HTTP {he.code}: {he.reason}\n{err_body}"
+                    err_msg = str(he)
+                err_text = f"HTTP {he.code}: {err_msg}"
                 print(f"[GuardianDesk] HTTP Error: {err_text}")
                 self.root.after(0, lambda: self.on_reply_failed(err_text, url))
             except urllib.error.URLError as ue:
@@ -633,22 +656,28 @@ class GuardianDeskApp:
                 winsound.MessageBeep(winsound.MB_ICONASTERISK)
             except Exception:
                 pass
-        messagebox.showinfo("Note Sent Successfully", "✨ Note sent successfully to Hazel's screen!")
-        self.root.after(5000, lambda: self.lbl_status.config(text=""))
         self.manual_refresh()
+        try:
+            messagebox.showinfo("Note Sent Successfully", "✨ Note sent successfully to Hazel's screen!")
+        except Exception:
+            pass
+        self.root.after(5000, lambda: self.lbl_status.config(text=""))
 
     def on_reply_failed(self, error_msg, url=""):
         self.btn_send.config(state="normal", text="💌 Send Note to Hazel's Screen")
         short_err = error_msg.split("\n")[0]
         self.lbl_status.config(text=f"Failed: {short_err[:50]}", fg=self.colors["red"])
         target_info = f"\n\nTarget URL: {url}" if url else ""
-        messagebox.showerror(
-            "Note Delivery Failed",
-            f"Could not send note to Hazel's screen.\n\nError: {error_msg}{target_info}\n\nPlease check server URL and connectivity."
-        )
+        try:
+            messagebox.showerror(
+                "Note Delivery Failed",
+                f"Could not send note to Hazel's screen.\n\nError: {error_msg}{target_info}\n\nPlease check server URL and connectivity."
+            )
+        except Exception:
+            pass
 
     def open_web_portal(self):
-        webbrowser.open(f"{self.server_url}/guardian/desk")
+        webbrowser.open(f"{self.clean_server_url(self.server_url)}/guardian/desk")
 
     def manual_refresh(self):
         threading.Thread(target=self.fetch_all_data, daemon=True).start()
@@ -684,9 +713,10 @@ class GuardianDeskApp:
             break
 
     def fetch_all_data(self):
+        base_url = self.clean_server_url(self.server_url)
         try:
             # 1. Fetch Notes
-            notes_url = f"{self.server_url}/api/bridge/dispatch?limit=50"
+            notes_url = f"{base_url}/api/bridge/dispatch?limit=50"
             req = urllib.request.Request(notes_url, headers={"User-Agent": "HazelGuardianDesk/1.0"})
             with urllib.request.urlopen(req, timeout=4) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
@@ -704,7 +734,7 @@ class GuardianDeskApp:
             self.notes = new_notes
 
             # 2. Fetch Replies
-            replies_url = f"{self.server_url}/api/bridge/reply?all=true"
+            replies_url = f"{base_url}/api/bridge/reply?all=true"
             req = urllib.request.Request(replies_url, headers={"User-Agent": "HazelGuardianDesk/1.0"})
             with urllib.request.urlopen(req, timeout=4) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
@@ -713,7 +743,7 @@ class GuardianDeskApp:
             # 3. Fetch Live Guardian Insight & Sync State
             got_insight = False
             try:
-                sync_url = f"{self.server_url}/api/sync?userId=hazel_default"
+                sync_url = f"{base_url}/api/sync?userId=hazel_default"
                 req_sync = urllib.request.Request(sync_url, headers={"User-Agent": "HazelGuardianDesk/1.0"})
                 with urllib.request.urlopen(req_sync, timeout=4) as resp_sync:
                     sync_data = json.loads(resp_sync.read().decode("utf-8"))
@@ -725,7 +755,7 @@ class GuardianDeskApp:
 
             if not got_insight:
                 try:
-                    g_url = f"{self.server_url}/api/guardian"
+                    g_url = f"{base_url}/api/guardian"
                     req_g = urllib.request.Request(g_url, headers={"User-Agent": "HazelGuardianDesk/1.0"})
                     with urllib.request.urlopen(req_g, timeout=4) as resp_g:
                         g_data = json.loads(resp_g.read().decode("utf-8"))
@@ -849,7 +879,8 @@ class GuardianDeskApp:
             for r in self.replies[:6]:
                 ts = time.strftime("%I:%M %p", time.localtime(r.get("timestamp", 0) / 1000))
                 sender = r.get("sender", "Tim")
-                msg = (r.get("message", "")[:50] + "...") if len(r.get("message", "")) > 50 else r.get("message", "")
+                r_msg = r.get("message") or r.get("content") or ""
+                msg = (r_msg[:50] + "...") if len(r_msg) > 50 else r_msg
                 self.replies_listbox.insert("end", f"{ts} [{sender}]: \"{msg}\"")
 
         # Audio chime if new note arrived

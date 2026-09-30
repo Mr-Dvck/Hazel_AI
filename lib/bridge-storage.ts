@@ -5,8 +5,9 @@ import { BridgeNote, BridgeReply, BridgeState } from '@/types';
 const DATA_DIR = path.join(process.cwd(), 'data');
 const STATE_FILE = path.join(DATA_DIR, 'bridge_state.json');
 
-// In-memory cache for fast responsive API calls
+// In-memory cache with cross-process disk freshness check
 let inMemoryState: BridgeState | null = null;
+let lastMtime: number = 0;
 
 function ensureDataDir() {
   try {
@@ -19,13 +20,16 @@ function ensureDataDir() {
 }
 
 function loadState(): BridgeState {
-  if (inMemoryState) return inMemoryState;
-
   ensureDataDir();
   try {
     if (fs.existsSync(STATE_FILE)) {
+      const stat = fs.statSync(STATE_FILE);
+      if (inMemoryState && stat.mtimeMs <= lastMtime) {
+        return inMemoryState;
+      }
       const raw = fs.readFileSync(STATE_FILE, 'utf-8');
       inMemoryState = JSON.parse(raw);
+      lastMtime = stat.mtimeMs;
       if (inMemoryState) return inMemoryState;
     }
   } catch (err) {
@@ -45,6 +49,9 @@ function saveState(state: BridgeState): void {
   ensureDataDir();
   try {
     fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), 'utf-8');
+    if (fs.existsSync(STATE_FILE)) {
+      lastMtime = fs.statSync(STATE_FILE).mtimeMs;
+    }
   } catch (err) {
     console.error('Failed to write bridge_state.json:', err);
   }

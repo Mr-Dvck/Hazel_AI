@@ -100,10 +100,11 @@ export default function HomePage() {
       const res = await fetch('/api/bridge/reply?poll=1&markDelivered=true');
       if (res.ok) {
         const data = await res.json();
-        if (data.replies && data.replies.length > 0) {
+        const incomingReplies = data.replies || [];
+        if (incomingReplies.length > 0) {
           setMessages((prev) => {
             const existingIds = new Set(prev.map((m) => m.id));
-            const newItems: ChatMessage[] = data.replies
+            const newItems: ChatMessage[] = incomingReplies
               .filter((r: any) => !existingIds.has(r.id))
               .map((r: any) => ({
                 id: r.id,
@@ -117,12 +118,16 @@ export default function HomePage() {
             Storage.setMessages(next);
 
             // Celebration confetti for receiving loving reassurance from Tim & Mom!
-            confetti({
-              particleCount: 80,
-              spread: 75,
-              origin: { y: 0.6 },
-              colors: ['#f59e0b', '#ec4899', '#8b5cf6', '#10b981'],
-            });
+            try {
+              confetti({
+                particleCount: 80,
+                spread: 75,
+                origin: { y: 0.6 },
+                colors: ['#f59e0b', '#ec4899', '#8b5cf6', '#10b981'],
+              });
+            } catch {
+              // Non-blocking confetti
+            }
             return next;
           });
         }

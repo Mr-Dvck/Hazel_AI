@@ -308,7 +308,23 @@ assert.ok(fs.existsSync(path.join(desktopAppDir, 'assets', 'guardian_desk_logo.i
 assert.ok(fs.existsSync(path.join(desktopAppDir, 'assets', 'guardian_desk_logo.png')), 'guardian_desk_logo.png exists');
 assert.ok(fs.existsSync(shortcutPath), 'Hazel Guardian Desk.lnk desktop shortcut exists');
 
-console.log('  ✅ Pass: Standalone Windows desktop app, assets, and .lnk shortcut verified\n');
+// Verify synchronization and required handler signatures
+const localDeskPy = path.join(__dirname, '../Hazel_Guardian_Desk/guardian_desk.py');
+const desktopDeskPy = path.join(desktopAppDir, 'guardian_desk.py');
+assert.strictEqual(
+  fs.readFileSync(localDeskPy, 'utf-8'),
+  fs.readFileSync(desktopDeskPy, 'utf-8'),
+  'Local repository and Desktop guardian_desk.py are synchronized and identical'
+);
+const deskPySrc = fs.readFileSync(localDeskPy, 'utf-8');
+assert.ok(deskPySrc.includes('clean_server_url'), 'guardian_desk.py defines clean_server_url');
+assert.ok(deskPySrc.includes('send_custom_reply'), 'guardian_desk.py defines send_custom_reply handler');
+assert.ok(deskPySrc.includes('send_reply'), 'guardian_desk.py defines send_reply handler');
+assert.ok(deskPySrc.includes('on_reply_sent'), 'guardian_desk.py defines on_reply_sent confirmation');
+assert.ok(deskPySrc.includes('on_reply_failed'), 'guardian_desk.py defines on_reply_failed visual error handling');
+assert.ok(deskPySrc.includes('self.btn_send'), 'guardian_desk.py manages self.btn_send state');
+
+console.log('  ✅ Pass: Standalone Windows desktop app, assets, synchronization, and handlers verified\n');
 
 // Test 9: Dynamic Companion Name Audit & Reset to Beginning Verification
 console.log('▶ Test 9: Dynamic Companion Name Audit & Reset to Beginning Verification');

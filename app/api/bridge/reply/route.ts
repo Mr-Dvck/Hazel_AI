@@ -55,10 +55,18 @@ export async function GET(req: NextRequest) {
     if (poll) {
       // Return new replies awaiting delivery to Hazel's chat screen
       const replies = BridgeStorage.getUndeliveredReplies(markDelivered);
+      const allReplies = BridgeStorage.getAllReplies();
+      const pending = allReplies.filter((r) => !r.deliveredToHazel);
+      const delivered = allReplies.filter((r) => r.deliveredToHazel);
       return NextResponse.json({
         success: true,
         replies,
+        pending,
+        delivered,
         count: replies.length,
+        total: allReplies.length,
+        pendingCount: pending.length,
+        deliveredCount: delivered.length,
       });
     }
 

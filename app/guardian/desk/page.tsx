@@ -479,7 +479,11 @@ export default function GuardianDeskPage() {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-emerald-400 font-medium">
+                  <span
+                    className={`text-xs font-medium ${
+                      statusMessage.startsWith('✨') ? 'text-emerald-400' : 'text-rose-400'
+                    }`}
+                  >
                     {statusMessage}
                   </span>
 
@@ -517,7 +521,7 @@ export default function GuardianDeskPage() {
                         <span>💖 {reply.sender}</span>
                         <span>{new Date(reply.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                       </div>
-                      <p className="text-gray-200 italic">"{reply.message}"</p>
+                      <p className="text-gray-200 italic">"{reply.message || reply.content}"</p>
                     </div>
                   ))
                 )}
