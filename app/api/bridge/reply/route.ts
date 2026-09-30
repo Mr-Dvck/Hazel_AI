@@ -7,16 +7,14 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const {
-      sender = 'Tim',
-      message,
-      noteId,
-      reassuranceType = 'love',
-    } = body;
+    const sender = body.sender || 'Tim';
+    const message = (body.message ?? body.content ?? body.text ?? '').toString().trim();
+    const noteId = body.noteId;
+    const reassuranceType = body.reassuranceType || 'love';
 
-    if (!message || typeof message !== 'string' || !message.trim()) {
+    if (!message) {
       return NextResponse.json(
-        { success: false, error: 'Reply message cannot be empty' },
+        { success: false, error: 'Reply message or content cannot be empty' },
         { status: 400 }
       );
     }
@@ -24,6 +22,7 @@ export async function POST(req: NextRequest) {
     const reply = BridgeStorage.addReply({
       sender,
       message,
+      content: message,
       noteId,
       reassuranceType,
     });
@@ -48,7 +47,6 @@ export async function GET(req: NextRequest) {
     const poll = searchParams.get('poll') === '1' || searchParams.get('poll') === 'true';
     const markDelivered = searchParams.get('markDelivered') !== 'false';
     const markReadId = searchParams.get('markRead');
-    const getAll = searchParams.get('all') === 'true';
 
     if (markReadId) {
       BridgeStorage.markReplyRead(markReadId);
@@ -64,21 +62,19 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    if (getAll) {
-      const replies = BridgeStorage.getAllReplies();
-      return NextResponse.json({
-        success: true,
-        replies,
-        total: replies.length,
-      });
-    }
+    // Return all pending and delivered notes with clean JSON
+    const allReplies = BridgeStorage.getAllReplies();
+    const pending = allReplies.filter((r) => !r.deliveredToHazel);
+    const delivered = allReplies.filter((r) => r.deliveredToHazel);
 
-    // Default: return undelivered replies without marking delivered unless requested
-    const replies = BridgeStorage.getUndeliveredReplies(markDelivered);
     return NextResponse.json({
       success: true,
-      replies,
-      count: replies.length,
+      replies: allReplies,
+      pending,
+      delivered,
+      total: allReplies.length,
+      pendingCount: pending.length,
+      deliveredCount: delivered.length,
     });
   } catch (error: any) {
     console.error('Error in /api/bridge/reply GET:', error);

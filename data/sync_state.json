@@ -18,7 +18,7 @@
         "detail": "Drawing dragons"
       }
     ],
-    "syncedAt": 1790467383891
+    "syncedAt": 1790791068231
   },
   "hazel_profile_customized": {
     "profile": {
@@ -32,8 +32,8 @@
       "companionAvatar": "🌟",
       "bioOrMotto": "Bold, creative, and invincible! ✨",
       "favoriteColor": "Sunset Amber",
-      "createdAt": 1790208183902,
-      "lastActive": 1790467383902
+      "createdAt": 1790531868236,
+      "lastActive": 1790791068236
     },
     "monsters": [
       {
@@ -43,7 +43,7 @@
       }
     ],
     "memories": [],
-    "syncedAt": 1790467383903
+    "syncedAt": 1790791068236
   },
   "hazel_birthday_user": {
     "profile": {
@@ -57,8 +57,8 @@
       "companionAvatar": "🌟",
       "bioOrMotto": "Bold, creative, and invincible! ✨",
       "favoriteColor": "Sunset Amber",
-      "createdAt": 1790208183902,
-      "lastActive": 1790467383902,
+      "createdAt": 1790531868236,
+      "lastActive": 1790791068236,
       "birthday": "May 14, 2015"
     },
     "monsters": [
@@ -76,7 +76,7 @@
         "detail": "May 14, 2015"
       }
     ],
-    "syncedAt": 1790467388275
+    "syncedAt": 1790791071568
   },
   "hazel_default": {
     "profile": {
@@ -86,7 +86,7 @@
     "monsters": [],
     "memories": [],
     "guardianInsight": {
-      "lastUpdated": 1790467394729,
+      "lastUpdated": 1790791078015,
       "howHazelIsDoing": {
         "currentMoodAndEnergy": "Sad / Overwhelmed (Low Energy)",
         "whatsWeighingOnHer": "Hazel explicitly stated she was sad in chat (\"i told the AI I was sad today\"). She expressed feeling down and is carrying emotional sorrow that needs gentle, heartfelt comfort without pressure.",
@@ -100,8 +100,8 @@
         "summary": "Hazel explicitly shared feeling sad or down in recent chats (\"i told the AI I was sad today\"). Send genuine reassurance.",
         "recentTriggers": [
           {
-            "id": "trig-1790467394729-c0m",
-            "timestamp": 1790467394729,
+            "id": "trig-1790791078015-xzm",
+            "timestamp": 1790791078014,
             "category": "emotional_distress",
             "severity": "Moderate",
             "snippet": "i told the AI I was sad today",
@@ -149,6 +149,6 @@
         }
       ]
     },
-    "syncedAt": 1790467394730
+    "syncedAt": 1790791078015
   }
 }

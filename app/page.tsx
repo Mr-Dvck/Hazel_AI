@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   UserProfile,
   ChatMessage,
@@ -94,48 +94,50 @@ export default function HomePage() {
     }
   };
 
-  // Periodic poll for warm glowing notes from Tim & Mom's Guardian Desk
-  useEffect(() => {
-    const pollBridgeReplies = async () => {
-      try {
-        const res = await fetch('/api/bridge/reply?poll=1&markDelivered=true');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.replies && data.replies.length > 0) {
-            setMessages((prev) => {
-              const existingIds = new Set(prev.map((m) => m.id));
-              const newItems: ChatMessage[] = data.replies
-                .filter((r: any) => !existingIds.has(r.id))
-                .map((r: any) => ({
-                  id: r.id,
-                  role: 'assistant' as const,
-                  content: r.message,
-                  timestamp: r.timestamp,
-                  bridgeReply: r,
-                }));
-              if (newItems.length === 0) return prev;
-              const next = [...prev, ...newItems];
-              Storage.setMessages(next);
+  // Check and inject warm glowing notes from Tim & Mom's Guardian Desk
+  const checkBridgeReplies = useCallback(async () => {
+    try {
+      const res = await fetch('/api/bridge/reply?poll=1&markDelivered=true');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.replies && data.replies.length > 0) {
+          setMessages((prev) => {
+            const existingIds = new Set(prev.map((m) => m.id));
+            const newItems: ChatMessage[] = data.replies
+              .filter((r: any) => !existingIds.has(r.id))
+              .map((r: any) => ({
+                id: r.id,
+                role: 'assistant' as const,
+                content: r.message || r.content || '',
+                timestamp: r.timestamp || Date.now(),
+                bridgeReply: r,
+              }));
+            if (newItems.length === 0) return prev;
+            const next = [...prev, ...newItems];
+            Storage.setMessages(next);
 
-              // Celebration confetti for receiving loving reassurance from Tim & Mom!
-              confetti({
-                particleCount: 80,
-                spread: 75,
-                origin: { y: 0.6 },
-                colors: ['#f59e0b', '#ec4899', '#8b5cf6', '#10b981'],
-              });
-              return next;
+            // Celebration confetti for receiving loving reassurance from Tim & Mom!
+            confetti({
+              particleCount: 80,
+              spread: 75,
+              origin: { y: 0.6 },
+              colors: ['#f59e0b', '#ec4899', '#8b5cf6', '#10b981'],
             });
-          }
+            return next;
+          });
         }
-      } catch (err) {
-        // Non-blocking
       }
-    };
-
-    const interval = setInterval(pollBridgeReplies, 3000);
-    return () => clearInterval(interval);
+    } catch (err) {
+      // Non-blocking
+    }
   }, []);
+
+  // Periodic poll for warm glowing notes from Tim & Mom's Guardian Desk (every 5 seconds + immediate on mount)
+  useEffect(() => {
+    checkBridgeReplies();
+    const interval = setInterval(checkBridgeReplies, 5000);
+    return () => clearInterval(interval);
+  }, [checkBridgeReplies]);
 
   // Dispatch note from Hazel to Tim's desk
   const handleDispatchBridgeNote = async (text: string) => {
@@ -320,6 +322,8 @@ export default function HomePage() {
     Storage.syncToServer();
     // Run non-intrusive background guardian evaluation pass
     runBackgroundGuardianEvaluation(nextMessages);
+    // Check for pending bridge replies from Tim & Mom
+    checkBridgeReplies();
 
     setIsLoading(true);
 
@@ -455,6 +459,7 @@ export default function HomePage() {
       setStreamingMessage(null);
     } finally {
       setIsLoading(false);
+      checkBridgeReplies();
     }
   };
 

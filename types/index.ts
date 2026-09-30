@@ -35,6 +35,7 @@ export interface BridgeReply {
   sender: 'Tim' | 'Mom' | 'Tim & Mom' | string;
   recipient: 'Hazel';
   message: string;
+  content?: string;
   timestamp: number;
   deliveredToHazel: boolean;
   readByHazel: boolean;

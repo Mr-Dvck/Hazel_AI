@@ -52,6 +52,19 @@ def save_config(cfg):
 
 
 class GuardianDeskApp:
+    @staticmethod
+    def clean_server_url(url: str) -> str:
+        if not url:
+            return DEFAULT_SERVER_URL
+        cleaned = url.strip()
+        while cleaned.endswith("/"):
+            cleaned = cleaned[:-1]
+        if not cleaned.startswith("http://") and not cleaned.startswith("https://"):
+            cleaned = f"http://{cleaned}"
+        while cleaned.endswith("/"):
+            cleaned = cleaned[:-1]
+        return cleaned
+
     def __init__(self, root):
         self.root = root
         self.root.title("Hazel Guardian Desk — Reassurance Console")
@@ -68,7 +81,7 @@ class GuardianDeskApp:
 
         # Config & State
         self.config = load_config()
-        self.server_url = self.config.get("server_url", DEFAULT_SERVER_URL).rstrip("/")
+        self.server_url = self.clean_server_url(self.config.get("server_url", DEFAULT_SERVER_URL))
         self.notes = []
         self.replies = []
         self.seen_note_ids = set()
@@ -468,7 +481,7 @@ class GuardianDeskApp:
         self.lbl_status = tk.Label(act_bar, text="", font=("Segoe UI", 9), fg=self.colors["green"], bg=self.colors["bg_card"])
         self.lbl_status.pack(side="left")
 
-        btn_send = tk.Button(
+        self.btn_send = tk.Button(
             act_bar,
             text="💌 Send Note to Hazel's Screen",
             font=("Segoe UI", 10, "bold"),
@@ -481,7 +494,7 @@ class GuardianDeskApp:
             pady=8,
             command=self.send_reply,
         )
-        btn_send.pack(side="right")
+        self.btn_send.pack(side="right")
 
         # Recent delivered notes feed
         tk.Label(right_col, text="Recent Delivered Notes to Hazel:", font=("Segoe UI", 8, "bold"), fg=self.colors["text_muted"], bg=self.colors["bg_card"]).pack(anchor="w", pady=(8, 2))
@@ -498,8 +511,8 @@ class GuardianDeskApp:
         self.replies_listbox.pack(fill="x")
 
     def toggle_server_preset(self):
-        current = self.server_entry.get().strip().rstrip("/")
-        if "localhost" in current:
+        current = self.clean_server_url(self.server_entry.get().strip())
+        if "localhost" in current or "127.0.0.1" in current:
             target = "https://hazel-ai.vercel.app"
             self.btn_toggle_srv.config(text="💻 Localhost", fg="#a78bfa")
         else:
@@ -511,10 +524,10 @@ class GuardianDeskApp:
         self.apply_server_url()
 
     def apply_server_url(self):
-        new_url = self.server_entry.get().strip().rstrip("/")
-        if not new_url:
-            new_url = DEFAULT_SERVER_URL
-        self.server_url = new_url
+        raw_url = self.server_entry.get().strip()
+        self.server_url = self.clean_server_url(raw_url)
+        self.server_entry.delete(0, "end")
+        self.server_entry.insert(0, self.server_url)
         self.config["server_url"] = self.server_url
         recent = self.config.get("recent_urls", [])
         if self.server_url not in recent:
@@ -540,6 +553,10 @@ class GuardianDeskApp:
             self.txt_note_detail.insert("1.0", detail)
             self.txt_note_detail.config(state="disabled")
 
+    def send_custom_reply(self):
+        """Handler alias for custom reply dispatch."""
+        self.send_reply()
+
     def send_reply(self):
         msg = self.txt_reply.get("1.0", "end").strip()
         if not msg:
@@ -549,40 +566,86 @@ class GuardianDeskApp:
         sender = self.sender_var.get()
         note_id = self.selected_note.get("id") if self.selected_note else None
 
+        # Build payload with both message and content conventions
         payload = {
             "sender": sender,
             "message": msg,
+            "content": msg,
+            "text": msg,
             "noteId": note_id,
             "reassuranceType": "love",
         }
 
+        # Provide instant visual confirmation that dispatch is in flight
+        self.btn_send.config(state="disabled", text="⏳ Sending to Hazel...")
+        self.lbl_status.config(text="Sending note to Hazel's screen...", fg=self.colors["amber"])
+
         def post():
+            target_base = self.clean_server_url(self.server_url)
+            url = f"{target_base}/api/bridge/reply"
+            print(f"[GuardianDesk] POST {url} sender={sender} length={len(msg)}")
             try:
-                url = f"{self.server_url}/api/bridge/reply"
+                data_bytes = json.dumps(payload).encode("utf-8")
                 req = urllib.request.Request(
                     url,
-                    data=json.dumps(payload).encode("utf-8"),
-                    headers={"Content-Type": "application/json", "User-Agent": "HazelGuardianDesk/1.0"},
+                    data=data_bytes,
+                    headers={
+                        "Content-Type": "application/json; charset=utf-8",
+                        "Accept": "application/json",
+                        "User-Agent": "HazelGuardianDesk/1.0",
+                    },
                     method="POST",
                 )
-                with urllib.request.urlopen(req, timeout=6) as resp:
-                    if resp.status == 200:
-                        self.root.after(0, self.on_reply_sent)
+                with urllib.request.urlopen(req, timeout=10) as resp:
+                    resp_code = resp.status if hasattr(resp, "status") else resp.getcode()
+                    resp_body = resp.read().decode("utf-8", errors="replace")
+                    print(f"[GuardianDesk] Response HTTP {resp_code}: {resp_body}")
+                    if 200 <= resp_code < 300:
+                        self.root.after(0, lambda: self.on_reply_sent("✨ Note sent successfully to Hazel's screen!"))
+                    else:
+                        err_text = f"Server returned HTTP {resp_code}: {resp_body}"
+                        self.root.after(0, lambda: self.on_reply_failed(err_text, url))
+            except urllib.error.HTTPError as he:
+                try:
+                    err_body = he.read().decode("utf-8", errors="replace")
+                except Exception:
+                    err_body = str(he)
+                err_text = f"HTTP {he.code}: {he.reason}\n{err_body}"
+                print(f"[GuardianDesk] HTTP Error: {err_text}")
+                self.root.after(0, lambda: self.on_reply_failed(err_text, url))
+            except urllib.error.URLError as ue:
+                err_text = f"Network Connection Error: Cannot connect to {target_base}.\n\nReason: {ue.reason}"
+                print(f"[GuardianDesk] Network Error: {err_text}")
+                self.root.after(0, lambda: self.on_reply_failed(err_text, url))
             except Exception as e:
-                self.root.after(0, lambda: self.lbl_status.config(text=f"Failed: {e}", fg="#ef4444"))
+                err_text = f"Unexpected Error: {e}"
+                print(f"[GuardianDesk] Unexpected Error: {err_text}")
+                self.root.after(0, lambda: self.on_reply_failed(err_text, url))
 
         threading.Thread(target=post, daemon=True).start()
 
-    def on_reply_sent(self):
+    def on_reply_sent(self, success_msg="✨ Note sent successfully to Hazel's screen!"):
+        self.btn_send.config(state="normal", text="💌 Send Note to Hazel's Screen")
         self.txt_reply.delete("1.0", "end")
-        self.lbl_status.config(text="✨ Note delivered directly to Hazel's screen!", fg=self.colors["green"])
+        self.lbl_status.config(text=success_msg, fg=self.colors["green"])
         if winsound:
             try:
                 winsound.MessageBeep(winsound.MB_ICONASTERISK)
             except Exception:
                 pass
-        self.root.after(4000, lambda: self.lbl_status.config(text=""))
+        messagebox.showinfo("Note Sent Successfully", "✨ Note sent successfully to Hazel's screen!")
+        self.root.after(5000, lambda: self.lbl_status.config(text=""))
         self.manual_refresh()
+
+    def on_reply_failed(self, error_msg, url=""):
+        self.btn_send.config(state="normal", text="💌 Send Note to Hazel's Screen")
+        short_err = error_msg.split("\n")[0]
+        self.lbl_status.config(text=f"Failed: {short_err[:50]}", fg=self.colors["red"])
+        target_info = f"\n\nTarget URL: {url}" if url else ""
+        messagebox.showerror(
+            "Note Delivery Failed",
+            f"Could not send note to Hazel's screen.\n\nError: {error_msg}{target_info}\n\nPlease check server URL and connectivity."
+        )
 
     def open_web_portal(self):
         webbrowser.open(f"{self.server_url}/guardian/desk")

@@ -92,21 +92,23 @@ export default function GuardianDeskPage() {
         body: JSON.stringify({
           sender: replySender,
           message: replyText.trim(),
+          content: replyText.trim(),
           noteId: selectedNote?.id,
           reassuranceType: 'love',
         }),
       });
 
       if (res.ok) {
-        setStatusMessage("✨ Note delivered directly to Hazel's screen!");
+        setStatusMessage("✨ Note sent successfully to Hazel's screen!");
         setReplyText('');
         fetchBridgeData();
-        setTimeout(() => setStatusMessage(''), 4000);
+        setTimeout(() => setStatusMessage(''), 5000);
       } else {
-        setStatusMessage('Failed to deliver note. Check connection.');
+        const errJson = await res.json().catch(() => ({}));
+        setStatusMessage(errJson.error || 'Failed to deliver note. Check connection.');
       }
-    } catch (err) {
-      setStatusMessage('Error delivering note.');
+    } catch (err: any) {
+      setStatusMessage(`Error delivering note: ${err?.message || 'Network error'}`);
     } finally {
       setIsSendingReply(false);
     }

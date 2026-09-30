@@ -420,7 +420,7 @@ const MessageBubble: React.FC<{
               </div>
               <div>
                 <div className="text-xs sm:text-sm font-extrabold text-amber-300 tracking-wide uppercase flex items-center gap-2">
-                  <span>Warm Note from {reply.sender}</span>
+                  <span>Special Note from {reply.sender || 'Tim & Mom'}</span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-200 border border-amber-400/40">
                     Guardian Desk
                   </span>
@@ -434,7 +434,7 @@ const MessageBubble: React.FC<{
           </div>
 
           <p className="text-base sm:text-lg font-semibold text-white leading-relaxed italic px-1 py-1">
-            "{reply.message}"
+            "{reply.message || reply.content || message.content}"
           </p>
 
           <div className="mt-3 pt-2.5 border-t border-amber-400/15 flex items-center justify-between text-xs text-amber-300/90 font-medium">

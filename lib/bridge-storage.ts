@@ -110,7 +110,8 @@ export const BridgeStorage = {
 
   addReply(data: {
     sender: 'Tim' | 'Mom' | 'Tim & Mom' | string;
-    message: string;
+    message?: string;
+    content?: string;
     noteId?: string;
     reassuranceType?: 'love' | 'courage' | 'safe_harbor' | 'custom' | string;
   }): BridgeReply {
@@ -124,12 +125,15 @@ export const BridgeStorage = {
       }
     }
 
+    const text = (data.message || data.content || '').trim();
+
     const newReply: BridgeReply = {
       id: `br-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       noteId: data.noteId,
       sender: data.sender || 'Tim',
       recipient: 'Hazel',
-      message: data.message.trim(),
+      message: text,
+      content: text,
       timestamp: Date.now(),
       deliveredToHazel: false,
       readByHazel: false,

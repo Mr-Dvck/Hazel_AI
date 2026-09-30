@@ -294,6 +294,42 @@ async function testApi() {
   const secondPollRes = await bridgeReplyGet(secondPollReq as any);
   const secondPollData = await secondPollRes.json();
   assert.strictEqual(secondPollData.replies.length, 0, 'No remaining undelivered replies after delivery');
+
+  // Test reply with content payload format (as sent by guardian_desk.py)
+  const contentReplyReq = new Request('http://localhost/api/bridge/reply', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sender: 'Mom',
+      content: 'Mom loves you so much! You are brave and wonderful.',
+      noteId: dispatchData.note.id,
+      reassuranceType: 'love',
+    }),
+  });
+  const contentReplyRes = await bridgeReplyPost(contentReplyReq as any);
+  assert.strictEqual(contentReplyRes.status, 200, 'Reply with content field returns 200 OK');
+  const contentReplyData = await contentReplyRes.json();
+  assert.strictEqual(contentReplyData.reply.message, 'Mom loves you so much! You are brave and wonderful.');
+  assert.strictEqual(contentReplyData.reply.content, 'Mom loves you so much! You are brave and wonderful.');
+
+  // Test validation error when message/content is empty
+  const emptyReplyReq = new Request('http://localhost/api/bridge/reply', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sender: 'Tim', message: '   ' }),
+  });
+  const emptyReplyRes = await bridgeReplyPost(emptyReplyReq as any);
+  assert.strictEqual(emptyReplyRes.status, 400, 'Empty reply rejected with 400');
+
+  // Test GET /api/bridge/reply returns all pending and delivered notes with clean JSON
+  const allRepliesReq = new Request('http://localhost/api/bridge/reply', { method: 'GET' });
+  const allRepliesRes = await bridgeReplyGet(allRepliesReq as any);
+  assert.strictEqual(allRepliesRes.status, 200, 'GET all replies returns 200 OK');
+  const allRepliesData = await allRepliesRes.json();
+  assert.ok(Array.isArray(allRepliesData.replies), 'replies returned as array');
+  assert.ok(Array.isArray(allRepliesData.pending), 'pending returned as array');
+  assert.ok(Array.isArray(allRepliesData.delivered), 'delivered returned as array');
+  assert.ok(allRepliesData.pending.some((r: any) => r.id === contentReplyData.reply.id), 'Mom reply is in pending list');
   console.log('  ✅ Pass: Two-way reply delivery to Hazel\'s screen verified\n');
 
   // Test 11: Bridge Status Overview API
