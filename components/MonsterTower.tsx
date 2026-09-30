@@ -22,13 +22,13 @@ export const MonsterTower: React.FC<MonsterTowerProps> = ({
   const progressPct = Math.round((unlockedCount / monsters.length) * 100);
 
   return (
-    <aside className="w-full h-full flex flex-col bg-black/60 backdrop-blur-xl border border-white/10 rounded-3xl p-4 sm:p-5 shadow-2xl overflow-hidden">
+    <aside className="w-full h-full flex flex-col bg-black/75 backdrop-blur-2xl border border-white/15 rounded-3xl p-4 sm:p-5 shadow-2xl shadow-black/80 ring-1 ring-white/10 overflow-hidden">
       {/* Tower Header */}
       <div className="flex items-center justify-between pb-3 border-b border-white/10">
         <div>
           <div className="flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-amber-400" />
-            <h2 className="text-sm font-bold tracking-wide text-white uppercase">
+            <Trophy className="w-4 h-4 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
+            <h2 className="text-sm font-bold tracking-wide text-white uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">
               Resilience Tower
             </h2>
           </div>
@@ -37,7 +37,7 @@ export const MonsterTower: React.FC<MonsterTowerProps> = ({
           </p>
         </div>
         <div className="text-right">
-          <span className="text-xs font-bold text-amber-300">
+          <span className="text-xs font-bold text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]">
             {unlockedCount}/10
           </span>
           <p className="text-[10px] text-gray-400">Awakened</p>
@@ -58,7 +58,7 @@ export const MonsterTower: React.FC<MonsterTowerProps> = ({
             <span>{Math.max(0, nextLocked.requiredMessages - totalMessages)} chats away</span>
           </div>
         ) : (
-          <div className="text-[10px] text-amber-300 text-center mt-1 font-semibold">
+          <div className="text-[10px] text-amber-300 text-center mt-1 font-semibold drop-shadow-[0_0_10px_rgba(251,191,36,0.7)]">
             ✨ Supreme Tower Complete! ✨
           </div>
         )}
@@ -76,16 +76,16 @@ export const MonsterTower: React.FC<MonsterTowerProps> = ({
               onClick={() => onSelectMonster(monster)}
               className={`w-full group relative text-left rounded-2xl p-2.5 transition-all duration-300 border ${
                 monster.unlocked
-                  ? 'bg-white/5 hover:bg-white/10 border-white/15 hover:border-white/30 shadow-lg'
+                  ? 'bg-white/5 hover:bg-white/10 border-white/20 hover:border-white/40 shadow-[0_0_16px_rgba(255,255,255,0.06)] hover:shadow-[0_0_24px_rgba(255,255,255,0.15)]'
                   : isNext
-                  ? 'bg-purple-950/20 border-purple-500/30 hover:border-purple-500/50'
+                  ? 'bg-purple-950/20 border-purple-500/40 hover:border-purple-500/60 shadow-[0_0_14px_rgba(168,85,247,0.2)]'
                   : 'bg-black/30 border-white/5 opacity-60 hover:opacity-80'
               }`}
             >
               {/* Active glow backing when unlocked */}
               {monster.unlocked && (
                 <div
-                  className="absolute inset-0 rounded-2xl opacity-10 group-hover:opacity-20 transition-opacity"
+                  className="absolute inset-0 rounded-2xl opacity-15 group-hover:opacity-30 blur-sm transition-opacity"
                   style={{ backgroundColor: monster.color }}
                 />
               )}

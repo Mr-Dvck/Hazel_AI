@@ -122,13 +122,13 @@ export const MemoryBank: React.FC<MemoryBankProps> = ({
   };
 
   return (
-    <aside className="w-full h-full flex flex-col bg-black/60 backdrop-blur-xl border border-white/10 rounded-3xl p-4 sm:p-5 shadow-2xl overflow-hidden">
+    <aside className="w-full h-full flex flex-col bg-black/75 backdrop-blur-2xl border border-white/15 rounded-3xl p-4 sm:p-5 shadow-2xl shadow-black/80 ring-1 ring-white/10 overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-white/10">
         <div>
           <div className="flex items-center gap-2">
-            <Bookmark className="w-4 h-4 text-cyan-400" />
-            <h2 className="text-sm font-bold tracking-wide text-white uppercase">
+            <Bookmark className="w-4 h-4 text-cyan-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.6)]" />
+            <h2 className="text-sm font-bold tracking-wide text-white uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">
               Memory Bank
             </h2>
           </div>
@@ -138,7 +138,7 @@ export const MemoryBank: React.FC<MemoryBankProps> = ({
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-1.5 text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/30 active:scale-95 transition-all shadow-sm"
+          className="flex items-center gap-1.5 text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-500/30 active:scale-95 transition-all shadow-[0_0_14px_rgba(0,240,255,0.25)] hover:shadow-[0_0_20px_rgba(0,240,255,0.45)]"
           title="Add a new memory or passion"
         >
           <Plus className="w-3.5 h-3.5" />
@@ -205,7 +205,7 @@ export const MemoryBank: React.FC<MemoryBankProps> = ({
               <div
                 key={m.id}
                 onClick={() => handleOpenEdit(m)}
-                className="group relative rounded-2xl p-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-cyan-400/40 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-cyan-500/10"
+                className="group relative rounded-2xl p-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-cyan-400/50 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-[0_0_18px_rgba(0,240,255,0.25)]"
                 title="Click to view, expand, or edit this memory"
               >
                 <div className="flex items-start justify-between gap-2">

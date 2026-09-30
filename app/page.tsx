@@ -519,6 +519,24 @@ export default function HomePage() {
 
   const unlockedCount = monsters.filter((m) => m.unlocked).length;
 
+  const getThemeStageGlow = () => {
+    switch (profile.vibeTheme) {
+      case 'neon-red':
+      case 'sunset-violet':
+        return 'rounded-3xl shadow-[0_0_30px_rgba(255,0,51,0.22)] ring-1 ring-red-500/35';
+      case 'electric-blue':
+      case 'cyber-blue':
+        return 'rounded-3xl shadow-[0_0_30px_rgba(0,240,255,0.22)] ring-1 ring-cyan-400/35';
+      case 'neon-yellow':
+      case 'cosmic-emerald':
+        return 'rounded-3xl shadow-[0_0_30px_rgba(255,230,0,0.22)] ring-1 ring-yellow-400/35';
+      case 'neon-pink':
+      case 'cyber-pink':
+      default:
+        return 'rounded-3xl shadow-[0_0_30px_rgba(255,42,157,0.22)] ring-1 ring-pink-500/35';
+    }
+  };
+
   return (
     <div className="relative h-[100dvh] min-h-[100dvh] flex flex-col overflow-hidden text-gray-100 pb-[env(safe-area-inset-bottom)]">
       {/* Dynamic Background */}
@@ -553,7 +571,7 @@ export default function HomePage() {
           onClick={() => setMobileTab('chat')}
           className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl min-h-[44px] text-xs font-bold transition-all mx-1.5 ${
             mobileTab === 'chat'
-              ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40 shadow-[0_0_15px_rgba(255,46,147,0.3)]'
+              ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40 shadow-[0_0_15px_rgba(255,42,157,0.3)]'
               : 'text-gray-400 hover:text-gray-200'
           }`}
         >
@@ -578,7 +596,7 @@ export default function HomePage() {
       <main className="relative z-10 flex-1 w-full max-w-[1700px] mx-auto p-2 sm:p-4 md:p-6 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 md:gap-5 min-h-0 overflow-hidden">
         {/* Left Column: Monster Milestone Tower */}
         <div
-          className={`md:col-span-3 lg:col-span-3 h-[calc(100dvh-130px)] md:h-[calc(100vh-100px)] ${
+          className={`md:col-span-3 lg:col-span-3 h-[calc(100dvh-130px)] md:h-[calc(100vh-100px)] ${getThemeStageGlow()} transition-all duration-500 ${
             mobileTab === 'tower' ? 'block' : 'hidden md:block'
           }`}
         >
@@ -591,7 +609,7 @@ export default function HomePage() {
 
         {/* Center Column: Main Chat Stage */}
         <div
-          className={`md:col-span-6 lg:col-span-6 h-[calc(100dvh-130px)] md:h-[calc(100vh-100px)] ${
+          className={`md:col-span-6 lg:col-span-6 h-[calc(100dvh-130px)] md:h-[calc(100vh-100px)] ${getThemeStageGlow()} transition-all duration-500 ${
             mobileTab === 'chat' ? 'block' : 'hidden md:block'
           }`}
         >
@@ -607,7 +625,7 @@ export default function HomePage() {
 
         {/* Right Column: Persistent Memory Bank */}
         <div
-          className={`md:col-span-3 lg:col-span-3 h-[calc(100dvh-130px)] md:h-[calc(100vh-100px)] ${
+          className={`md:col-span-3 lg:col-span-3 h-[calc(100dvh-130px)] md:h-[calc(100vh-100px)] ${getThemeStageGlow()} transition-all duration-500 ${
             mobileTab === 'memory' ? 'block' : 'hidden md:block'
           }`}
         >

@@ -88,8 +88,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     {
       id: 'neon-pink',
       label: 'Neon Pink',
-      desc: 'Hot glowing magenta & neon aura',
-      color: '#ff2e93',
+      desc: 'Electric bubblegum & vibrant hot neon magenta',
+      color: '#ff2a9d',
       border: 'border-pink-500',
     },
     {
@@ -109,9 +109,9 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     {
       id: 'neon-red',
       label: 'Neon Red',
-      desc: 'Intense glowing neon crimson & power',
-      color: '#ff1744',
-      border: 'border-red-500',
+      desc: 'Pure menacing blood-crimson & scarlet FNAF red',
+      color: '#ff0033',
+      border: 'border-red-600',
     },
   ];
 
@@ -550,14 +550,20 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     onClick={() => setVibeTheme(v.id)}
                     className={`p-3.5 rounded-2xl border text-left transition-all ${
                       vibeTheme === v.id
-                        ? `bg-white/15 ${v.border} shadow-lg scale-[1.01]`
+                        ? `bg-white/15 ${v.border} scale-[1.01]`
                         : 'bg-white/5 border-white/10 hover:bg-white/10'
                     }`}
+                    style={{
+                      boxShadow: vibeTheme === v.id ? `0 0 24px ${v.color}60` : undefined,
+                    }}
                   >
                     <div className="flex items-center gap-2">
                       <span
                         className="w-3.5 h-3.5 rounded-full border border-white/40"
-                        style={{ backgroundColor: v.color }}
+                        style={{
+                          backgroundColor: v.color,
+                          boxShadow: `0 0 10px ${v.color}`,
+                        }}
                       />
                       <span className="text-xs font-bold text-white">{v.label}</span>
                     </div>

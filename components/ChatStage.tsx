@@ -293,12 +293,12 @@ export const ChatStage: React.FC<ChatStageProps> = ({
 
         <div className={`flex items-center gap-1.5 sm:gap-2 bg-obsidian-900/90 border rounded-full px-2 sm:px-3 py-1 sm:py-1.5 shadow-inner transition-all ${
           profile.vibeTheme === 'electric-blue' || profile.vibeTheme === 'cyber-blue'
-            ? 'border-cyan-400/60 shadow-[0_0_20px_rgba(0,240,255,0.35)] focus-within:border-cyan-300 focus-within:shadow-[0_0_30px_rgba(0,240,255,0.6)]'
+            ? 'border-cyan-400/80 shadow-[0_0_24px_rgba(0,240,255,0.45),0_0_48px_rgba(0,240,255,0.2)] focus-within:border-cyan-300 focus-within:shadow-[0_0_36px_rgba(0,240,255,0.8),0_0_65px_rgba(0,240,255,0.35)]'
             : profile.vibeTheme === 'neon-yellow' || profile.vibeTheme === 'cosmic-emerald'
-            ? 'border-yellow-400/60 shadow-[0_0_20px_rgba(255,230,0,0.35)] focus-within:border-yellow-300 focus-within:shadow-[0_0_30px_rgba(255,230,0,0.6)]'
+            ? 'border-yellow-400/80 shadow-[0_0_24px_rgba(255,230,0,0.45),0_0_48px_rgba(255,230,0,0.2)] focus-within:border-yellow-300 focus-within:shadow-[0_0_36px_rgba(255,230,0,0.8),0_0_65px_rgba(255,230,0,0.35)]'
             : profile.vibeTheme === 'neon-red' || profile.vibeTheme === 'sunset-violet'
-            ? 'border-red-500/60 shadow-[0_0_20px_rgba(255,23,68,0.35)] focus-within:border-red-400 focus-within:shadow-[0_0_30px_rgba(255,23,68,0.6)]'
-            : 'border-pink-500/60 shadow-[0_0_20px_rgba(255,46,147,0.35)] focus-within:border-pink-400 focus-within:shadow-[0_0_30px_rgba(255,46,147,0.6)]'
+            ? 'border-red-600/85 shadow-[0_0_24px_rgba(255,0,51,0.5),0_0_48px_rgba(220,38,38,0.25)] focus-within:border-red-400 focus-within:shadow-[0_0_36px_rgba(255,0,51,0.85),0_0_65px_rgba(220,38,38,0.4)]'
+            : 'border-pink-500/85 shadow-[0_0_24px_rgba(255,42,157,0.5),0_0_48px_rgba(255,20,147,0.25)] focus-within:border-pink-400 focus-within:shadow-[0_0_36px_rgba(255,42,157,0.85),0_0_65px_rgba(255,20,147,0.4)]'
         }`}>
           {/* Prominent Camera / Picture & Artwork Upload Button (Touch-Friendly 44px) */}
           <input
@@ -380,7 +380,13 @@ export const ChatStage: React.FC<ChatStageProps> = ({
             aria-label="Send message"
             className={`min-h-[44px] min-w-[44px] p-2.5 rounded-full transition-all duration-200 flex items-center justify-center flex-shrink-0 ${
               (inputText.trim() || selectedImages.length > 0) && !isLoading
-                ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-neon-pink hover:scale-105 active:scale-95'
+                ? profile.vibeTheme === 'neon-red' || profile.vibeTheme === 'sunset-violet'
+                  ? 'bg-gradient-to-r from-red-600 to-rose-700 text-white shadow-neon-red hover:scale-105 active:scale-95'
+                  : profile.vibeTheme === 'electric-blue' || profile.vibeTheme === 'cyber-blue'
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-neon-cyan hover:scale-105 active:scale-95'
+                  : profile.vibeTheme === 'neon-yellow' || profile.vibeTheme === 'cosmic-emerald'
+                  ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-bold shadow-neon-yellow hover:scale-105 active:scale-95'
+                  : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-neon-pink hover:scale-105 active:scale-95'
                 : 'bg-white/5 text-gray-600 cursor-not-allowed'
             }`}
           >
@@ -724,12 +730,12 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ alt, url, theme }) => {
 
   const getBorderColor = () => {
     if (theme === 'electric-blue' || theme === 'cyber-blue')
-      return 'border-cyan-400/80 shadow-[0_0_25px_rgba(0,240,255,0.4)]';
+      return 'border-cyan-400/90 shadow-[0_0_28px_rgba(0,240,255,0.55),0_0_50px_rgba(0,240,255,0.25)]';
     if (theme === 'neon-yellow' || theme === 'cosmic-emerald')
-      return 'border-yellow-400/80 shadow-[0_0_25px_rgba(255,230,0,0.4)]';
+      return 'border-yellow-400/90 shadow-[0_0_28px_rgba(255,230,0,0.55),0_0_50px_rgba(255,230,0,0.25)]';
     if (theme === 'neon-red' || theme === 'sunset-violet')
-      return 'border-red-500/80 shadow-[0_0_25px_rgba(255,23,68,0.4)]';
-    return 'border-pink-500/80 shadow-[0_0_25px_rgba(255,46,147,0.4)]';
+      return 'border-red-600/95 shadow-[0_0_28px_rgba(255,0,51,0.6),0_0_50px_rgba(220,38,38,0.3)]';
+    return 'border-pink-500/95 shadow-[0_0_28px_rgba(255,42,157,0.6),0_0_50px_rgba(255,20,147,0.3)]';
   };
 
   const handleDownload = async (e: React.MouseEvent) => {

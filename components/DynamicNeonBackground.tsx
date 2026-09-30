@@ -61,7 +61,26 @@ export const DynamicNeonBackground: React.FC<DynamicNeonBackgroundProps> = ({
         const dynamicAlpha = p.alpha + Math.sin(step * 2 + p.x) * 0.25;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0.1, Math.min(1, dynamicAlpha))})`;
+
+        // Theme-distinct ambient particles: Scarlet embers for Neon Red vs electric bubblegum for Neon Pink
+        let particleColor = `rgba(255, 255, 255, ${Math.max(0.1, Math.min(1, dynamicAlpha))})`;
+        if (theme === 'neon-red' || theme === 'sunset-violet') {
+          // Menacing blood-orange & scarlet embers with zero pink/purple
+          particleColor = Math.sin(step + p.x) > 0
+            ? `rgba(255, 30, 30, ${Math.max(0.2, Math.min(1, dynamicAlpha))})`
+            : `rgba(255, 90, 20, ${Math.max(0.15, Math.min(0.9, dynamicAlpha))})`;
+        } else if (theme === 'neon-pink' || theme === 'cyber-pink') {
+          // Electric bubblegum hot magenta & bright violet
+          particleColor = Math.sin(step + p.x) > 0
+            ? `rgba(255, 42, 157, ${Math.max(0.2, Math.min(1, dynamicAlpha))})`
+            : `rgba(215, 100, 255, ${Math.max(0.15, Math.min(0.9, dynamicAlpha))})`;
+        } else if (theme === 'electric-blue' || theme === 'cyber-blue') {
+          particleColor = `rgba(0, 240, 255, ${Math.max(0.2, Math.min(1, dynamicAlpha))})`;
+        } else if (theme === 'neon-yellow' || theme === 'cosmic-emerald') {
+          particleColor = `rgba(255, 230, 0, ${Math.max(0.2, Math.min(1, dynamicAlpha))})`;
+        }
+
+        ctx.fillStyle = particleColor;
         ctx.fill();
       });
 
@@ -82,31 +101,37 @@ export const DynamicNeonBackground: React.FC<DynamicNeonBackgroundProps> = ({
       case 'neon-yellow':
       case 'cosmic-emerald':
         return {
-          glow1: 'from-[#ffe600]/25 via-amber-500/15 to-transparent',
-          glow2: 'from-amber-400/20 via-yellow-600/10 to-transparent',
-          glow3: 'from-[#ffe600]/15 via-orange-500/10 to-transparent',
+          glow1: 'from-[#ffe600]/40 via-amber-500/25 to-transparent',
+          glow2: 'from-amber-400/35 via-yellow-600/20 to-transparent',
+          glow3: 'from-[#ffe600]/25 via-orange-600/15 to-transparent',
+          baseBg: 'bg-[#090802]',
         };
       case 'electric-blue':
       case 'cyber-blue':
         return {
-          glow1: 'from-[#00f0ff]/25 via-blue-600/15 to-transparent',
-          glow2: 'from-sky-500/20 via-indigo-600/15 to-transparent',
-          glow3: 'from-[#00f0ff]/15 via-cyan-600/10 to-transparent',
+          glow1: 'from-[#00f0ff]/40 via-blue-600/25 to-transparent',
+          glow2: 'from-sky-500/35 via-indigo-600/20 to-transparent',
+          glow3: 'from-[#00f0ff]/25 via-cyan-600/15 to-transparent',
+          baseBg: 'bg-[#02070e]',
         };
       case 'neon-red':
       case 'sunset-violet':
+        // Pure menacing blood-crimson / scarlet FNAF red with dark blood-orange embers & zero pink/purple
         return {
-          glow1: 'from-[#ff1744]/25 via-rose-600/20 to-transparent',
-          glow2: 'from-red-600/20 via-amber-600/15 to-transparent',
-          glow3: 'from-[#ff1744]/20 via-pink-700/15 to-transparent',
+          glow1: 'from-[#ff0033]/45 via-red-700/35 to-transparent',
+          glow2: 'from-[#dc2626]/40 via-orange-700/25 to-transparent',
+          glow3: 'from-[#ff1a1a]/35 via-red-950/40 to-transparent',
+          baseBg: 'bg-[#0a0203]',
         };
       case 'neon-pink':
       case 'cyber-pink':
       default:
+        // Electric bubblegum / vibrant hot neon magenta with bright violet/fuchsia ambient radiance
         return {
-          glow1: 'from-[#ff2e93]/30 via-purple-700/20 to-transparent',
-          glow2: 'from-pink-500/20 via-fuchsia-700/15 to-transparent',
-          glow3: 'from-[#ff2e93]/20 via-purple-900/20 to-transparent',
+          glow1: 'from-[#ff2a9d]/45 via-fuchsia-600/30 to-transparent',
+          glow2: 'from-[#ff1493]/35 via-purple-700/25 to-transparent',
+          glow3: 'from-[#ff2a9d]/30 via-violet-950/35 to-transparent',
+          baseBg: 'bg-[#08020a]',
         };
     }
   };
@@ -114,28 +139,28 @@ export const DynamicNeonBackground: React.FC<DynamicNeonBackgroundProps> = ({
   const gradients = getThemeGradients();
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-[#07070b]">
+    <div className={`fixed inset-0 pointer-events-none z-0 overflow-hidden ${gradients.baseBg} transition-colors duration-700`}>
       {/* Aurora orb 1 - Top Left */}
       <div
-        className={`absolute -top-32 -left-32 w-[600px] h-[600px] rounded-full bg-gradient-to-br ${gradients.glow1} blur-[120px] animate-pulse-slow`}
+        className={`absolute -top-32 -left-32 w-[680px] h-[680px] rounded-full bg-gradient-to-br ${gradients.glow1} blur-[120px] animate-pulse-slow`}
       />
 
       {/* Aurora orb 2 - Bottom Right */}
       <div
-        className={`absolute -bottom-40 -right-40 w-[680px] h-[680px] rounded-full bg-gradient-to-tl ${gradients.glow2} blur-[140px] animate-pulse-slow delay-1000`}
+        className={`absolute -bottom-40 -right-40 w-[740px] h-[740px] rounded-full bg-gradient-to-tl ${gradients.glow2} blur-[130px] animate-pulse-slow delay-1000`}
       />
 
       {/* Aurora orb 3 - Center subtle drift */}
       <div
-        className={`absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] h-[450px] rounded-full bg-gradient-to-r ${gradients.glow3} blur-[150px] opacity-70 animate-float`}
+        className={`absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[820px] h-[520px] rounded-full bg-gradient-to-r ${gradients.glow3} blur-[140px] opacity-80 animate-float`}
       />
 
       {/* Canvas particle stars */}
-      <canvas ref={canvasRef} className="absolute inset-0 opacity-80" />
+      <canvas ref={canvasRef} className="absolute inset-0 opacity-85" />
 
       {/* Fine grid overlay */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 opacity-[0.035]"
         style={{
           backgroundImage: `linear-gradient(#ffffff 1px, transparent 1px), linear-gradient(90deg, #ffffff 1px, transparent 1px)`,
           backgroundSize: '48px 48px',

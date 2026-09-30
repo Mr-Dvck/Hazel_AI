@@ -1,4 +1,4 @@
-import { Monster, MemoryItem, UserProfile, GuardianInsight, MonsterStyle } from '@/types';
+import { Monster, MemoryItem, UserProfile, GuardianInsight, MonsterStyle, VibeTheme } from '@/types';
 
 export interface MonsterStyleOption {
   id: MonsterStyle;
@@ -668,6 +668,55 @@ export function getMonstersByStyle(
     };
   });
 }
+
+export interface VibeOption {
+  id: VibeTheme;
+  label: string;
+  desc: string;
+  color: string;
+  border: string;
+  glow: string;
+  accent: string;
+}
+
+export const VIBE_OPTIONS: VibeOption[] = [
+  {
+    id: 'neon-pink',
+    label: 'Neon Pink',
+    desc: 'Electric bubblegum & vibrant hot neon magenta',
+    color: '#ff2a9d',
+    border: 'border-pink-500',
+    glow: 'rgba(255, 42, 157, 0.65)',
+    accent: '#ff1493',
+  },
+  {
+    id: 'neon-yellow',
+    label: 'Neon Yellow',
+    desc: 'High-voltage cyber electric yellow',
+    color: '#ffe600',
+    border: 'border-yellow-400',
+    glow: 'rgba(255, 230, 0, 0.65)',
+    accent: '#eab308',
+  },
+  {
+    id: 'electric-blue',
+    label: 'Electric Blue',
+    desc: 'Vivid starlight cyan & electric blue pulse',
+    color: '#00f0ff',
+    border: 'border-cyan-400',
+    glow: 'rgba(0, 240, 255, 0.65)',
+    accent: '#00b4ff',
+  },
+  {
+    id: 'neon-red',
+    label: 'Neon Red',
+    desc: 'Pure menacing blood-crimson & scarlet FNAF red',
+    color: '#ff0033',
+    border: 'border-red-600',
+    glow: 'rgba(255, 0, 51, 0.7)',
+    accent: '#dc2626',
+  },
+];
 
 export const INITIAL_PROFILE: UserProfile = {
   name: 'Hazel',
