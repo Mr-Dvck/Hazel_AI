@@ -647,10 +647,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 type="button"
                 onClick={onResetToBeginning}
                 className="px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-red-400 bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 hover:border-red-500/60 transition-all flex items-center gap-1.5 active:scale-95"
-                title="Return to the beginning (Reset all settings to default)"
+                title="Reset to Beginning: Reset all settings to default"
               >
                 <Trash2 className="w-3.5 h-3.5 text-red-400" />
-                <span>Reset to Beginning</span>
+                <span>Reset All / Start Over</span>
               </button>
             ) : <div />}
             <div className="flex items-center gap-2.5">

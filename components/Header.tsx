@@ -2,9 +2,8 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sparkles, Trash2, Heart, Palette, RotateCcw } from 'lucide-react';
+import { Sparkles, Heart, Palette, RotateCcw } from 'lucide-react';
 import { VibeTheme, UserProfile } from '@/types';
-import { calculateAge } from '@/lib/constants';
 
 interface HeaderProps {
   profile: UserProfile;
@@ -75,27 +74,17 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           onClick={onOpenProfile}
-          title="Edit Sanctuary Profile"
+          title="Sanctuary Profile"
           className="text-left group/profile p-1 -m-1 rounded-xl hover:bg-white/5 transition-all focus:outline-none focus:ring-1 focus:ring-pink-400/40"
         >
           <div className="flex items-center gap-2">
             <span className="text-base font-bold tracking-tight text-white flex items-center gap-1.5">
               Hazel<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-300 to-cyan-400">_AI</span>
             </span>
-            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
-              Safe Sanctuary
+            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 tracking-wide">
+              Sanctuary
             </span>
           </div>
-          <p className="text-[11px] text-gray-400 flex items-center gap-1.5">
-            Devoted companion for{' '}
-            <span className="text-pink-300 font-semibold group-hover/profile:underline flex items-center gap-1">
-              {profile.name}
-              <span>{profile.avatarEmoji || '🦄'}</span>
-            </span>
-            <span className="text-[9px] text-purple-300 bg-purple-900/40 px-1.5 py-0.5 rounded-full border border-purple-500/25">
-              Age {calculateAge(profile.birthday)}
-            </span>
-          </p>
         </button>
       </div>
 
@@ -124,26 +113,23 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </button>
 
-      {/* Right: Actions (Profile button, Vibe selector, Clear chat) */}
+      {/* Right: Actions (Sleek Profile Pill, Vibe selector, Clean Chat Reset) */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Profile Button */}
+        {/* Sleek Profile Pill */}
         <button
           onClick={onOpenProfile}
-          className="flex items-center gap-1.5 text-xs text-pink-300 hover:text-white bg-pink-950/40 hover:bg-pink-900/50 border border-pink-500/30 hover:border-pink-500/60 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all shadow-sm active:scale-95"
-          title="View & Edit Hazel's Sanctuary Profile"
+          className="flex items-center gap-1.5 text-xs font-semibold text-pink-200 hover:text-white bg-pink-950/40 hover:bg-pink-900/50 border border-pink-500/30 hover:border-pink-500/60 px-3 py-1.5 rounded-full transition-all shadow-sm active:scale-95"
+          title={`Sanctuary Profile: ${profile.name || 'Hazel'}`}
         >
-          <span className="text-sm">{profile.avatarEmoji || '🦄'}</span>
-          <span className="font-semibold text-pink-200 hidden sm:inline">{profile.name}</span>
-          <span className="text-[10px] text-pink-300 bg-pink-900/50 px-1.5 py-0.5 rounded-md border border-pink-500/30 hidden md:inline">
-            Age {calculateAge(profile.birthday)}
-          </span>
-          <span className="text-[10px] text-pink-400 hidden lg:inline">• Edit</span>
+          <span className="text-sm leading-none">{profile.avatarEmoji || '🦄'}</span>
+          <span>{profile.name || 'Hazel'}</span>
         </button>
+
         {/* Vibe Selector */}
         <div className="relative">
           <button
             onClick={() => setShowVibeMenu(!showVibeMenu)}
-            className="flex items-center gap-1.5 text-xs text-gray-300 bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-xl transition-all"
+            className="flex items-center gap-1.5 text-xs text-gray-300 bg-white/5 hover:bg-white/10 border border-white/10 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all"
             title="Change Sanctuary Vibe"
           >
             <Palette className="w-3.5 h-3.5 text-pink-400" />
@@ -181,29 +167,17 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </div>
 
-        {/* Reset to Beginning Button (Return to Default / Step 1 Onboarding) */}
-        {onResetToBeginning && (
-          <button
-            onClick={onResetToBeginning}
-            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs text-red-400 hover:text-red-200 bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 hover:border-red-500/60 transition-all flex items-center gap-1 active:scale-95"
-            title="Return to the beginning (Reset all settings to default)"
-            aria-label="Return to beginning"
-          >
-            <Trash2 className="w-3.5 h-3.5 text-red-400" />
-            <span className="hidden sm:inline font-medium">Reset All</span>
-          </button>
-        )}
-
-        {/* Clear chat button */}
+        {/* Clean Icon Button for Chat Reset (Reset All / Start Over tucked into Profile modal) */}
         <button
           onClick={onClearChat}
-          className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-colors flex items-center gap-1"
-          title="Clear Conversation"
+          className="p-2 rounded-xl text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-colors flex items-center justify-center active:scale-95"
+          title="Clear Chat (Reset All available in Profile)"
+          aria-label="Clear Chat"
         >
           <RotateCcw className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Clear Chat</span>
         </button>
       </div>
     </header>
   );
 };
+
