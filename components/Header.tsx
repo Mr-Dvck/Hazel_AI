@@ -55,13 +55,13 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="relative z-30 w-full px-4 py-3 sm:px-6 flex items-center justify-between border-b border-white/10 bg-black/40 backdrop-blur-md">
-      {/* Left: Brand with stealth 5-click easter egg & Profile click */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={handleLogoClick}
-          title="Hazel_AI"
-          className="group relative flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 via-pink-500 to-cyan-400 p-[1.5px] shadow-neon-pink/30 shadow-md active:scale-95 transition-transform"
-        >
+      {/* Left: Punchy brand logo with subtle Sanctuary tag & stealth 5-click Guardian easter egg */}
+      <button
+        onClick={handleLogoClick}
+        title="Hazel_AI"
+        className="group flex items-center gap-3 p-1 -m-1 rounded-xl hover:bg-white/5 transition-all focus:outline-none text-left active:scale-[0.98]"
+      >
+        <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 via-pink-500 to-cyan-400 p-[1.5px] shadow-neon-pink/30 shadow-md group-hover:shadow-neon-pink/50 transition-all flex-shrink-0">
           <div className="w-full h-full bg-black/90 rounded-[10px] flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-pink-400 group-hover:rotate-12 transition-transform duration-300" />
           </div>
@@ -70,23 +70,17 @@ export const Header: React.FC<HeaderProps> = ({
               {5 - clickCount}
             </span>
           )}
-        </button>
+        </div>
 
-        <button
-          onClick={onOpenProfile}
-          title="Sanctuary Profile"
-          className="text-left group/profile p-1 -m-1 rounded-xl hover:bg-white/5 transition-all focus:outline-none focus:ring-1 focus:ring-pink-400/40"
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-base font-bold tracking-tight text-white flex items-center gap-1.5">
-              Hazel<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-300 to-cyan-400">_AI</span>
-            </span>
-            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 tracking-wide">
-              Sanctuary
-            </span>
-          </div>
-        </button>
-      </div>
+        <div className="flex items-center gap-2">
+          <span className="text-base font-bold tracking-tight text-white flex items-center gap-1.5">
+            Hazel<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-300 to-cyan-400">_AI</span>
+          </span>
+          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 tracking-wide">
+            Sanctuary
+          </span>
+        </div>
+      </button>
 
       {/* Center: Live Resilience Status (Clickable to edit profile) */}
       <button
@@ -121,8 +115,8 @@ export const Header: React.FC<HeaderProps> = ({
           className="flex items-center gap-1.5 text-xs font-semibold text-pink-200 hover:text-white bg-pink-950/40 hover:bg-pink-900/50 border border-pink-500/30 hover:border-pink-500/60 px-3 py-1.5 rounded-full transition-all shadow-sm active:scale-95"
           title={`Sanctuary Profile: ${profile.name || 'Hazel'}`}
         >
-          <span className="text-sm leading-none">{profile.avatarEmoji || '🦄'}</span>
-          <span>{profile.name || 'Hazel'}</span>
+          <span className="text-sm leading-none flex-shrink-0">{profile.avatarEmoji || '🦄'}</span>
+          <span className="max-w-[100px] sm:max-w-[140px] truncate">{profile.name || 'Hazel'}</span>
         </button>
 
         {/* Vibe Selector */}
@@ -139,38 +133,45 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           {showVibeMenu && (
-            <div className="absolute right-0 mt-2 w-44 rounded-2xl bg-black/95 border border-white/15 shadow-2xl p-2 z-50 backdrop-blur-xl animate-in fade-in zoom-in-95">
-              <div className="text-[10px] uppercase tracking-wider text-gray-400 px-2 py-1 font-semibold">
-                Sanctuary Vibe
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setShowVibeMenu(false)}
+                aria-hidden="true"
+              />
+              <div className="absolute right-0 mt-2 w-44 rounded-2xl bg-black/95 border border-white/15 shadow-2xl p-2 z-50 backdrop-blur-xl animate-in fade-in zoom-in-95">
+                <div className="text-[10px] uppercase tracking-wider text-gray-400 px-2 py-1 font-semibold">
+                  Sanctuary Vibe
+                </div>
+                {vibeOptions.map((v) => (
+                  <button
+                    key={v.id}
+                    onClick={() => {
+                      onUpdateVibe(v.id);
+                      setShowVibeMenu(false);
+                    }}
+                    className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs text-left transition-colors ${
+                      profile.vibeTheme === v.id
+                        ? 'bg-white/15 text-white font-medium'
+                        : 'text-gray-300 hover:bg-white/10'
+                    }`}
+                  >
+                    <span
+                      className="w-3 h-3 rounded-full border border-white/30"
+                      style={{ backgroundColor: v.color }}
+                    />
+                    <span>{v.label}</span>
+                  </button>
+                ))}
               </div>
-              {vibeOptions.map((v) => (
-                <button
-                  key={v.id}
-                  onClick={() => {
-                    onUpdateVibe(v.id);
-                    setShowVibeMenu(false);
-                  }}
-                  className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs text-left transition-colors ${
-                    profile.vibeTheme === v.id
-                      ? 'bg-white/15 text-white font-medium'
-                      : 'text-gray-300 hover:bg-white/10'
-                  }`}
-                >
-                  <span
-                    className="w-3 h-3 rounded-full border border-white/30"
-                    style={{ backgroundColor: v.color }}
-                  />
-                  <span>{v.label}</span>
-                </button>
-              ))}
-            </div>
+            </>
           )}
         </div>
 
         {/* Clean Icon Button for Chat Reset (Reset All / Start Over tucked into Profile modal) */}
         <button
           onClick={onClearChat}
-          className="p-2 rounded-xl text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-colors flex items-center justify-center active:scale-95"
+          className="p-2 sm:p-2.5 min-w-[36px] min-h-[36px] rounded-xl text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-colors flex items-center justify-center active:scale-95"
           title="Clear Chat (Reset All available in Profile)"
           aria-label="Clear Chat"
         >
