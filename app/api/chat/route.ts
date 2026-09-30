@@ -4,6 +4,8 @@ import {
   ALL_MODELS,
   analyzeGuardianSentiment,
   generateEmpatheticOfflineStream,
+  detectArtRequest,
+  generateImageWithFallback,
 } from '@/lib/llm-router';
 import { synthesizeGuardianInsight, saveGuardianInsightToDisk } from '@/lib/guardian-service';
 
@@ -37,6 +39,79 @@ export async function POST(req: NextRequest) {
 
     // Helper for encoder
     const encoder = new TextEncoder();
+
+    // Check if this is an art / drawing request
+    const artIntent = detectArtRequest(userText);
+    if (artIntent.isArt) {
+      let thinking = '';
+      let response = '';
+      let modelLabel = 'Hazel-Art-Studio';
+
+      if (artIntent.isVague) {
+        thinking = `*Hazel expressed interest in drawing/generating an image...*\nPrompting with interactive creative direction to give her creative agency over style and lighting.`;
+        response = `I would love to make some epic art with you! 🎨 Before I start rendering: do you want it in a voxel Minecraft style, neon cyber-dark, or painted fantasy? What should the lighting and colors look like? Tell me your vision and I'll bring it to life!`;
+        modelLabel = 'Hazel-Creative-Director';
+      } else {
+        const imgResult = await generateImageWithFallback(artIntent.subject, apiKey);
+        thinking = `*Hazel shared her vision: "${artIntent.subject}"...*\nSynthesizing enriched high-fidelity prompt for ${imgResult.source === 'openrouter' ? `OpenRouter ${imgResult.model}` : 'Pollinations Flux engine'} and embedding markdown art frame.`;
+        response = `Here is what I drew for you! 🎨✨\n\n![Generated Art](${imgResult.url})\n\nWhat do you think of how it turned out? Want me to change up any details or give it some crazy powers or lore?`;
+        modelLabel = imgResult.source === 'openrouter' ? `OpenRouter (${imgResult.model})` : 'Pollinations-Flux';
+      }
+
+      const stream = new ReadableStream({
+        async start(controller) {
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({
+                type: 'meta',
+                model: modelLabel,
+                guardianAlert: guardianSentiment,
+                detectedBirthday: detectedBirthday || undefined,
+              })}\n\n`
+            )
+          );
+
+          for (const word of thinking.split(' ')) {
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({
+                  type: 'thinking',
+                  chunk: word + ' ',
+                })}\n\n`
+              )
+            );
+            await new Promise((r) => setTimeout(r, 15));
+          }
+
+          await new Promise((r) => setTimeout(r, 60));
+
+          const words = response.split(' ');
+          for (let i = 0; i < words.length; i++) {
+            const word = words[i];
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({
+                  type: 'content',
+                  chunk: word + (i < words.length - 1 ? ' ' : ''),
+                })}\n\n`
+              )
+            );
+            await new Promise((r) => setTimeout(r, 20));
+          }
+
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+          controller.close();
+        },
+      });
+
+      return new NextResponse(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream; charset=utf-8',
+          'Cache-Control': 'no-cache, no-transform',
+          Connection: 'keep-alive',
+        },
+      });
+    }
 
     // If no API key is provided, stream using our empathetic offline engine
     if (!apiKey || apiKey.trim() === '') {

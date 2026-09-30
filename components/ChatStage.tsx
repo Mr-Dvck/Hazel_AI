@@ -324,14 +324,20 @@ export const ChatStage: React.FC<ChatStageProps> = ({
           <button
             type="button"
             onClick={() => {
-              setInputText((prev) => {
-                const trimmed = prev.trim();
-                if (!trimmed) return 'Draw a ';
-                if (/^draw/i.test(trimmed)) return prev;
-                return `Draw a ${trimmed}`;
-              });
-              const el = document.querySelector('textarea');
-              if (el) el.focus();
+              const trimmed = inputText.trim();
+              if (trimmed && !/^draw\b/i.test(trimmed)) {
+                onSendMessage(`Draw a ${trimmed}`, selectedImages);
+                setInputText('');
+                setSelectedImages([]);
+              } else if (trimmed && /^draw\b/i.test(trimmed)) {
+                onSendMessage(trimmed, selectedImages);
+                setInputText('');
+                setSelectedImages([]);
+              } else {
+                setInputText('Draw a ');
+                const el = document.querySelector('textarea');
+                if (el) el.focus();
+              }
             }}
             title="Ask companion to draw or imagine an artwork"
             aria-label="Imagine or Draw artwork"
@@ -679,7 +685,7 @@ interface ContentPart {
 
 function parseContentWithImages(content: string): ContentPart[] {
   const parts: ContentPart[] = [];
-  const regex = /!\[([^\]]*)\]\((https?:\/\/[^)\n\r]+)\)/g;
+  const regex = /!\[([^\]]*)\]\((https?:\/\/[^)\n\r]+|data:image\/[^)\n\r]+)\)/g;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
@@ -688,7 +694,7 @@ function parseContentWithImages(content: string): ContentPart[] {
       parts.push({ type: 'text', text: content.substring(lastIndex, match.index) });
     }
     const rawUrl = match[2].trim();
-    const safeUrl = rawUrl.includes(' ') ? encodeURI(rawUrl) : rawUrl;
+    const safeUrl = rawUrl.startsWith('data:') ? rawUrl : (rawUrl.includes(' ') ? encodeURI(rawUrl) : rawUrl);
     parts.push({ type: 'image', alt: match[1], url: safeUrl });
     lastIndex = regex.lastIndex;
   }
@@ -726,6 +732,16 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ alt, url, theme }) => {
     e.stopPropagation();
     setIsDownloading(true);
     try {
+      if (url.startsWith('data:')) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `hazel-art-${Date.now()}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setIsDownloading(false);
+        return;
+      }
       const response = await fetch(url);
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);

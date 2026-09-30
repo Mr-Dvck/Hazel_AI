@@ -612,6 +612,103 @@ async function testApi() {
     assert.ok(sFullContent.includes('model=flux'), 'Specifies Flux model parameter');
     assert.ok(sFullContent.includes('nologo=true'), 'Specifies nologo parameter');
     console.log('  ✅ Pass: Chat stream delivers enriched Flux-optimized art embedding\n');
+
+    // Test 19: Multi-Tier Image Generation Service Route - POST /api/image
+    console.log('▶ Test 19: Multi-Tier Image Generation Service Route - POST /api/image');
+    const { POST: imagePostHandler, GET: imageGetHandler } = await import('../app/api/image/route');
+    const imgReq = new Request('http://localhost/api/image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: 'A neon wolf in a Minecraft forest' }),
+    });
+    const imgRes = await imagePostHandler(imgReq as any);
+    assert.strictEqual(imgRes.status, 200, 'POST /api/image returns 200');
+    const imgData = await imgRes.json();
+    assert.strictEqual(imgData.success, true, 'Returns success: true');
+    assert.ok(imgData.url, 'Returns resolved image URL');
+    assert.ok(imgData.model, 'Returns model identification');
+    assert.ok(imgData.prompt.includes('cinematic voxel neon wolf'), 'Returns enriched prompt');
+    assert.ok(imgData.markdown.includes('![Generated Art]('), 'Returns ready-to-render markdown');
+    assert.strictEqual(imgData.source, 'pollinations', 'Falls back to Pollinations when API key is empty');
+    assert.ok(imgData.url.includes('image.pollinations.ai/prompt/'), 'Uses Pollinations Flux URL');
+    assert.ok(imgData.url.includes('model=flux'), 'Specifies Flux model in URL');
+    console.log('  ✅ Pass: POST /api/image successfully generates image with Pollinations fail-safe\n');
+
+    // Test 20: Image Generation Route - GET /api/image
+    console.log('▶ Test 20: Image Generation Service Route - GET /api/image');
+    // Subtest A: Metadata inspect
+    const imgMetaReq = new Request('http://localhost/api/image', { method: 'GET' });
+    const imgMetaRes = await imageGetHandler(imgMetaReq as any);
+    assert.strictEqual(imgMetaRes.status, 200, 'GET /api/image returns 200');
+    const imgMetaData = await imgMetaRes.json();
+    assert.ok(imgMetaData.models?.tier1?.includes('google/gemini-3.1-flash-image'), 'Exposes Tier 1 models');
+    assert.ok(imgMetaData.endpoints?.tier1, 'Exposes Tier 1 OpenRouter endpoint');
+
+    // Subtest B: Query param prompt execution
+    const imgQueryReq = new Request('http://localhost/api/image?prompt=spooky%20animatronic%20bear', { method: 'GET' });
+    const imgQueryRes = await imageGetHandler(imgQueryReq as any);
+    assert.strictEqual(imgQueryRes.status, 200, 'GET /api/image with prompt returns 200');
+    const imgQueryData = await imgQueryRes.json();
+    assert.strictEqual(imgQueryData.success, true);
+    assert.ok(imgQueryData.prompt.includes("Five Nights at Freddy's aesthetic") || imgQueryData.prompt.includes('animatronic'));
+    console.log('  ✅ Pass: GET /api/image provides discovery metadata and query-based image generation\n');
+
+    // Test 21: OpenRouter Image Generation Resilience on Error Codes (402, 404, 429)
+    console.log('▶ Test 21: OpenRouter Image Generation Resilience on Error Codes (402, 404, 429)');
+    const { generateImageWithFallback } = await import('../lib/llm-router');
+    const originalFetch = global.fetch;
+
+    // Test 402 Payment Required
+    global.fetch = async (url: any) => {
+      if (typeof url === 'string' && url.includes('openrouter.ai/api/v1/images')) {
+        return new Response(JSON.stringify({ error: { message: 'Insufficient credits', code: 402 } }), { status: 402 });
+      }
+      return originalFetch(url);
+    };
+    const res402 = await generateImageWithFallback('voxel castle', 'sk-or-dummy-key');
+    assert.strictEqual(res402.source, 'pollinations', 'Falls back to Pollinations on 402 Payment Required');
+    assert.ok(res402.url.includes('image.pollinations.ai/prompt/'));
+
+    // Test 404 Model Unavailable
+    global.fetch = async (url: any) => {
+      if (typeof url === 'string' && url.includes('openrouter.ai/api/v1/images')) {
+        return new Response(JSON.stringify({ error: { message: 'Model unavailable', code: 404 } }), { status: 404 });
+      }
+      return originalFetch(url);
+    };
+    const res404 = await generateImageWithFallback('voxel castle', 'sk-or-dummy-key');
+    assert.strictEqual(res404.source, 'pollinations', 'Falls back to Pollinations on 404 Model Unavailable');
+
+    // Test 429 Rate Limit
+    global.fetch = async (url: any) => {
+      if (typeof url === 'string' && url.includes('openrouter.ai/api/v1/images')) {
+        return new Response(JSON.stringify({ error: { message: 'Rate limit exceeded', code: 429 } }), { status: 429 });
+      }
+      return originalFetch(url);
+    };
+    const res429 = await generateImageWithFallback('voxel castle', 'sk-or-dummy-key');
+    assert.strictEqual(res429.source, 'pollinations', 'Falls back to Pollinations on 429 Rate Limit');
+    console.log('  ✅ Pass: Resilient cascade seamlessly falls back to Pollinations on 402, 404, 429\n');
+
+    // Test 22: OpenRouter Tier 1 Image Generation Resolution
+    console.log('▶ Test 22: OpenRouter Tier 1 Image Generation Resolution');
+    global.fetch = async (url: any) => {
+      if (typeof url === 'string' && url.includes('openrouter.ai/api/v1/images')) {
+        return new Response(
+          JSON.stringify({
+            data: [{ url: 'https://images.openrouter.ai/generated/mock-art-12345.png' }],
+          }),
+          { status: 200 }
+        );
+      }
+      return originalFetch(url);
+    };
+    const openRouterSuccess = await generateImageWithFallback('cybernetic falcon', 'sk-or-valid-key');
+    assert.strictEqual(openRouterSuccess.source, 'openrouter', 'Selects openrouter on successful generation');
+    assert.strictEqual(openRouterSuccess.url, 'https://images.openrouter.ai/generated/mock-art-12345.png', 'Resolves OpenRouter generated image URL');
+    assert.strictEqual(openRouterSuccess.model, 'google/gemini-3.1-flash-image', 'Uses primary Tier 1 model');
+    global.fetch = originalFetch;
+    console.log('  ✅ Pass: OpenRouter Tier 1 image generation URL correctly resolved\n');
   } finally {
     process.env.OPENROUTER_API_KEY = savedApiKey;
     try {
@@ -622,7 +719,7 @@ async function testApi() {
     }
   }
 
-  console.log('🎉 ALL API END-TO-END TESTS PASSED! (18/18 gates green)\n');
+  console.log('🎉 ALL API END-TO-END TESTS PASSED! (22/22 gates green)\n');
 }
 
 testApi().catch((err) => {

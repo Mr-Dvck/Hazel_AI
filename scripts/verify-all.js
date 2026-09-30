@@ -1,7 +1,16 @@
 const assert = require('assert');
 
 // 1. Test LLM router & Guardian Sentiment Analysis
-const { analyzeGuardianSentiment, generateEmpatheticOfflineStream, MODEL_TIERS, ALL_MODELS } = require('../lib/llm-router.ts');
+const {
+  analyzeGuardianSentiment,
+  generateEmpatheticOfflineStream,
+  MODEL_TIERS,
+  ALL_MODELS,
+  IMAGE_MODELS,
+  buildOptimizedArtPrompt,
+  getPollinationsImageUrl,
+  detectArtRequest,
+} = require('../lib/llm-router.ts');
 
 console.log('🧪 Starting Hazel_AI Automated Test Suite...\n');
 
@@ -497,7 +506,40 @@ const churchRes = generateEmpatheticOfflineStream("I had fun at church today", "
 assert.ok(churchRes.response.includes('church') || churchRes.response.includes('faith'), 'Offline engine warmly honors faith and church');
 console.log('  ✅ Pass: Interactive art direction, Flux synthesis, and passion responses fully verified\n');
 
-console.log('🎉 ALL AUTOMATED TESTS PASSED SUCCESSFULLY! (14/14 test gates green)\n');
+// Test 15: OpenRouter Multi-Tier Image Generation Service & Pollinations Fail-Safe
+console.log('▶ Test 15: OpenRouter Multi-Tier Image Generation Service & Pollinations Fail-Safe');
+assert.ok(IMAGE_MODELS && IMAGE_MODELS.tier1, 'IMAGE_MODELS.tier1 defined');
+assert.ok(IMAGE_MODELS.tier1.includes('google/gemini-3.1-flash-image'), 'Tier 1 includes google/gemini-3.1-flash-image (Nano Banana 2)');
+assert.ok(IMAGE_MODELS.tier1.includes('black-forest-labs/flux-1-schnell'), 'Tier 1 includes black-forest-labs/flux-1-schnell (Flux Schnell)');
+
+// Test buildOptimizedArtPrompt
+const customOptPrompt = buildOptimizedArtPrompt('a glowing cybernetic tiger');
+assert.ok(customOptPrompt.includes('cinematic'), 'Enriches prompt with cinematic style');
+assert.ok(customOptPrompt.includes('8k resolution') || customOptPrompt.includes('Unreal Engine 5'), 'Includes high-res render keywords');
+
+// Test already optimized prompt preservation
+const alreadyOptimized = 'cinematic voxel castle glowing, 8k resolution, Unreal Engine 5 render';
+assert.strictEqual(buildOptimizedArtPrompt(alreadyOptimized), alreadyOptimized, 'Does not duplicate already optimized prompt');
+
+// Test detectArtRequest
+const vagueDetect = detectArtRequest('Can you paint a picture?');
+assert.strictEqual(vagueDetect.isArt, true, 'Detects art intent');
+assert.strictEqual(vagueDetect.isVague, true, 'Detects vague art request');
+
+const specificDetect = detectArtRequest('Draw a neon wolf in a Minecraft forest');
+assert.strictEqual(specificDetect.isArt, true, 'Detects art intent');
+assert.strictEqual(specificDetect.isVague, false, 'Detects specific art request');
+assert.ok(specificDetect.subject.includes('neon wolf'), 'Extracts subject accurately');
+
+// Test Pollinations image URL builder
+const fluxUrl = getPollinationsImageUrl('test prompt');
+assert.ok(fluxUrl.includes('image.pollinations.ai/prompt/'), 'Valid Pollinations base URL');
+assert.ok(fluxUrl.includes('model=flux'), 'Specifies Flux model');
+assert.ok(fluxUrl.includes('nologo=true'), 'Specifies nologo parameter');
+
+console.log('  ✅ Pass: OpenRouter Image Generation Tier 1 & Tier 2 Pollinations fail-safe verified\n');
+
+console.log('🎉 ALL AUTOMATED TESTS PASSED SUCCESSFULLY! (15/15 test gates green)\n');
 
 
 

@@ -18,7 +18,7 @@
         "detail": "Drawing dragons"
       }
     ],
-    "syncedAt": 1790792693872
+    "syncedAt": 1790794453763
   },
   "hazel_profile_customized": {
     "profile": {
@@ -32,8 +32,8 @@
       "companionAvatar": "🌟",
       "bioOrMotto": "Bold, creative, and invincible! ✨",
       "favoriteColor": "Sunset Amber",
-      "createdAt": 1790533493876,
-      "lastActive": 1790792693876
+      "createdAt": 1790535253767,
+      "lastActive": 1790794453767
     },
     "monsters": [
       {
@@ -43,7 +43,7 @@
       }
     ],
     "memories": [],
-    "syncedAt": 1790792693876
+    "syncedAt": 1790794453767
   },
   "hazel_birthday_user": {
     "profile": {
@@ -57,8 +57,8 @@
       "companionAvatar": "🌟",
       "bioOrMotto": "Bold, creative, and invincible! ✨",
       "favoriteColor": "Sunset Amber",
-      "createdAt": 1790533493876,
-      "lastActive": 1790792693876,
+      "createdAt": 1790535253767,
+      "lastActive": 1790794453767,
       "birthday": "May 14, 2015"
     },
     "monsters": [
@@ -76,7 +76,7 @@
         "detail": "May 14, 2015"
       }
     ],
-    "syncedAt": 1790792697180
+    "syncedAt": 1790794456022
   },
   "hazel_default": {
     "profile": {
@@ -86,7 +86,7 @@
     "monsters": [],
     "memories": [],
     "guardianInsight": {
-      "lastUpdated": 1790792706539,
+      "lastUpdated": 1790794464305,
       "howHazelIsDoing": {
         "currentMoodAndEnergy": "Expressive & Creative (High Energy)",
         "whatsWeighingOnHer": "No heavy emotional burdens or peer friction detected in recent chats.",
@@ -140,6 +140,6 @@
         }
       ]
     },
-    "syncedAt": 1790792706540
+    "syncedAt": 1790794464306
   }
 }

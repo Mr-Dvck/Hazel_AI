@@ -19,6 +19,270 @@ export const MODEL_TIERS = {
 
 export const ALL_MODELS = [...MODEL_TIERS.tier1, ...MODEL_TIERS.tier2];
 
+export const IMAGE_MODELS = {
+  tier1: [
+    'google/gemini-3.1-flash-image', // Nano Banana 2
+    'black-forest-labs/flux-1-schnell', // Flux Schnell
+  ],
+};
+
+export interface ImageGenerationResult {
+  url: string;
+  model: string;
+  source: 'openrouter' | 'pollinations';
+  prompt: string;
+  error?: string;
+}
+
+export function buildOptimizedArtPrompt(rawSubject: string): string {
+  if (!rawSubject || typeof rawSubject !== 'string') {
+    return 'cinematic magical creature, vibrant neon highlights, dense atmosphere, volumetric fog, dramatic rim lighting, 8k resolution, Unreal Engine 5 render, highly detailed digital art';
+  }
+
+  const clean = rawSubject.trim();
+
+  // If already contains cinematic / Unreal Engine / 8k markers, don't duplicate
+  if (
+    clean.includes('Unreal Engine 5') ||
+    clean.includes('8k resolution') ||
+    clean.includes('bioluminescent pine forest')
+  ) {
+    return clean;
+  }
+
+  // Strip common request framing if present
+  let subject = clean
+    .replace(/^(can you|could you|please|can we|let's|i want to|i'd like to|i want you to|would you|will you)\s+/i, '')
+    .replace(/^(draw|paint|sketch|illustrate|render|generate|create|make)\s+(me\s+|us\s+)?/i, '')
+    .replace(/^(an?\s+)?(image|picture|drawing|painting|artwork|art|illustration)\s+(of\s+)?/i, '')
+    .replace(/^(a|an|the|some)\s+/i, '')
+    .replace(/\b(for me|for us|please)\b/gi, '')
+    .replace(/[?!.]+$/g, '')
+    .trim();
+
+  if (!subject) {
+    subject = clean;
+  }
+
+  if (/minecraft|redstone|voxel/i.test(subject)) {
+    const cleanArtSubject = subject
+      .replace(/\s+in\s+a\s+minecraft\s+(forest|world|biome)/i, '')
+      .replace(/\s+in\s+minecraft/i, '')
+      .replace(/\s+minecraft\s+/i, ' ')
+      .trim();
+    return `cinematic voxel ${cleanArtSubject} glowing with electric cyan highlights, dense bioluminescent pine forest, volumetric fog, dramatic rim lighting, highly detailed 3D Minecraft aesthetic, 8k resolution, Unreal Engine 5 render`;
+  } else if (/fnaf|freddy|animatronic|spooky/i.test(subject)) {
+    const cleanFnafSubject = subject.replace(/\s+(from|in)\s+(fnaf|five nights at freddy'?s)/i, '').trim();
+    return `cinematic eerie animatronic ${cleanFnafSubject}, Five Nights at Freddy's aesthetic, mechanical joints, glowing neon eyes, moody atmospheric shadows, dramatic rim lighting, hyper-detailed 3D render, 8k resolution, Unreal Engine 5`;
+  } else {
+    return `cinematic ${subject}, vibrant neon highlights, dense atmosphere, volumetric fog, dramatic rim lighting, rich texture, epic composition, 8k resolution, Unreal Engine 5 render, highly detailed digital art`;
+  }
+}
+
+export function getPollinationsImageUrl(prompt: string): string {
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&model=flux&nologo=true`;
+}
+
+export function detectArtRequest(userMessage: string): {
+  isArt: boolean;
+  isVague: boolean;
+  subject: string;
+} {
+  const isArt =
+    /\b(draw|paint|sketch|illustrate|render|generate|create|make)\b.*\b(image|picture|drawing|painting|artwork|art|illustration)\b/i.test(userMessage) ||
+    /\b(draw|paint|sketch|illustrate)\b\s+(me\s+|us\s+)?(a|an|the|some|something)?\b/i.test(userMessage) ||
+    /^(draw|paint|sketch|illustrate|imagine|render)\b/i.test(userMessage.trim()) ||
+    /\b(can you|could you|please|let's|i want to|i'd like to|i would love to)\s+(draw|paint|sketch|generate|make|create)\b/i.test(userMessage);
+
+  if (!isArt) {
+    return { isArt: false, isVague: false, subject: '' };
+  }
+
+  let subject = userMessage
+    .replace(/^(can you|could you|please|can we|let's|i want to|i'd like to|i want you to|would you|will you)\s+/i, '')
+    .replace(/^(draw|paint|sketch|illustrate|render|generate|create|make)\s+(me\s+|us\s+)?/i, '')
+    .replace(/^(an?\s+)?(image|picture|drawing|painting|artwork|art|illustration)\s+(of\s+)?/i, '')
+    .replace(/^(a|an|the|some)\s+/i, '')
+    .replace(/\b(for me|for us|please)\b/gi, '')
+    .replace(/[?!.]+$/g, '')
+    .trim();
+
+  const isVague =
+    !subject ||
+    subject.length < 3 ||
+    /^(something|an image|a picture|anything|picture|image|art|drawing|something cool|cool|a drawing)$/i.test(subject);
+
+  return { isArt: true, isVague, subject };
+}
+
+function extractImageUrlFromResponse(data: any): string | null {
+  if (!data) return null;
+  // 1. data[0].url (OpenAI image generation format)
+  if (data.data && Array.isArray(data.data) && data.data[0]?.url) {
+    return data.data[0].url;
+  }
+  // 2. data[0].b64_json
+  if (data.data && Array.isArray(data.data) && data.data[0]?.b64_json) {
+    return `data:image/png;base64,${data.data[0].b64_json}`;
+  }
+  // 3. url at top level
+  if (typeof data.url === 'string' && data.url.startsWith('http')) {
+    return data.url;
+  }
+  // 4. choices[0].message multimodal images
+  const msg = data.choices?.[0]?.message;
+  if (msg) {
+    if (Array.isArray(msg.images) && msg.images.length > 0) {
+      const first = msg.images[0];
+      if (typeof first === 'string') return first;
+      if (first?.image_url?.url) return first.image_url.url;
+      if (first?.url) return first.url;
+    }
+    if (Array.isArray(msg.content)) {
+      for (const part of msg.content) {
+        if (part.type === 'image_url' && part.image_url?.url) return part.image_url.url;
+        if (part.type === 'image' && part.image_url?.url) return part.image_url.url;
+      }
+    }
+    if (typeof msg.content === 'string') {
+      const mdMatch = msg.content.match(/!\[.*?\]\((https?:\/\/[^\s\)]+|data:image\/[^)\n\r]+)\)/);
+      if (mdMatch) return mdMatch[1];
+      if (msg.content.trim().startsWith('http')) return msg.content.trim();
+    }
+    if (Array.isArray(msg.tool_calls)) {
+      for (const tc of msg.tool_calls) {
+        try {
+          const args = JSON.parse(tc.function?.arguments || '{}');
+          if (args.url) return args.url;
+          if (args.image_url) return args.image_url;
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }
+  return null;
+}
+
+export async function generateImageWithFallback(
+  rawPrompt: string,
+  apiKey?: string
+): Promise<ImageGenerationResult> {
+  const optimizedPrompt = buildOptimizedArtPrompt(rawPrompt);
+
+  // Tier 2 Direct: If no API key configured, smoothly and instantly fall back to Pollinations Flux
+  if (!apiKey || apiKey.trim() === '') {
+    return {
+      url: getPollinationsImageUrl(optimizedPrompt),
+      model: 'flux (Pollinations Fail-Safe)',
+      source: 'pollinations',
+      prompt: optimizedPrompt,
+    };
+  }
+
+  // Tier 1: OpenRouter Image API (Nano Banana 2 or Flux Schnell)
+  for (const model of IMAGE_MODELS.tier1) {
+    try {
+      // 1. Try standard OpenAI-compatible OpenRouter image endpoint
+      const imgRes = await fetch('https://openrouter.ai/api/v1/images', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey.trim()}`,
+          'HTTP-Referer': 'https://hazel-ai.vercel.app',
+          'X-Title': 'Hazel_AI Companion',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: model,
+          prompt: optimizedPrompt,
+          n: 1,
+          size: '1024x1024',
+        }),
+      });
+
+      if (imgRes.ok) {
+        const data = await imgRes.json().catch(() => null);
+        const url = extractImageUrlFromResponse(data);
+        if (url) {
+          return {
+            url,
+            model,
+            source: 'openrouter',
+            prompt: optimizedPrompt,
+          };
+        }
+      }
+
+      // If status is 402, 404, or 429, log warning and try tool calling / chat completions fallback
+      if (imgRes.status === 402 || imgRes.status === 404 || imgRes.status === 429) {
+        console.warn(`OpenRouter image endpoint for model ${model} returned ${imgRes.status}.`);
+      }
+
+      // 2. Tool calling fallback via chat/completions with image modalities
+      try {
+        const chatRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${apiKey.trim()}`,
+            'HTTP-Referer': 'https://hazel-ai.vercel.app',
+            'X-Title': 'Hazel_AI Companion',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: model,
+            messages: [
+              { role: 'user', content: `Generate an image: ${optimizedPrompt}` },
+            ],
+            modalities: ['image', 'text'],
+            tools: [
+              {
+                type: 'function',
+                function: {
+                  name: 'generate_image',
+                  description: 'Generate and return the generated image URL',
+                  parameters: {
+                    type: 'object',
+                    properties: {
+                      url: { type: 'string', description: 'URL of the generated image' },
+                    },
+                    required: ['url'],
+                  },
+                },
+              },
+            ],
+          }),
+        });
+
+        if (chatRes.ok) {
+          const chatData = await chatRes.json().catch(() => null);
+          const url = extractImageUrlFromResponse(chatData);
+          if (url) {
+            return {
+              url,
+              model,
+              source: 'openrouter',
+              prompt: optimizedPrompt,
+            };
+          }
+        }
+      } catch (chatErr) {
+        console.warn(`Tool calling fallback failed for ${model}:`, chatErr);
+      }
+    } catch (err) {
+      console.warn(`OpenRouter attempt failed for ${model}:`, err);
+    }
+  }
+
+  // Tier 2: Zero-Cost Pollinations Fail-Safe
+  // If OpenRouter returns an error (402 payment required, 404 model unavailable, 429 rate limit, or no API key configured), smoothly and instantly fall back to Pollinations Flux
+  return {
+    url: getPollinationsImageUrl(optimizedPrompt),
+    model: 'flux (Pollinations Fail-Safe)',
+    source: 'pollinations',
+    prompt: optimizedPrompt,
+  };
+}
+
 // Keywords to silently analyze for guardian safety without disturbing Hazel
 export function analyzeGuardianSentiment(userText: string): {
   tag: 'safe' | 'mild_alert' | 'moderate_alert' | 'critical_alert';
@@ -228,40 +492,15 @@ export function generateEmpatheticOfflineStream(
     /^(draw|paint|sketch|illustrate|imagine|render)\b/i.test(userMessage.trim()) ||
     /\b(can you|could you|please|let's|i want to|i'd like to|i would love to)\s+(draw|paint|sketch|generate|make|create)\b/i.test(userMessage)
   ) {
-    let subject = userMessage
-      .replace(/^(can you|could you|please|can we|let's|i want to|i'd like to|i want you to|would you|will you)\s+/i, '')
-      .replace(/^(draw|paint|sketch|illustrate|render|generate|create|make)\s+(me\s+|us\s+)?/i, '')
-      .replace(/^(an?\s+)?(image|picture|drawing|painting|artwork|art|illustration)\s+(of\s+)?/i, '')
-      .replace(/^(a|an|the|some)\s+/i, '')
-      .replace(/\b(for me|for us|please)\b/gi, '')
-      .replace(/[?!.]+$/g, '')
-      .trim();
+    const artCheck = detectArtRequest(userMessage);
 
-    const isVagueRequest =
-      !subject ||
-      subject.length < 3 ||
-      /^(something|an image|a picture|anything|picture|image|art|drawing|something cool|cool|a drawing)$/i.test(subject);
-
-    if (isVagueRequest) {
+    if (artCheck.isVague) {
       thinking += `\n*Hazel expressed interest in drawing/generating an image...*\nPrompting with interactive creative direction to give her creative agency over style and lighting.`;
       response = `I would love to make some epic art with you! 🎨 Before I start rendering: do you want it in a voxel Minecraft style, neon cyber-dark, or painted fantasy? What should the lighting and colors look like? Tell me your vision and I'll bring it to life!`;
     } else {
-      let optimizedPrompt = '';
-      if (/minecraft|redstone|voxel/i.test(subject)) {
-        const cleanArtSubject = subject
-          .replace(/\s+in\s+a\s+minecraft\s+(forest|world|biome)/i, '')
-          .replace(/\s+in\s+minecraft/i, '')
-          .replace(/\s+minecraft\s+/i, ' ')
-          .trim();
-        optimizedPrompt = `cinematic voxel ${cleanArtSubject} glowing with electric cyan highlights, dense bioluminescent pine forest, volumetric fog, dramatic rim lighting, highly detailed 3D Minecraft aesthetic, 8k resolution, Unreal Engine 5 render`;
-      } else if (/fnaf|freddy|animatronic|spooky/i.test(subject)) {
-        const cleanFnafSubject = subject.replace(/\s+(from|in)\s+(fnaf|five nights at freddy'?s)/i, '').trim();
-        optimizedPrompt = `cinematic eerie animatronic ${cleanFnafSubject}, Five Nights at Freddy's aesthetic, mechanical joints, glowing neon eyes, moody atmospheric shadows, dramatic rim lighting, hyper-detailed 3D render, 8k resolution, Unreal Engine 5`;
-      } else {
-        optimizedPrompt = `cinematic ${subject}, vibrant neon highlights, dense atmosphere, volumetric fog, dramatic rim lighting, rich texture, epic composition, 8k resolution, Unreal Engine 5 render, highly detailed digital art`;
-      }
-      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(optimizedPrompt)}?width=1024&height=1024&model=flux&nologo=true`;
-      thinking += `\n*Hazel shared her vision: "${subject}"...*\nSynthesizing enriched high-fidelity prompt for Pollinations Flux engine and embedding markdown art frame.`;
+      const optimizedPrompt = buildOptimizedArtPrompt(artCheck.subject);
+      const imageUrl = getPollinationsImageUrl(optimizedPrompt);
+      thinking += `\n*Hazel shared her vision: "${artCheck.subject}"...*\nSynthesizing enriched high-fidelity prompt for Pollinations Flux engine and embedding markdown art frame.`;
       response = `Here is what I drew for you! 🎨✨\n\n![Generated Art](${imageUrl})\n\nWhat do you think of how it turned out? Want me to change up any details or give it some crazy powers or lore?`;
     }
   } else if (
