@@ -76,16 +76,23 @@ export const MonsterTower: React.FC<MonsterTowerProps> = ({
               onClick={() => onSelectMonster(monster)}
               className={`w-full group relative text-left rounded-2xl p-2.5 transition-all duration-300 border ${
                 monster.unlocked
-                  ? 'bg-white/5 hover:bg-white/10 border-white/20 hover:border-white/40 shadow-[0_0_16px_rgba(255,255,255,0.06)] hover:shadow-[0_0_24px_rgba(255,255,255,0.15)]'
+                  ? 'bg-white/[0.08] hover:bg-white/[0.14] border-white/25 hover:border-white/50'
                   : isNext
-                  ? 'bg-purple-950/20 border-purple-500/40 hover:border-purple-500/60 shadow-[0_0_14px_rgba(168,85,247,0.2)]'
+                  ? 'bg-purple-950/20 border-purple-500/50 hover:border-purple-500/70 shadow-[0_0_18px_rgba(168,85,247,0.35)]'
                   : 'bg-black/30 border-white/5 opacity-60 hover:opacity-80'
               }`}
+              style={{
+                boxShadow: monster.unlocked
+                  ? `0 0 24px ${monster.color}40, inset 0 0 12px ${monster.color}20`
+                  : isNext
+                  ? '0 0 18px rgba(168, 85, 247, 0.35)'
+                  : undefined,
+              }}
             >
               {/* Active glow backing when unlocked */}
               {monster.unlocked && (
                 <div
-                  className="absolute inset-0 rounded-2xl opacity-15 group-hover:opacity-30 blur-sm transition-opacity"
+                  className="absolute inset-0 rounded-2xl opacity-25 group-hover:opacity-45 blur-md transition-opacity"
                   style={{ backgroundColor: monster.color }}
                 />
               )}

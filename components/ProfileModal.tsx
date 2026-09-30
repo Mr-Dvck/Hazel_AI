@@ -148,7 +148,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       particleCount: 80,
       spread: 75,
       origin: { y: 0.55 },
-      colors: ['#ff2e93', '#00f0ff', '#facc15', '#a855f7', '#10b981'],
+      colors: ['#ff2a9d', '#00f0ff', '#facc15', '#a855f7', '#10b981'],
     });
 
     const updatedProfile: UserProfile = {

@@ -293,12 +293,12 @@ export const ChatStage: React.FC<ChatStageProps> = ({
 
         <div className={`flex items-center gap-1.5 sm:gap-2 bg-obsidian-900/90 border rounded-full px-2 sm:px-3 py-1 sm:py-1.5 shadow-inner transition-all ${
           profile.vibeTheme === 'electric-blue' || profile.vibeTheme === 'cyber-blue'
-            ? 'border-cyan-400/80 shadow-[0_0_24px_rgba(0,240,255,0.45),0_0_48px_rgba(0,240,255,0.2)] focus-within:border-cyan-300 focus-within:shadow-[0_0_36px_rgba(0,240,255,0.8),0_0_65px_rgba(0,240,255,0.35)]'
+            ? 'border-cyan-400/90 shadow-[0_0_28px_rgba(0,240,255,0.6),0_0_55px_rgba(0,180,255,0.3)] focus-within:border-cyan-300 focus-within:shadow-[0_0_40px_rgba(0,240,255,0.9),0_0_75px_rgba(0,180,255,0.45)]'
             : profile.vibeTheme === 'neon-yellow' || profile.vibeTheme === 'cosmic-emerald'
-            ? 'border-yellow-400/80 shadow-[0_0_24px_rgba(255,230,0,0.45),0_0_48px_rgba(255,230,0,0.2)] focus-within:border-yellow-300 focus-within:shadow-[0_0_36px_rgba(255,230,0,0.8),0_0_65px_rgba(255,230,0,0.35)]'
+            ? 'border-yellow-400/90 shadow-[0_0_28px_rgba(255,230,0,0.6),0_0_55px_rgba(234,179,8,0.3)] focus-within:border-yellow-300 focus-within:shadow-[0_0_40px_rgba(255,230,0,0.9),0_0_75px_rgba(234,179,8,0.45)]'
             : profile.vibeTheme === 'neon-red' || profile.vibeTheme === 'sunset-violet'
-            ? 'border-red-600/85 shadow-[0_0_24px_rgba(255,0,51,0.5),0_0_48px_rgba(220,38,38,0.25)] focus-within:border-red-400 focus-within:shadow-[0_0_36px_rgba(255,0,51,0.85),0_0_65px_rgba(220,38,38,0.4)]'
-            : 'border-pink-500/85 shadow-[0_0_24px_rgba(255,42,157,0.5),0_0_48px_rgba(255,20,147,0.25)] focus-within:border-pink-400 focus-within:shadow-[0_0_36px_rgba(255,42,157,0.85),0_0_65px_rgba(255,20,147,0.4)]'
+            ? 'border-red-600/95 shadow-[0_0_30px_rgba(255,0,51,0.65),0_0_58px_rgba(220,38,38,0.35)] focus-within:border-red-400 focus-within:shadow-[0_0_42px_rgba(255,0,51,0.95),0_0_80px_rgba(220,38,38,0.5)]'
+            : 'border-pink-500/95 shadow-[0_0_30px_rgba(255,42,157,0.65),0_0_58px_rgba(255,20,147,0.35)] focus-within:border-pink-400 focus-within:shadow-[0_0_42px_rgba(255,42,157,0.95),0_0_80px_rgba(255,20,147,0.5)]'
         }`}>
           {/* Prominent Camera / Picture & Artwork Upload Button (Touch-Friendly 44px) */}
           <input
@@ -730,12 +730,12 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ alt, url, theme }) => {
 
   const getBorderColor = () => {
     if (theme === 'electric-blue' || theme === 'cyber-blue')
-      return 'border-cyan-400/90 shadow-[0_0_28px_rgba(0,240,255,0.55),0_0_50px_rgba(0,240,255,0.25)]';
+      return 'border-cyan-400 shadow-[0_0_32px_rgba(0,240,255,0.7),0_0_60px_rgba(0,180,255,0.35)]';
     if (theme === 'neon-yellow' || theme === 'cosmic-emerald')
-      return 'border-yellow-400/90 shadow-[0_0_28px_rgba(255,230,0,0.55),0_0_50px_rgba(255,230,0,0.25)]';
+      return 'border-yellow-400 shadow-[0_0_32px_rgba(255,230,0,0.7),0_0_60px_rgba(234,179,8,0.35)]';
     if (theme === 'neon-red' || theme === 'sunset-violet')
-      return 'border-red-600/95 shadow-[0_0_28px_rgba(255,0,51,0.6),0_0_50px_rgba(220,38,38,0.3)]';
-    return 'border-pink-500/95 shadow-[0_0_28px_rgba(255,42,157,0.6),0_0_50px_rgba(255,20,147,0.3)]';
+      return 'border-red-600 shadow-[0_0_32px_rgba(255,0,51,0.75),0_0_60px_rgba(220,38,38,0.4)]';
+    return 'border-pink-500 shadow-[0_0_32px_rgba(255,42,157,0.7),0_0_60px_rgba(255,20,147,0.4)]';
   };
 
   const handleDownload = async (e: React.MouseEvent) => {

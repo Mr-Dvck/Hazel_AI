@@ -112,11 +112,11 @@ class GuardianDeskApp:
             "bg_card": "#131422",
             "bg_input": "#0d0e1a",
             "border": "#25273c",
-            "pink": "#ff2e93",
+            "pink": "#ff2a9d",
             "purple": "#a855f7",
             "amber": "#fbbf24",
             "green": "#10b981",
-            "red": "#ff1744",
+            "red": "#ff0033",
             "text": "#f3f4f6",
             "text_muted": "#9ca3af",
         }

@@ -205,7 +205,7 @@ export const MemoryBank: React.FC<MemoryBankProps> = ({
               <div
                 key={m.id}
                 onClick={() => handleOpenEdit(m)}
-                className="group relative rounded-2xl p-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-cyan-400/50 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-[0_0_18px_rgba(0,240,255,0.25)]"
+                className="group relative rounded-2xl p-3 bg-white/5 hover:bg-white/[0.12] border border-white/10 hover:border-cyan-400/60 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-[0_0_24px_rgba(0,240,255,0.35),0_0_45px_rgba(0,240,255,0.15)]"
                 title="Click to view, expand, or edit this memory"
               >
                 <div className="flex items-start justify-between gap-2">

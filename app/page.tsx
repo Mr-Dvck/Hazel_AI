@@ -209,7 +209,7 @@ export default function HomePage() {
       particleCount: 90,
       spread: 85,
       origin: { y: 0.5 },
-      colors: ['#a78bfa', '#ff2e93', '#00f0ff', '#facc15', '#ef4444'],
+      colors: ['#a78bfa', '#ff2a9d', '#00f0ff', '#facc15', '#ef4444'],
     });
 
     // Directly enter main sanctuary interface without automatic monster reveal celebration modal
@@ -236,7 +236,7 @@ export default function HomePage() {
         particleCount: 100,
         spread: 90,
         origin: { y: 0.5 },
-        colors: [(newlyUnlocked as Monster).color, '#ff2e93', '#00f0ff', '#fde047'],
+        colors: [(newlyUnlocked as Monster).color, '#ff2a9d', '#00f0ff', '#fde047'],
       });
 
       setSelectedMonster(newlyUnlocked);
@@ -523,17 +523,17 @@ export default function HomePage() {
     switch (profile.vibeTheme) {
       case 'neon-red':
       case 'sunset-violet':
-        return 'rounded-3xl shadow-[0_0_30px_rgba(255,0,51,0.22)] ring-1 ring-red-500/35';
+        return 'rounded-3xl shadow-[0_0_32px_rgba(255,0,51,0.45),0_0_65px_rgba(220,38,38,0.22)] ring-1 ring-red-500/50';
       case 'electric-blue':
       case 'cyber-blue':
-        return 'rounded-3xl shadow-[0_0_30px_rgba(0,240,255,0.22)] ring-1 ring-cyan-400/35';
+        return 'rounded-3xl shadow-[0_0_32px_rgba(0,240,255,0.45),0_0_65px_rgba(0,180,255,0.22)] ring-1 ring-cyan-400/50';
       case 'neon-yellow':
       case 'cosmic-emerald':
-        return 'rounded-3xl shadow-[0_0_30px_rgba(255,230,0,0.22)] ring-1 ring-yellow-400/35';
+        return 'rounded-3xl shadow-[0_0_32px_rgba(255,230,0,0.45),0_0_65px_rgba(234,179,8,0.22)] ring-1 ring-yellow-400/50';
       case 'neon-pink':
       case 'cyber-pink':
       default:
-        return 'rounded-3xl shadow-[0_0_30px_rgba(255,42,157,0.22)] ring-1 ring-pink-500/35';
+        return 'rounded-3xl shadow-[0_0_32px_rgba(255,42,157,0.45),0_0_65px_rgba(255,20,147,0.22)] ring-1 ring-pink-500/50';
     }
   };
 

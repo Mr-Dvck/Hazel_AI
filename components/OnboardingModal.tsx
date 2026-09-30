@@ -103,7 +103,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       particleCount: 90,
       spread: 85,
       origin: { y: 0.5 },
-      colors: ['#ff2e93', '#00f0ff', '#facc15', '#a855f7', '#ef4444'],
+      colors: ['#ff2a9d', '#00f0ff', '#facc15', '#a855f7', '#ef4444'],
     });
 
     const memories: Omit<MemoryItem, 'id' | 'timestamp'>[] = [];

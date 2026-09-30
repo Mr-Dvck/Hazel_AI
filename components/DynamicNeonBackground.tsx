@@ -118,20 +118,20 @@ export const DynamicNeonBackground: React.FC<DynamicNeonBackgroundProps> = ({
       case 'sunset-violet':
         // Pure menacing blood-crimson / scarlet FNAF red with dark blood-orange embers & zero pink/purple
         return {
-          glow1: 'from-[#ff0033]/45 via-red-700/35 to-transparent',
-          glow2: 'from-[#dc2626]/40 via-orange-700/25 to-transparent',
-          glow3: 'from-[#ff1a1a]/35 via-red-950/40 to-transparent',
-          baseBg: 'bg-[#0a0203]',
+          glow1: 'from-[#ff0033]/60 via-[#b91c1c]/45 to-transparent',
+          glow2: 'from-[#dc2626]/50 via-[#c2410c]/35 to-transparent',
+          glow3: 'from-[#ff1a1a]/40 via-[#7f1d1d]/50 to-transparent',
+          baseBg: 'bg-[#070102]',
         };
       case 'neon-pink':
       case 'cyber-pink':
       default:
         // Electric bubblegum / vibrant hot neon magenta with bright violet/fuchsia ambient radiance
         return {
-          glow1: 'from-[#ff2a9d]/45 via-fuchsia-600/30 to-transparent',
-          glow2: 'from-[#ff1493]/35 via-purple-700/25 to-transparent',
-          glow3: 'from-[#ff2a9d]/30 via-violet-950/35 to-transparent',
-          baseBg: 'bg-[#08020a]',
+          glow1: 'from-[#ff2a9d]/60 via-[#d946ef]/40 to-transparent',
+          glow2: 'from-[#ff1493]/50 via-[#a855f7]/35 to-transparent',
+          glow3: 'from-[#f43f5e]/40 via-[#581c87]/50 to-transparent',
+          baseBg: 'bg-[#09010a]',
         };
     }
   };
