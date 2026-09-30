@@ -465,6 +465,23 @@ assert.ok(specificArtRes.response.includes('![Generated Art]('), 'Generates ![Ge
 assert.ok(specificArtRes.response.includes('image.pollinations.ai/prompt/'), 'Uses Pollinations image URL');
 assert.ok(specificArtRes.response.includes('model=flux'), 'Specifies Flux model parameter');
 assert.ok(specificArtRes.response.includes('nologo=true'), 'Specifies nologo parameter');
+assert.ok(
+  decodeURIComponent(specificArtRes.response).includes('cinematic voxel neon wolf glowing with electric cyan highlights, dense bioluminescent pine forest, volumetric fog, dramatic rim lighting, highly detailed 3D Minecraft aesthetic, 8k resolution, Unreal Engine 5 render'),
+  'Matches exact optimized prompt specified in task'
+);
+
+// Conversational variants of art requests
+const conversationalVagueRes = generateEmpatheticOfflineStream("I want to draw something", "Hazel", "Sparky", false);
+assert.ok(!conversationalVagueRes.response.includes('https://image.pollinations.ai'), '"I want to draw something" triggers interactive creative direction');
+assert.ok(conversationalVagueRes.response.includes('voxel Minecraft') || conversationalVagueRes.response.includes('style'));
+
+const makeImgRes = generateEmpatheticOfflineStream("Can you make an image of a redstone robot?", "Hazel", "Sparky", false);
+assert.ok(makeImgRes.response.includes('![Generated Art]('), '"Can you make an image of..." generates art');
+assert.ok(makeImgRes.response.includes('voxel%20redstone%20robot'), 'Extracts redstone robot subject cleanly');
+
+const fnafImgRes = generateEmpatheticOfflineStream("Can you draw Freddy Fazbear from FNAF?", "Hazel", "Sparky", false);
+assert.ok(fnafImgRes.response.includes('![Generated Art]('), 'FNAF art request generates art');
+assert.ok(decodeURIComponent(fnafImgRes.response).includes("Five Nights at Freddy's aesthetic"), 'Applies FNAF aesthetic');
 
 // Passions offline chat responses
 const mcRes = generateEmpatheticOfflineStream("Look at my Minecraft redstone machine", "Hazel", "Sparky", false);

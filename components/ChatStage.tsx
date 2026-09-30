@@ -679,7 +679,7 @@ interface ContentPart {
 
 function parseContentWithImages(content: string): ContentPart[] {
   const parts: ContentPart[] = [];
-  const regex = /!\[([^\]]*)\]\((https?:\/\/[^\s\)]+)\)/g;
+  const regex = /!\[([^\]]*)\]\((https?:\/\/[^)\n\r]+)\)/g;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
@@ -687,7 +687,9 @@ function parseContentWithImages(content: string): ContentPart[] {
     if (match.index > lastIndex) {
       parts.push({ type: 'text', text: content.substring(lastIndex, match.index) });
     }
-    parts.push({ type: 'image', alt: match[1], url: match[2] });
+    const rawUrl = match[2].trim();
+    const safeUrl = rawUrl.includes(' ') ? encodeURI(rawUrl) : rawUrl;
+    parts.push({ type: 'image', alt: match[1], url: safeUrl });
     lastIndex = regex.lastIndex;
   }
 

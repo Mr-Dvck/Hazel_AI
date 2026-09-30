@@ -124,7 +124,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </button>
 
-      {/* Right: Actions (Profile button, Vibe selector, Clear chat, Discreet Guardian link) */}
+      {/* Right: Actions (Profile button, Vibe selector, Clear chat) */}
       <div className="flex items-center gap-2 sm:gap-3">
         {/* Profile Button */}
         <button

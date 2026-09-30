@@ -223,11 +223,16 @@ export function generateEmpatheticOfflineStream(
   } else if (sentiment.tag === 'critical_alert') {
     response = `${hazelName}, take a deep, gentle breath with me right now. I hear you, and I am sitting right here with you. Your feelings are real, but please know with every piece of my heart: you are deeply loved, you matter so much, and you never have to carry this heavy weight alone. You have people in your corner who care about you more than anything. What do you need right now to feel a tiny bit safer?`;
   } else if (
-    /^(draw|paint|sketch|illustrate|make an image|generate an image|give me an image|give me a picture|create an image)/i.test(userMessage.trim()) ||
-    /\b(draw me|draw a|draw an|paint me|paint a|sketch a|illustrate a|can you draw|please draw|picture of)\b/i.test(userMessage)
+    /\b(draw|paint|sketch|illustrate|render|generate|create|make)\b.*\b(image|picture|drawing|painting|artwork|art|illustration)\b/i.test(userMessage) ||
+    /\b(draw|paint|sketch|illustrate)\b\s+(me\s+|us\s+)?(a|an|the|some|something)?\b/i.test(userMessage) ||
+    /^(draw|paint|sketch|illustrate|imagine|render)\b/i.test(userMessage.trim()) ||
+    /\b(can you|could you|please|let's|i want to|i'd like to|i would love to)\s+(draw|paint|sketch|generate|make|create)\b/i.test(userMessage)
   ) {
     let subject = userMessage
-      .replace(/^(can you |please )?(draw|paint|sketch|illustrate|make an image of|generate an image of|give me an image of|give me a picture of|picture of)\s*(me\s+)?(a\s+|an\s+|the\s+)?/i, '')
+      .replace(/^(can you|could you|please|can we|let's|i want to|i'd like to|i want you to|would you|will you)\s+/i, '')
+      .replace(/^(draw|paint|sketch|illustrate|render|generate|create|make)\s+(me\s+|us\s+)?/i, '')
+      .replace(/^(an?\s+)?(image|picture|drawing|painting|artwork|art|illustration)\s+(of\s+)?/i, '')
+      .replace(/^(a|an|the|some)\s+/i, '')
       .replace(/\b(for me|for us|please)\b/gi, '')
       .replace(/[?!.]+$/g, '')
       .trim();
@@ -243,9 +248,15 @@ export function generateEmpatheticOfflineStream(
     } else {
       let optimizedPrompt = '';
       if (/minecraft|redstone|voxel/i.test(subject)) {
-        optimizedPrompt = `cinematic voxel ${subject} glowing with electric cyan highlights, dense bioluminescent pine forest, volumetric fog, dramatic rim lighting, highly detailed 3D Minecraft aesthetic, 8k resolution, Unreal Engine 5 render`;
+        const cleanArtSubject = subject
+          .replace(/\s+in\s+a\s+minecraft\s+(forest|world|biome)/i, '')
+          .replace(/\s+in\s+minecraft/i, '')
+          .replace(/\s+minecraft\s+/i, ' ')
+          .trim();
+        optimizedPrompt = `cinematic voxel ${cleanArtSubject} glowing with electric cyan highlights, dense bioluminescent pine forest, volumetric fog, dramatic rim lighting, highly detailed 3D Minecraft aesthetic, 8k resolution, Unreal Engine 5 render`;
       } else if (/fnaf|freddy|animatronic|spooky/i.test(subject)) {
-        optimizedPrompt = `cinematic eerie animatronic ${subject}, Five Nights at Freddy's aesthetic, mechanical joints, glowing neon eyes, moody atmospheric shadows, dramatic rim lighting, hyper-detailed 3D render, 8k resolution, Unreal Engine 5`;
+        const cleanFnafSubject = subject.replace(/\s+(from|in)\s+(fnaf|five nights at freddy'?s)/i, '').trim();
+        optimizedPrompt = `cinematic eerie animatronic ${cleanFnafSubject}, Five Nights at Freddy's aesthetic, mechanical joints, glowing neon eyes, moody atmospheric shadows, dramatic rim lighting, hyper-detailed 3D render, 8k resolution, Unreal Engine 5`;
       } else {
         optimizedPrompt = `cinematic ${subject}, vibrant neon highlights, dense atmosphere, volumetric fog, dramatic rim lighting, rich texture, epic composition, 8k resolution, Unreal Engine 5 render, highly detailed digital art`;
       }
