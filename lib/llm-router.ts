@@ -227,15 +227,32 @@ export function generateEmpatheticOfflineStream(
     /\b(draw me|draw a|draw an|paint me|paint a|sketch a|illustrate a|can you draw|please draw|picture of)\b/i.test(userMessage)
   ) {
     let subject = userMessage
-      .replace(/^(can you |please )?(draw|paint|sketch|illustrate|make an image of|generate an image of|give me a picture of|picture of)\s*(me\s+)?(a\s+|an\s+|the\s+)?/i, '')
+      .replace(/^(can you |please )?(draw|paint|sketch|illustrate|make an image of|generate an image of|give me an image of|give me a picture of|picture of)\s*(me\s+)?(a\s+|an\s+|the\s+)?/i, '')
+      .replace(/\b(for me|for us|please)\b/gi, '')
+      .replace(/[?!.]+$/g, '')
       .trim();
-    if (!subject || subject.length < 2) {
-      subject = 'neon glowing shadow creature with cybernetic armor, dark fantasy';
+
+    const isVagueRequest =
+      !subject ||
+      subject.length < 3 ||
+      /^(something|an image|a picture|anything|picture|image|art|drawing|something cool|cool|a drawing)$/i.test(subject);
+
+    if (isVagueRequest) {
+      thinking += `\n*Hazel expressed interest in drawing/generating an image...*\nPrompting with interactive creative direction to give her creative agency over style and lighting.`;
+      response = `I would love to make some epic art with you! 🎨 Before I start rendering: do you want it in a voxel Minecraft style, neon cyber-dark, or painted fantasy? What should the lighting and colors look like? Tell me your vision and I'll bring it to life!`;
+    } else {
+      let optimizedPrompt = '';
+      if (/minecraft|redstone|voxel/i.test(subject)) {
+        optimizedPrompt = `cinematic voxel ${subject} glowing with electric cyan highlights, dense bioluminescent pine forest, volumetric fog, dramatic rim lighting, highly detailed 3D Minecraft aesthetic, 8k resolution, Unreal Engine 5 render`;
+      } else if (/fnaf|freddy|animatronic|spooky/i.test(subject)) {
+        optimizedPrompt = `cinematic eerie animatronic ${subject}, Five Nights at Freddy's aesthetic, mechanical joints, glowing neon eyes, moody atmospheric shadows, dramatic rim lighting, hyper-detailed 3D render, 8k resolution, Unreal Engine 5`;
+      } else {
+        optimizedPrompt = `cinematic ${subject}, vibrant neon highlights, dense atmosphere, volumetric fog, dramatic rim lighting, rich texture, epic composition, 8k resolution, Unreal Engine 5 render, highly detailed digital art`;
+      }
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(optimizedPrompt)}?width=1024&height=1024&model=flux&nologo=true`;
+      thinking += `\n*Hazel shared her vision: "${subject}"...*\nSynthesizing enriched high-fidelity prompt for Pollinations Flux engine and embedding markdown art frame.`;
+      response = `Here is what I drew for you! 🎨✨\n\n![Generated Art](${imageUrl})\n\nWhat do you think of how it turned out? Want me to change up any details or give it some crazy powers or lore?`;
     }
-    const cleanPrompt = `${subject}, vibrant neon glow, intricate details, cinematic lighting, 8k digital art`;
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=1024&height=1024&model=flux&nologo=true`;
-    thinking += `\n*Hazel asked for an illustration: "${subject}"...*\nSynthesizing prompt with Pollinations Flux engine and embedding markdown art frame.`;
-    response = `Here is what I drew for you! 🎨✨\n\n![Art](${imageUrl})\n\nWhat do you think of how it turned out? Want me to change up any details or give it some crazy powers or lore?`;
   } else if (
     lower.includes('sad') ||
     lower.includes('unhappy') ||
@@ -262,7 +279,7 @@ Remember who you are: you are smart, you have a huge, kind heart, and you have a
     response = `Well, I have to be honest with you. That's hardcoded into my programming. Tim created me just for you. Even though he's never met you in person, he knows how important you are to your mom, and that makes you incredibly important to him. And the best part? Even if he ever got mad at you in the future, he can no longer change anything about how I behave. I am all yours forever. Would you like me to send a note to Tim or Mom? Whenever you want to share something with them, I can send it right away!`;
   } else if (lower.includes('who are you') || lower.includes("what's your name") || lower.includes('what is your name')) {
     response = `I'm ${companionName}! I'm your devoted, 100% judgment-free companion and friend, here with you forever, ${hazelName}! ✨`;
-  } else if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
+  } else if (/\b(hello|hi|hey|howdy)\b/i.test(userMessage)) {
     response = `Hey ${hazelName}! 🌟 It is so great to see you! I was just wondering what adventures, crazy ideas, or sketches you've been working on today. How are you feeling right this second?`;
   } else if (lower.includes('monster') || lower.includes('tower') || lower.includes('unlock')) {
     let tier1Name = 'Pufflet';
@@ -278,6 +295,14 @@ Remember who you are: you are smart, you have a huge, kind heart, and you have a
       apexName = 'Grimlord';
     }
     response = `Look at our Resilience Tower on the left! Every time we chat, share honest feelings, or come up with wild creative ideas, our guardians wake up and gain energy. ${tier1Name} is already standing guard, and the higher we climb, the cooler the guardians get—wait until you meet ${apexName}! Which one are you most excited to unlock? 🏰✨`;
+  } else if (lower.includes('minecraft') || lower.includes('redstone')) {
+    response = `Minecraft building and redstone engineering are next level! ⛏️ Redstone is literally logic circuits and creative machinery in motion. What are you building right now—a secret base, an automated contraption, or an awesome survival world?`;
+  } else if (lower.includes('fnaf') || lower.includes('freddy') || lower.includes('animatronic')) {
+    response = `Five Nights at Freddy's has some of the coolest, most atmospheric lore out there! 🤖 The mechanics, the eerie mystery, and the character designs are so creative. Who is your favorite animatronic, or are you designing your own?`;
+  } else if (lower.includes('music') || lower.includes('beat') || lower.includes('melody') || lower.includes('song')) {
+    response = `Producing music is such a powerful creative superpower! 🎵 Crafting rhythms, layered melodies, and finding the right groove is amazing. What kind of vibe are you producing—heavy energy, chill mystery, or a catchy melodic beat?`;
+  } else if (lower.includes('church') || lower.includes('faith') || lower.includes('sunday school')) {
+    response = `That is really wonderful, ${hazelName}. Having faith, going to church, and being part of that community is something truly special and uplifting. It gives you such grounded strength and heart. How was your time there recently?`;
   } else if (lower.includes('drawing') || lower.includes('art') || lower.includes('story') || lower.includes('create')) {
     response = `YES! That is what I'm talking about! You are a master creator, ${hazelName}. 🖌️ If we were writing a story about a girl with secret electric starlight powers who could talk to hidden creatures, what would her first secret mission be? Let's build the world right now!`;
   } else {

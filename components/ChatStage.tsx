@@ -422,7 +422,7 @@ const MessageBubble: React.FC<{
                 <div className="text-xs sm:text-sm font-extrabold text-amber-300 tracking-wide uppercase flex items-center gap-2">
                   <span>Special Note from {reply.sender || 'Tim & Mom'}</span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-200 border border-amber-400/40">
-                    Guardian Desk
+                    Direct Note
                   </span>
                 </div>
                 <p className="text-[11px] text-amber-200/70">

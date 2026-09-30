@@ -406,6 +406,81 @@ assert.ok(sadInsight.howHazelIsDoing.whatsWeighingOnHer.includes('sad'), 'whatsW
 assert.strictEqual(sadInsight.howHazelIsDoing.hasConversations, true, 'hasConversations is true after chat');
 console.log('  ✅ Pass: Blank onboarding names and live sadness well-being synthesis verified\n');
 
-console.log('🎉 ALL AUTOMATED TESTS PASSED SUCCESSFULLY! (11/11 test gates green)\n');
+// Test 12: Core Persona, Real World Passions & Tone Guardrail in SYSTEM_PROMPT
+console.log('▶ Test 12: Core Persona, Real World Passions & Tone Guardrail');
+const { SYSTEM_PROMPT: loadedSystemPrompt } = require('../lib/constants.ts');
+
+assert.ok(loadedSystemPrompt.includes('Minecraft'), 'SYSTEM_PROMPT includes Minecraft passion');
+assert.ok(loadedSystemPrompt.includes('redstone'), 'SYSTEM_PROMPT includes redstone circuitry/engineering');
+assert.ok(loadedSystemPrompt.includes('Five Nights at Freddy\'s') || loadedSystemPrompt.includes('FNAF'), 'SYSTEM_PROMPT includes Five Nights at Freddy\'s/FNAF');
+assert.ok(loadedSystemPrompt.includes('producing music'), 'SYSTEM_PROMPT includes producing music');
+assert.ok(loadedSystemPrompt.includes('sketching') || loadedSystemPrompt.includes('drawing'), 'SYSTEM_PROMPT includes sketching/drawing');
+assert.ok(loadedSystemPrompt.includes('church') && loadedSystemPrompt.includes('faith'), 'SYSTEM_PROMPT warmly honors faith and church');
+assert.ok(loadedSystemPrompt.includes('capable, creative equal') || loadedSystemPrompt.includes('creative equal'), 'SYSTEM_PROMPT treats Hazel as creative equal');
+assert.ok(loadedSystemPrompt.includes('older-sibling energy'), 'SYSTEM_PROMPT embodies older-sibling energy');
+assert.ok(loadedSystemPrompt.includes('sweetie') && loadedSystemPrompt.includes('honey') && loadedSystemPrompt.includes('little one'), 'SYSTEM_PROMPT bans condescending pet names');
+assert.ok(loadedSystemPrompt.includes('Interactive Creative Direction'), 'SYSTEM_PROMPT includes two-step interactive art direction');
+assert.ok(loadedSystemPrompt.includes('Pollinations Flux Optimization') || loadedSystemPrompt.includes('Flux engine'), 'SYSTEM_PROMPT includes Pollinations Flux prompt optimization');
+assert.ok(loadedSystemPrompt.includes('Strict Stealth Guardrail: Complete Guardian Camouflage'), 'SYSTEM_PROMPT includes strict stealth camouflage guardrail');
+assert.ok(loadedSystemPrompt.includes('Zero Interface Footprint'), 'SYSTEM_PROMPT mandates zero interface footprint');
+console.log('  ✅ Pass: SYSTEM_PROMPT fully grounds passions, older-sibling tone, art direction & stealth camouflage\n');
+
+// Test 13: Strict Stealth Guardrail: Zero Interface Footprint in UI
+console.log('▶ Test 13: Strict Stealth Guardrail: Zero Interface Footprint in UI');
+const chatStageSrc = fs.readFileSync(path.join(__dirname, '../components/ChatStage.tsx'), 'utf-8');
+
+// Header.tsx assertions
+assert.ok(!headerSrc.includes('>Guardian<'), 'Header has no visible Guardian text/button');
+assert.ok(!headerSrc.includes('<Shield'), 'Header has no visible Shield icon');
+assert.ok(!headerSrc.includes('Guardian Portal (PIN protected)'), 'Header has no Guardian tooltip');
+assert.ok(!headerSrc.includes('Click 5x quickly to open Guardian Portal'), 'Header logo button does not disclose portal in title');
+assert.ok(headerSrc.includes('title="Hazel_AI"'), 'Header logo button has clean title="Hazel_AI"');
+assert.ok(headerSrc.includes('handleLogoClick'), 'Header retains stealth 5-click easter egg handler');
+assert.ok(headerSrc.includes("router.push('/guardian')"), 'Header 5-click easter egg routes to /guardian');
+
+// ChatStage.tsx assertions
+assert.ok(!chatStageSrc.includes('Guardian Desk'), 'ChatStage has purged all visible Guardian Desk badges');
+assert.ok(chatStageSrc.includes('Direct Note'), 'ChatStage displays discreet Direct Note badge on replies');
+
+// OnboardingModal.tsx assertions
+assert.ok(!onboardingSrc.includes('Guardian Portal'), 'OnboardingModal has zero Guardian Portal mentions');
+assert.ok(onboardingSrc.includes("router.push('/guardian')"), 'Onboarding retains stealth 5-click easter egg handler');
+console.log('  ✅ Pass: Zero interface footprint verified across Header, ChatStage, and OnboardingModal\n');
+
+// Test 14: Interactive Art Direction & Pollinations Flux Prompt Engineering in Engine
+console.log('▶ Test 14: Interactive Art Direction & Pollinations Flux Prompt Engineering');
+// Vague art request triggers interactive direction asking for style/lighting choices
+const vagueArtRes = generateEmpatheticOfflineStream("Can you draw an image for me?", "Hazel", "Sparky", false);
+assert.ok(!vagueArtRes.response.includes('https://image.pollinations.ai'), 'Vague art request does not immediately render generic image');
+assert.ok(
+  vagueArtRes.response.includes('voxel Minecraft') ||
+  vagueArtRes.response.includes('style') ||
+  vagueArtRes.response.includes('lighting'),
+  'Vague art request playfully asks for style and lighting details'
+);
+
+// Specific art request synthesizes enriched Pollinations Flux markdown
+const specificArtRes = generateEmpatheticOfflineStream("Draw a neon wolf in a Minecraft forest", "Hazel", "Sparky", false);
+assert.ok(specificArtRes.response.includes('![Generated Art]('), 'Generates ![Generated Art] markdown embedding');
+assert.ok(specificArtRes.response.includes('image.pollinations.ai/prompt/'), 'Uses Pollinations image URL');
+assert.ok(specificArtRes.response.includes('model=flux'), 'Specifies Flux model parameter');
+assert.ok(specificArtRes.response.includes('nologo=true'), 'Specifies nologo parameter');
+
+// Passions offline chat responses
+const mcRes = generateEmpatheticOfflineStream("Look at my Minecraft redstone machine", "Hazel", "Sparky", false);
+assert.ok(mcRes.response.includes('Minecraft') && mcRes.response.includes('redstone'), 'Offline engine responds enthusiastically to Minecraft and redstone');
+
+const fnafRes = generateEmpatheticOfflineStream("I love FNAF animatronics", "Hazel", "Sparky", false);
+assert.ok(fnafRes.response.includes('Freddy') || fnafRes.response.includes('animatronic'), 'Offline engine responds enthusiastically to FNAF');
+
+const musicRes = generateEmpatheticOfflineStream("I made a new music beat today", "Hazel", "Sparky", false);
+assert.ok(musicRes.response.includes('music') || musicRes.response.includes('beat'), 'Offline engine responds enthusiastically to music production');
+
+const churchRes = generateEmpatheticOfflineStream("I had fun at church today", "Hazel", "Sparky", false);
+assert.ok(churchRes.response.includes('church') || churchRes.response.includes('faith'), 'Offline engine warmly honors faith and church');
+console.log('  ✅ Pass: Interactive art direction, Flux synthesis, and passion responses fully verified\n');
+
+console.log('🎉 ALL AUTOMATED TESTS PASSED SUCCESSFULLY! (14/14 test gates green)\n');
+
 
 

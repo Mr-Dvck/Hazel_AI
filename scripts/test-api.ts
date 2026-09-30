@@ -1,4 +1,6 @@
 import assert from 'assert';
+import fs from 'fs';
+import path from 'path';
 
 async function testApi() {
   console.log('🌐 Starting API End-to-End Test Suite...\n');
@@ -511,6 +513,105 @@ async function testApi() {
     assert.ok(gCheckData.insight.emotionalWeather.score <= 65, 'Resilience score lowered appropriately');
     assert.ok(gCheckData.insight.howHazelIsDoing.whatsWeighingOnHer.includes('sad'), 'whatsWeighingOnHer quotes sadness');
     console.log('  ✅ Pass: Live sadness immediately reflected in guardian well-being assessment\n');
+    // Test 16: SYSTEM_PROMPT & Full Persona Grounding in Chat System
+    console.log('▶ Test 16: SYSTEM_PROMPT & Full Persona Grounding in Chat System');
+    const { SYSTEM_PROMPT: chatSysPrompt } = await import('../lib/constants');
+    const chatRouteSrc = fs.readFileSync(path.join(__dirname, '../app/api/chat/route.ts'), 'utf-8');
+    assert.ok(chatRouteSrc.includes('getSystemPrompt'), 'Chat route connects getSystemPrompt for dynamic persona formatting');
+    assert.ok(chatSysPrompt.includes('Minecraft'), 'SYSTEM_PROMPT has Minecraft');
+    assert.ok(chatSysPrompt.includes('Five Nights at Freddy\'s') || chatSysPrompt.includes('FNAF'), 'SYSTEM_PROMPT has FNAF');
+    assert.ok(chatSysPrompt.includes('producing music'), 'SYSTEM_PROMPT has music production');
+    assert.ok(chatSysPrompt.includes('church') && chatSysPrompt.includes('faith'), 'SYSTEM_PROMPT honors church/faith');
+    assert.ok(chatSysPrompt.includes('capable, creative equal') || chatSysPrompt.includes('creative equal'), 'SYSTEM_PROMPT treats Hazel as creative equal');
+    assert.ok(chatSysPrompt.includes('sweetie') && chatSysPrompt.includes('honey'), 'SYSTEM_PROMPT bans pet names');
+    assert.ok(chatSysPrompt.includes('Interactive Creative Direction'), 'SYSTEM_PROMPT includes interactive art direction');
+    assert.ok(chatSysPrompt.includes('Pollinations Flux Optimization') || chatSysPrompt.includes('Flux engine'), 'SYSTEM_PROMPT includes Pollinations Flux');
+    assert.ok(chatSysPrompt.includes('Strict Stealth Guardrail: Complete Guardian Camouflage'), 'SYSTEM_PROMPT includes stealth camouflage');
+    console.log('  ✅ Pass: Chat system incorporates SYSTEM_PROMPT with complete persona, passions, art direction & stealth camouflage\n');
+
+    // Test 17: Interactive Art Direction in Chat Stream
+    console.log('▶ Test 17: Interactive Art Direction in Chat Stream');
+    const vagueDrawReq = new Request('http://localhost/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: 'Can you draw a picture?' }],
+        profile: { name: 'Hazel', companionName: 'Sparky' },
+      }),
+    });
+    const vagueDrawRes = await chatHandler(vagueDrawReq as any);
+    assert.strictEqual(vagueDrawRes.status, 200);
+    const vReader = vagueDrawRes.body?.getReader();
+    assert.ok(vReader);
+    const vDec = new TextDecoder();
+    let vData = '';
+    while (true) {
+      const { done, value } = await vReader.read();
+      if (done) break;
+      vData += vDec.decode(value);
+    }
+    const vChunks = vData
+      .split('\n\n')
+      .filter((line) => line.startsWith('data: ') && !line.includes('[DONE]'))
+      .map((line) => {
+        try {
+          return JSON.parse(line.replace('data: ', ''));
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean);
+    const vFullContent = vChunks
+      .filter((c) => c.type === 'content')
+      .map((c) => c.chunk)
+      .join('');
+
+    assert.ok(!vFullContent.includes('https://image.pollinations.ai'), 'Vague art request does not immediately render generic image');
+    assert.ok(vFullContent.includes('Minecraft') || vFullContent.includes('style') || vFullContent.includes('lighting'), 'Chat stream playfully asks for style/lighting choices');
+    console.log('  ✅ Pass: Chat stream provides interactive creative direction for art requests\n');
+
+    // Test 18: Pollinations Flux Art Delivery in Chat Stream
+    console.log('▶ Test 18: Pollinations Flux Art Delivery in Chat Stream');
+    const specDrawReq = new Request('http://localhost/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: 'Draw a neon wolf in a Minecraft forest' }],
+        profile: { name: 'Hazel', companionName: 'Sparky' },
+      }),
+    });
+    const specDrawRes = await chatHandler(specDrawReq as any);
+    assert.strictEqual(specDrawRes.status, 200);
+    const sReader = specDrawRes.body?.getReader();
+    assert.ok(sReader);
+    const sDec = new TextDecoder();
+    let sData = '';
+    while (true) {
+      const { done, value } = await sReader.read();
+      if (done) break;
+      sData += sDec.decode(value);
+    }
+    const sChunks = sData
+      .split('\n\n')
+      .filter((line) => line.startsWith('data: ') && !line.includes('[DONE]'))
+      .map((line) => {
+        try {
+          return JSON.parse(line.replace('data: ', ''));
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean);
+    const sFullContent = sChunks
+      .filter((c) => c.type === 'content')
+      .map((c) => c.chunk)
+      .join('');
+
+    assert.ok(sFullContent.includes('![Generated Art]('), 'Generates ![Generated Art] markdown image');
+    assert.ok(sFullContent.includes('image.pollinations.ai/prompt/'), 'Uses Pollinations image URL');
+    assert.ok(sFullContent.includes('model=flux'), 'Specifies Flux model parameter');
+    assert.ok(sFullContent.includes('nologo=true'), 'Specifies nologo parameter');
+    console.log('  ✅ Pass: Chat stream delivers enriched Flux-optimized art embedding\n');
   } finally {
     process.env.OPENROUTER_API_KEY = savedApiKey;
     try {
@@ -521,7 +622,7 @@ async function testApi() {
     }
   }
 
-  console.log('🎉 ALL API END-TO-END TESTS PASSED! (15/15 gates green)\n');
+  console.log('🎉 ALL API END-TO-END TESTS PASSED! (18/18 gates green)\n');
 }
 
 testApi().catch((err) => {

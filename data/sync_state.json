@@ -18,7 +18,7 @@
         "detail": "Drawing dragons"
       }
     ],
-    "syncedAt": 1790791606972
+    "syncedAt": 1790792251944
   },
   "hazel_profile_customized": {
     "profile": {
@@ -32,8 +32,8 @@
       "companionAvatar": "🌟",
       "bioOrMotto": "Bold, creative, and invincible! ✨",
       "favoriteColor": "Sunset Amber",
-      "createdAt": 1790532406976,
-      "lastActive": 1790791606976
+      "createdAt": 1790533051948,
+      "lastActive": 1790792251948
     },
     "monsters": [
       {
@@ -43,7 +43,7 @@
       }
     ],
     "memories": [],
-    "syncedAt": 1790791606976
+    "syncedAt": 1790792251948
   },
   "hazel_birthday_user": {
     "profile": {
@@ -57,8 +57,8 @@
       "companionAvatar": "🌟",
       "bioOrMotto": "Bold, creative, and invincible! ✨",
       "favoriteColor": "Sunset Amber",
-      "createdAt": 1790532406976,
-      "lastActive": 1790791606976,
+      "createdAt": 1790533051948,
+      "lastActive": 1790792251948,
       "birthday": "May 14, 2015"
     },
     "monsters": [
@@ -76,7 +76,7 @@
         "detail": "May 14, 2015"
       }
     ],
-    "syncedAt": 1790791609052
+    "syncedAt": 1790792257204
   },
   "hazel_default": {
     "profile": {
@@ -86,35 +86,26 @@
     "monsters": [],
     "memories": [],
     "guardianInsight": {
-      "lastUpdated": 1790791615518,
+      "lastUpdated": 1790792266563,
       "howHazelIsDoing": {
-        "currentMoodAndEnergy": "Sad / Overwhelmed (Low Energy)",
-        "whatsWeighingOnHer": "Hazel explicitly stated she was sad in chat (\"i told the AI I was sad today\"). She expressed feeling down and is carrying emotional sorrow that needs gentle, heartfelt comfort without pressure.",
-        "whatsBringingHerJoy": "Exploring her companion sanctuary and building confidence through friendly conversation.",
-        "parentExecutiveSummary": "Hazel explicitly shared that she was sad. Send a warm, genuine note from Tim or Mom letting her know she is deeply loved, strong, and never alone in her feelings.",
+        "currentMoodAndEnergy": "Expressive & Creative (High Energy)",
+        "whatsWeighingOnHer": "No heavy emotional burdens or peer friction detected in recent chats.",
+        "whatsBringingHerJoy": "Deeply immersed in artwork, storytelling, and monster milestones. Creative imagination is lighting up her world.",
+        "parentExecutiveSummary": "Hazel is doing well! She is engaging creatively and feeling safe in her space. Acknowledge her ideas and keep encouraging her imagination.",
         "hasConversations": true
       },
       "bullyingSafetyAlert": {
-        "severity": "Moderate",
-        "headline": "Sadness / Emotional Vulnerability Expressed",
-        "summary": "Hazel explicitly shared feeling sad or down in recent chats (\"i told the AI I was sad today\"). Send genuine reassurance.",
-        "recentTriggers": [
-          {
-            "id": "trig-1790791615518-6ja",
-            "timestamp": 1790791615518,
-            "category": "emotional_distress",
-            "severity": "Moderate",
-            "snippet": "i told the AI I was sad today",
-            "context": "Hazel directly expressed feeling sad, down, or emotionally hurting in chat."
-          }
-        ]
+        "severity": "Safe",
+        "headline": "No Active Safety Threats Detected",
+        "summary": "Hazel is actively engaging in positive creative pursuits, monster milestones, and friendly conversation. Her resilience indicators are healthy.",
+        "recentTriggers": []
       },
       "familySentiment": {
         "overallStatus": "Positive",
         "summary": "Hazel lives with her dad; her mom lives with Tim. When overwhelmed, she benefits from unpressured, genuine connection and knowing Mom and Tim are always in her corner.",
         "constructiveInsights": [
           "Hazel cherishes silent companionable presence where she can just be herself without expectations.",
-          "Open-ended curiosity (\"Tell me about what you imagined today\") unlocks more openness than asking \"How was school?\".",
+          "Art and imaginative world-building serve as Hazel's natural emotional decompression chamber.",
           "Praising her bravery and empathy provides strong emotional armor against playground cliques."
         ],
         "whatHazelAppreciates": [
@@ -125,17 +116,17 @@
         ]
       },
       "emotionalWeather": {
-        "currentMood": "Sad / Overwhelmed",
-        "score": 61,
-        "trend": "needs_boost",
-        "description": "Hazel is carrying sorrow or feeling sad. A warm, gentle note from Tim or Mom will lift her spirits."
+        "currentMood": "Resilient",
+        "score": 87,
+        "trend": "improving",
+        "description": "Hazel displays strong innate creativity and resilience."
       },
-      "sessionSummary": "Hazel explicitly stated she was sad in chat (\"i told the AI I was sad today\"). A heartfelt note from Tim & Mom is recommended.",
+      "sessionSummary": "Hazel is actively engaging in positive creative pursuits and friendly conversation.",
       "actionableSuggestions": [
         {
-          "category": "Comfort & Heartfelt Reassurance",
-          "conversationStarter": "\"Hey Hazel, sending you the biggest hug. You never have to carry sad feelings alone—we love you so much and we're always in your corner.\"",
-          "purpose": "Delivers unconditional emotional safety and love across the bridge."
+          "category": "Evening Connection",
+          "conversationStarter": "\"Hey Hazel, I noticed how hard you worked today. Want to just cozy up with some cocoa and draw together tonight?\"",
+          "purpose": "Provides low-friction emotional safety and silent reassurance."
         },
         {
           "category": "Affirming Resilience & Core Worth",
@@ -143,12 +134,12 @@
           "purpose": "Builds intrinsic self-esteem insulated from playground popularity contests."
         },
         {
-          "category": "Playful Unpacking",
-          "conversationStarter": "\"Do you want to do high-tide/low-tide tonight? (One thing that was awesome today, and one thing that washed away.)\"",
+          "category": "Creative Co-Creation",
+          "conversationStarter": "\"I saw your amazing creative spark today! What kind of creature or adventure are you dreaming up next?\"",
           "purpose": "Encourages her to unpack experiences naturally through imagination and positive reflection."
         }
       ]
     },
-    "syncedAt": 1790791615519
+    "syncedAt": 1790792266564
   }
 }

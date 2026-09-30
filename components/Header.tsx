@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sparkles, Shield, Trash2, Heart, Palette, RotateCcw } from 'lucide-react';
+import { Sparkles, Trash2, Heart, Palette, RotateCcw } from 'lucide-react';
 import { VibeTheme, UserProfile } from '@/types';
 import { calculateAge } from '@/lib/constants';
 
@@ -56,11 +56,11 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="relative z-30 w-full px-4 py-3 sm:px-6 flex items-center justify-between border-b border-white/10 bg-black/40 backdrop-blur-md">
-      {/* Left: Brand with discrete 5-click Guardian access & Profile click */}
+      {/* Left: Brand with stealth 5-click easter egg & Profile click */}
       <div className="flex items-center gap-3">
         <button
           onClick={handleLogoClick}
-          title="Hazel_AI (Click 5x quickly to open Guardian Portal)"
+          title="Hazel_AI"
           className="group relative flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 via-pink-500 to-cyan-400 p-[1.5px] shadow-neon-pink/30 shadow-md active:scale-95 transition-transform"
         >
           <div className="w-full h-full bg-black/90 rounded-[10px] flex items-center justify-center">
@@ -202,16 +202,6 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <RotateCcw className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Clear Chat</span>
-        </button>
-
-        {/* Discreet Guardian Portal Button */}
-        <button
-          onClick={() => router.push('/guardian')}
-          className="flex items-center gap-1.5 text-xs text-purple-300 hover:text-purple-100 bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/30 px-2.5 py-1.5 rounded-xl transition-all"
-          title="Guardian Portal (PIN protected)"
-        >
-          <Shield className="w-3.5 h-3.5 text-purple-400" />
-          <span className="hidden sm:inline font-medium">Guardian</span>
         </button>
       </div>
     </header>
